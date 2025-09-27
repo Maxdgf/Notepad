@@ -1,5 +1,5 @@
 # Notepad
-Notepad a simple and minimalistic android app📱 for notes📃
+**Notepad** a simple and minimalistic android app📱 for notes📃
 Based on *MVVM Architecture*, *Room* and *Jetpack Compose*.
 
 # Gallery🖼️
