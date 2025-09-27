@@ -7,12 +7,12 @@ Based on *MVVM Architecture*, *Room* and *Jetpack Compose*.
 ## Light theme
 | Main screen | Note View | Edit note | Create Note |
 |:-----------------------:|:-----------------------:|:-----------------------:|:-----------------------:|
-| ![](.gihub/demo8.jpg) | ![](.gihub/demo7.jpg) | ![](.gihub/demo6.jpg) | ![](.gihub/demo5.jpg) |
+| <img src=".gihub/demo8.jpg" width="300" height="600"> | <img src=".gihub/demo7.jpg" width="300" height="600"> | <img src=".gihub/demo6.jpg" width="300" height="600"> | <img src=".gihub/demo5.jpg" width="300" height="600"> |
 
 ## Dark theme
 | Main screen | Note View | Edit note | Create Note |
 |:-----------------------:|:-----------------------:|:-----------------------:|:-----------------------:|
-| ![](.gihub/demo4.jpg) | ![](.gihub/demo3.jpg) | ![](.gihub/demo2.jpg) | ![](.gihub/demo1.jpg) |
+| <img src=".gihub/demo4.jpg" width="300" height="600"> | <img src=".gihub/demo3.jpg" width="300" height="600"> | <img src=".gihub/demo2.jpg" width="300" height="600"> | <img src=".gihub/demo1.jpg" width="300" height="600"> |
 
 # Possibilities
 
