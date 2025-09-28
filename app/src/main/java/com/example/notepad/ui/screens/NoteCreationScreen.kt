@@ -137,7 +137,11 @@ fun NoteUiCreationScreen(
                             addNoteMethod(
                                 NoteEntity(
                                     id = Random.nextInt(),
-                                    name = noteNameState,
+                                    name = if (noteNameState.isEmpty()) {
+                                        "Note_${Random.nextInt()}"
+                                    } else {
+                                        noteNameState
+                                    },
                                     content = noteContentState,
                                     uuid = UUID.randomUUID().toString(),
                                     dateTime = dateTimePicker.pickDateTimeNow(),
