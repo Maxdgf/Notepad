@@ -179,12 +179,16 @@ fun NoteUiEditScreen(
                 state = errorOfEmptyNotAlertMessageDialogState
             ) {
                 Column {
-                    Text(text = "Note couldn't be empty!")
+                    Text(
+                        text = "Note couldn't be empty!\n- Check note name and content.",
+                        color = Color.White
+                    )
 
                     Button(
                         onClick = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
                             text = "Ok",
