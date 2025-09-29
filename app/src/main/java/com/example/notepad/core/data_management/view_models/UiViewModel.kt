@@ -28,7 +28,7 @@ class UiViewModel: ViewModel() {
     fun updateNoteContentState(text: String) { noteContentState = text }
     fun clearNoteNameState() { noteNameState = "" }
     fun clearNoteContentState() { noteContentState = "" }
-    fun isNoteNameAnContentEmpty(): Boolean { return noteNameState.isEmpty() && noteContentState.isEmpty() }
+    fun isNoteNameAnContentEmpty(): Boolean { return noteNameState.isEmpty() || noteContentState.isEmpty() }
     fun updateSelectedNoteState(note: SelectedNote) { selectedNoteState = note }
     fun clearSelectedNoteState() {
         selectedNoteState = SelectedNote(
