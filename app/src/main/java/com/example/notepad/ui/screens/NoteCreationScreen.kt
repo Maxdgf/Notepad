@@ -137,11 +137,7 @@ fun NoteUiCreationScreen(
                             addNoteMethod(
                                 NoteEntity(
                                     id = Random.nextInt(),
-                                    name = if (noteNameState.isEmpty()) {
-                                        "Note_${Random.nextInt()}"
-                                    } else {
-                                        noteNameState
-                                    },
+                                    name = noteNameState,
                                     content = noteContentState,
                                     uuid = UUID.randomUUID().toString(),
                                     dateTime = dateTimePicker.pickDateTimeNow(),
@@ -175,7 +171,7 @@ fun NoteUiCreationScreen(
             ) {
                 Column {
                     Text(
-                        text = "Note couldn't be empty!",
+                        text = "Note couldn't be empty!\n- Check note name and content.",
                         color = Color.White
                     )
 
