@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
-class UiViewModel: ViewModel() {
+class UiViewModel : ViewModel() {
     var noteActionsDialogState by mutableStateOf(false)
     var noteNameState by mutableStateOf("")
     var noteContentState by mutableStateOf("")

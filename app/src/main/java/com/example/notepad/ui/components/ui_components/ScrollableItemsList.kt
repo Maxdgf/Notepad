@@ -11,15 +11,12 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ScrollableUiItemsList(
-    paddingValues: PaddingValues,
     contentPaddingValues: PaddingValues,
     verticalArrangementValue: Arrangement.Vertical,
     scrollableContent: LazyListScope.() -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = contentPaddingValues,
         verticalArrangement = verticalArrangementValue,
     ) { scrollableContent() }

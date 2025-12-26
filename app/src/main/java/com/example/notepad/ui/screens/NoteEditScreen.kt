@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,25 +31,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
-import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
-import com.example.notepad.core.data_models.SelectedNote
 import com.example.notepad.core.utils.DateTimePicker
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
-import com.example.notepad.ui.utils.CurrentThemeColor
-
 @Composable
 fun NoteUiEditScreen(
     navigationController: NavController,
-    currentThemeColor: CurrentThemeColor,
     dateTimePicker: DateTimePicker,
     noteNameState: String,
     noteContentState: String,
@@ -135,6 +130,7 @@ fun NoteUiEditScreen(
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
+                    .imePadding()
                     .fillMaxSize()
             ) {
                 BasicTextField(

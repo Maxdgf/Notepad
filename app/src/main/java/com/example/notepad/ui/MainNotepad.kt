@@ -34,6 +34,7 @@ fun MainUiNotePad(
     val navController = rememberNavController()
 
     val allNotesList by notesViewModel.noteList.collectAsState()
+    val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -54,7 +55,8 @@ fun MainUiNotePad(
                     updateDeleteAllNotesAlertMessageDialogStateMethod = uiViewModel::updateDeleteAllNotesAlertMessageDialogState,
                     deleteAllNotesMethod = notesViewModel::deleteAllNotes,
                     currentThemeColor = currentThemeColor,
-                    selectedNoteUuidState = uiViewModel.selectedNoteUuidState
+                    selectedNoteUuidState = uiViewModel.selectedNoteUuidState,
+                    isNotesLoadingState = notesLoadingState
                 )
             }
 
@@ -98,7 +100,6 @@ fun MainUiNotePad(
                     editNoteMethod = notesViewModel::editNote,
                     errorOfNoteChangesAlertMessageDialogState = uiViewModel.errorOfNoteChangesAlertMessageDialogState,
                     updateErrorOfNoteChangesAlertMessageDialogStateMethod = uiViewModel::updateErrorOfNoteChangesAlertMessageDialogState,
-                    currentThemeColor = currentThemeColor,
                     dateTimePicker = dateTimePicker,
                     selectedNoteUuidState = uiViewModel.selectedNoteUuidState,
                     notesList = allNotesList,
