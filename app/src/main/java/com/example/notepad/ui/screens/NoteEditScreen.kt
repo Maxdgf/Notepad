@@ -3,6 +3,7 @@ package com.example.notepad.ui.screens
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,22 +16,28 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+import com.example.notepad.R
+import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.core.data_models.SelectedNote
 import com.example.notepad.core.utils.DateTimePicker
 import com.example.notepad.ui.components.screen_components.TopUiBar
@@ -41,15 +48,17 @@ import com.example.notepad.ui.utils.CurrentThemeColor
 @Composable
 fun NoteUiEditScreen(
     navigationController: NavController,
+    currentThemeColor: CurrentThemeColor,
+    dateTimePicker: DateTimePicker,
     noteNameState: String,
     noteContentState: String,
-    selectedNoteState: SelectedNote,
+    selectedNoteUuidState: String,
+    notesList: List<NoteEntity>,
     errorOfEmptyNotAlertMessageDialogState: Boolean,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
     clearNoteNameStateMethod: () -> Unit,
     clearNoteContentStateMethod: () -> Unit,
-    clearSelectedNoteStateMethod: () -> Unit,
     isNoteNameAnContentEmptyMethod: () -> Boolean,
     errorOfNoteChangesAlertMessageDialogState: Boolean,
     updateErrorOfEmptyNotAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
@@ -61,46 +70,56 @@ fun NoteUiEditScreen(
     ) -> Unit,
     updateErrorOfNoteChangesAlertMessageDialogStateMethod: (state: Boolean) -> Unit
 ) {
-    val dateTimePicker = DateTimePicker()
-    val currentThemeColor = CurrentThemeColor()
-
     val haptic = LocalHapticFeedback.current
 
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
     val noteContentInputFieldHorizontalScrollState = rememberScrollState()
 
+    val currentNote = notesList[notesList.indexOfFirst { it.uuid == selectedNoteUuidState }]
+
+    LaunchedEffect(Unit) {
+        updateNoteNameStateMethod(currentNote.name)
+        updateNoteContentStateMethod(currentNote.content)
+    }
+
     Scaffold(
         topBar = {
             TopUiBar(
                 titleContent = {
-                    OutlinedTextField(
-                        maxLines = 1,
-                        modifier = Modifier.fillMaxWidth(),
-                        value = noteNameState,
-                        onValueChange = { newValue -> updateNoteNameStateMethod(newValue) },
-                        trailingIcon = {
-                            IconButton(onClick = { clearNoteNameStateMethod() }) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Note name input field clear text icon."
+                    Row {
+                        OutlinedTextField(
+                            maxLines = 1,
+                            modifier = Modifier.fillMaxWidth(),
+                            value = noteNameState,
+                            onValueChange = { newValue -> updateNoteNameStateMethod(newValue) },
+                            trailingIcon = {
+                                IconButton(onClick = { clearNoteNameStateMethod() }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Note name input field clear text icon."
+                                    )
+                                }
+                            },
+                            textStyle = TextStyle(fontSize = 15.sp),
+                            placeholder = {
+                                Text(
+                                    text = "Enter your note name here...",
+                                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                                    fontSize = 15.sp
                                 )
-                            }
-                        },
-                        textStyle = TextStyle(fontSize = 15.sp),
-                        placeholder = {
-                            Text(
-                                text = "Enter your note name here...",
-                                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                fontSize = 15.sp
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                                cursorColor = MaterialTheme.colorScheme.onPrimary
                             )
-                        }
-                    )
+                        )
+                    }
                 },
                 barIcon = {
                     IconButton(onClick = {
                         navigationController.navigate(NavigationRoutes.MainScreen.route)
 
-                        clearSelectedNoteStateMethod()
                         clearNoteNameStateMethod()
                         clearNoteContentStateMethod()
                     }) {
@@ -126,7 +145,7 @@ fun NoteUiEditScreen(
                         .horizontalScroll(noteContentInputFieldHorizontalScrollState),
                     value = noteContentState,
                     onValueChange = { newValue -> updateNoteContentStateMethod(newValue) },
-                    textStyle = TextStyle(color = currentThemeColor.getAdaptedCurrentThemeColor(false)),
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
                     decorationBox = @Composable { innerTextField ->
                         BasicTextFieldUiPlaceholder(
                             value = noteContentState,
@@ -137,18 +156,20 @@ fun NoteUiEditScreen(
                     }
                 )
 
+                HorizontalDivider()
+
                 Button(
                     onClick = {
                         if (isNoteNameAnContentEmptyMethod()) {
                             updateErrorOfEmptyNotAlertMessageDialogStateMethod(true)
                         } else {
                             //checking changes in note content.
-                            if (noteContentState != selectedNoteState.content || noteNameState != selectedNoteState.name) {
+                            if (noteContentState != currentNote.content || noteNameState != currentNote.name) {
                                 editNoteMethod(
                                     noteNameState,
                                     noteContentState,
                                     dateTimePicker.pickDateTimeNow(),
-                                    selectedNoteState.uuid
+                                    currentNote.uuid
                                 )
 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -179,12 +200,16 @@ fun NoteUiEditScreen(
                 state = errorOfEmptyNotAlertMessageDialogState
             ) {
                 Column {
-                    Text(text = "Note couldn't be empty!")
+                    Text(
+                        text = "Note couldn't be empty!\n- Check note name and content.",
+                        color = Color.White
+                    )
 
                     Button(
                         onClick = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
                             text = "Ok",

@@ -22,17 +22,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
-import com.example.notepad.core.data_models.SelectedNote
+import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.ui.components.screen_components.TopUiBar
 
 @Composable
 fun NoteUiViewScreen(
     navigationController: NavController,
-    selectedNoteState: SelectedNote,
-    //clearSelectedNoteStateMethod: () -> Unit
+    selectedNoteUuidState: String,
+    notesList: List<NoteEntity>
 ) {
     val noteViewVerticalScrollState = rememberScrollState()
     val noteViewHorizontalScrollState = rememberScrollState()
+
+    val currentNote = notesList[notesList.indexOfFirst { it.uuid == selectedNoteUuidState }]
 
     Scaffold(
         topBar = {
@@ -40,7 +42,7 @@ fun NoteUiViewScreen(
                 titleContent = {
                     Column {
                         Text(
-                            text = selectedNoteState.name,
+                            text = currentNote.name,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.basicMarquee(Int.MAX_VALUE),
                             fontSize = 16.sp
@@ -48,14 +50,14 @@ fun NoteUiViewScreen(
 
                         Row {
                             Text(
-                                text = selectedNoteState.creationDate,
+                                text = currentNote.dateTime,
                                 fontWeight = FontWeight.Light,
                                 modifier = Modifier.basicMarquee(Int.MAX_VALUE),
                                 fontSize = 10.sp
                             )
 
                             Text(
-                                text = "${selectedNoteState.content.length} symbols",
+                                text = "${currentNote.content.length} symbols",
                                 fontStyle = FontStyle.Italic,
                                 modifier = Modifier
                                     .padding(start = 10.dp)
@@ -80,7 +82,7 @@ fun NoteUiViewScreen(
         },
         content = { innerPadding ->
             Text(
-                text = selectedNoteState.content,
+                text = currentNote.content,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)

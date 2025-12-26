@@ -22,7 +22,7 @@ interface NoteDao {
         name: String,
         content: String,
         lastEditDateTime: String,
-        uuid: String
+        uuid: String,
     )
 
     @Query("DELETE FROM notes_storage")

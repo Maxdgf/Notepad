@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
@@ -39,23 +40,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 
-import com.example.notepad.core.data_models.SelectedNote
 import com.example.notepad.ui.components.screen_components.SimpleFloatingUiIconButton
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
 import com.example.notepad.ui.components.ui_components.CardUiItem
 import com.example.notepad.ui.components.ui_components.ScrollableUiItemsList
+import com.example.notepad.ui.utils.CurrentThemeColor
 
 @Composable
 fun MainUiScreen(
     navigationController: NavController,
+    currentThemeColor: CurrentThemeColor,
     noteActionsDialogState: Boolean,
     notesList: List<NoteEntity>,
-    selectedNoteState: SelectedNote,
+    selectedNoteUuidState: String,
     deleteAllNotesAlertMessageDialogState: Boolean,
     updateDeleteAllNotesAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
-    updateSelectedNoteStateMethod: (note: SelectedNote) -> Unit,
+    updateSelectedNoteUuidStateMethod: (uuid: String) -> Unit,
     updateNoteActionsDialogStateMethod: (state: Boolean) -> Unit,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
@@ -129,14 +131,7 @@ fun MainUiScreen(
                             .fillMaxSize()
                             .combinedClickable(
                                 onClick = {
-                                    updateSelectedNoteStateMethod(
-                                        SelectedNote(
-                                            name = note.name,
-                                            creationDate = note.dateTime,
-                                            content = note.content,
-                                            uuid = note.uuid
-                                        )
-                                    )
+                                    updateSelectedNoteUuidStateMethod(note.uuid)
 
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     navigationController.navigate(NavigationRoutes.NoteViewScreen.route)
@@ -145,14 +140,7 @@ fun MainUiScreen(
                                     updateNoteActionsDialogStateMethod(true)
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                    updateSelectedNoteStateMethod(
-                                        SelectedNote(
-                                            name = note.name,
-                                            creationDate = note.dateTime,
-                                            content = note.content,
-                                            uuid = note.uuid
-                                        )
-                                    )
+                                    updateSelectedNoteUuidStateMethod(note.uuid)
                                 }
                             )
                     ) {
@@ -176,9 +164,14 @@ fun MainUiScreen(
                                 )
 
                                 note.lastEditDateTime?.let { dateTime ->
+                                    HorizontalDivider(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = currentThemeColor.getAdaptedCurrentThemeColor(false)
+                                    )
+
                                     Row {
                                         Icon(
-                                            imageVector = Icons.Outlined.Edit,
+                                            imageVector = Icons.Default.Edit,
                                             contentDescription = "Last note edit decoration icon."
                                         )
 
@@ -256,11 +249,17 @@ fun MainUiScreen(
                 onDismissRequestFunction = { updateNoteActionsDialogStateMethod(false) },
                 isExpanded = false
             ) {
+                val currentNote = notesList[notesList.indexOfFirst { it.uuid == selectedNoteUuidState }]
+                
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
+                    ) {
                         Text(text = "Actions with note:")
                         Text(
-                            text = selectedNoteState.name,
+                            text = currentNote.name,
                             modifier = Modifier
                                 .weight(1f)
                                 .basicMarquee(Int.MAX_VALUE),
@@ -277,8 +276,9 @@ fun MainUiScreen(
                             onClick = {
                                 updateNoteActionsDialogStateMethod(false)
 
-                                updateNoteNameStateMethod(selectedNoteState.name)
-                                updateNoteContentStateMethod(selectedNoteState.content)
+                                updateSelectedNoteUuidStateMethod(currentNote.uuid)
+                                updateNoteNameStateMethod(currentNote.name)
+                                updateNoteContentStateMethod(currentNote.content)
 
                                 navigationController.navigate(NavigationRoutes.NoteEditScreen.route)
                             },
@@ -297,7 +297,7 @@ fun MainUiScreen(
 
                         Button(
                             onClick = {
-                                deleteNoteMethod(selectedNoteState.uuid)
+                                deleteNoteMethod(currentNote.uuid)
                                 updateNoteActionsDialogStateMethod(false)
                             },
                             modifier = Modifier.weight(0.5f),

@@ -5,12 +5,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteDao
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(

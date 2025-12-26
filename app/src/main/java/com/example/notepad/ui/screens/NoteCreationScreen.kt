@@ -3,6 +3,7 @@ package com.example.notepad.ui.screens
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,10 +16,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,16 +37,19 @@ import androidx.navigation.NavController
 import java.util.UUID
 import kotlin.random.Random
 
+import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.core.utils.DateTimePicker
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
+import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
 import com.example.notepad.ui.utils.CurrentThemeColor
 
 @Composable
 fun NoteUiCreationScreen(
     navigationController: NavController,
+    dateTimePicker: DateTimePicker,
     noteNameState: String,
     noteContentState: String,
     errorOfEmptyNotAlertMessageDialogState: Boolean,
@@ -54,9 +61,6 @@ fun NoteUiCreationScreen(
     updateErrorOfEmptyNotAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
     addNoteMethod: (note: NoteEntity) -> Unit
 ) {
-    val dateTimePicker = DateTimePicker()
-    val currentThemeColor = CurrentThemeColor()
-
     val haptic = LocalHapticFeedback.current
 
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
@@ -66,28 +70,35 @@ fun NoteUiCreationScreen(
         topBar = {
             TopUiBar(
                 titleContent = {
-                    OutlinedTextField(
-                        maxLines = 1,
-                        modifier = Modifier.fillMaxWidth(),
-                        value = noteNameState,
-                        onValueChange = { newValue -> updateNoteNameStateMethod(newValue) },
-                        trailingIcon = {
-                            IconButton(onClick = { clearNoteNameStateMethod() }) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Note name input field clear text icon."
+                    Row {
+                        OutlinedTextField(
+                            maxLines = 1,
+                            modifier = Modifier.fillMaxWidth(),
+                            value = noteNameState,
+                            onValueChange = { newValue -> updateNoteNameStateMethod(newValue) },
+                            trailingIcon = {
+                                IconButton(onClick = { clearNoteNameStateMethod() }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Note name input field clear text icon."
+                                    )
+                                }
+                            },
+                            textStyle = TextStyle(fontSize = 15.sp),
+                            placeholder = {
+                                Text(
+                                    text = "Enter your note name here...",
+                                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                                    fontSize = 15.sp
                                 )
-                            }
-                        },
-                        textStyle = TextStyle(fontSize = 15.sp),
-                        placeholder = {
-                            Text(
-                                text = "Enter your note name here...",
-                                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                fontSize = 15.sp
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                                cursorColor = MaterialTheme.colorScheme.onPrimary
                             )
-                        }
-                    )
+                        )
+                    }
                 },
                 barIcon = {
                     IconButton(onClick = {
@@ -118,7 +129,7 @@ fun NoteUiCreationScreen(
                         .horizontalScroll(noteContentInputFieldHorizontalScrollState),
                     value = noteContentState,
                     onValueChange = { newValue -> updateNoteContentStateMethod(newValue) },
-                    textStyle = TextStyle(color = currentThemeColor.getAdaptedCurrentThemeColor(false)),
+                    textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
                     decorationBox = @Composable { innerTextField ->
                         BasicTextFieldUiPlaceholder(
                             value = noteContentState,
@@ -128,6 +139,8 @@ fun NoteUiCreationScreen(
                         )
                     }
                 )
+
+                HorizontalDivider()
 
                 Button(
                     onClick = {
@@ -171,7 +184,7 @@ fun NoteUiCreationScreen(
             ) {
                 Column {
                     Text(
-                        text = "Note couldn't be empty!",
+                        text = "Note couldn't be empty!\n- Check note name and content.",
                         color = Color.White
                     )
 

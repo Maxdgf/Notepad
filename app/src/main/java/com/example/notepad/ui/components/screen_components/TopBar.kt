@@ -5,20 +5,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopUiBar(
     titleContent: @Composable () -> Unit,
     barIcon: @Composable () -> Unit,
-    barActionElements: @Composable () -> Unit = {}
+    barActionElements: @Composable () -> Unit = {},
+    containerColor: Color? = null,
 ) {
     TopAppBar(
         title = { titleContent() },
         navigationIcon = { barIcon() },
         actions = { barActionElements() },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
+            containerColor = containerColor ?: MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )

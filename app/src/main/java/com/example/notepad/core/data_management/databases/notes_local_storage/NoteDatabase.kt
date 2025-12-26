@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [NoteEntity::class],
-    version = 10
+    version = 11
 )
 abstract class NoteDatabase: RoomDatabase() {
     abstract fun getNoteDao(): NoteDao
