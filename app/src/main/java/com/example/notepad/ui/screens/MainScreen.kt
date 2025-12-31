@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -36,18 +38,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
+import com.example.notepad.R
 
+import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.ui.components.screen_components.SimpleFloatingUiIconButton
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
 import com.example.notepad.ui.components.ui_components.CardUiItem
+import com.example.notepad.ui.components.ui_components.CheckBoxWithUiText
 import com.example.notepad.ui.components.ui_components.ScrollableUiItemsList
 import com.example.notepad.ui.utils.CurrentThemeColor
 
@@ -58,6 +63,7 @@ fun MainUiScreen(
     noteActionsDialogState: Boolean,
     isNotesLoadingState: Boolean,
     notesList: List<NoteEntity>,
+    isGridEnabledState: Boolean,
     selectedNoteUuidState: String,
     deleteAllNotesAlertMessageDialogState: Boolean,
     updateDeleteAllNotesAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
@@ -87,6 +93,13 @@ fun MainUiScreen(
                             contentDescription = "Delete all notes icon button."
                         )
                     }
+
+                    IconButton(onClick = { navigationController.navigate(NavigationRoutes.NoteSettingsScreen.route) }) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_settings_24),
+                            contentDescription = null
+                        )
+                    }
                 }
             )
         },
@@ -111,9 +124,13 @@ fun MainUiScreen(
                 contentAlignment = Alignment.Center
             ) {
                 if (isNotesLoadingState) {
-                    Column {
-                        CircularProgressIndicator()
-                        Text(text = "Loading...")
+                    Row {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterVertically))
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "Loading...",
+                            modifier = Modifier.align(Alignment.CenterVertically)
+                        )
                     }
                 } else {
                     ScrollableUiItemsList(
@@ -122,101 +139,200 @@ fun MainUiScreen(
                             start = 5.dp,
                             end = 5.dp
                         ),
+                        isGridEnabled = isGridEnabledState,
                         verticalArrangementValue = Arrangement.spacedBy(10.dp),
-                    ) {
-                        item {
-                            Text(
-                                text = "notes count: ${notesList.size}", //test
-                                fontSize = 20.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                        scrollableContent = {
+                            item {
+                                Text(
+                                    text = "notes count: ${notesList.size}", //test
+                                    fontSize = 20.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
 
-                            HorizontalDivider(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                                HorizontalDivider(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
 
-                        items(
-                            items = notesList,
-                            key = { note -> note.uuid }
-                        ) { note ->
-                            CardUiItem(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .combinedClickable(
-                                        onClick = {
-                                            updateSelectedNoteUuidStateMethod(note.uuid)
+                            items(
+                                items = notesList,
+                                key = { note -> note.uuid }
+                            ) { note ->
+                                CardUiItem(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .combinedClickable(
+                                            onClick = {
+                                                updateSelectedNoteUuidStateMethod(note.uuid)
 
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            navigationController.navigate(NavigationRoutes.NoteViewScreen.route)
-                                        },
-                                        onLongClick = {
-                                            updateNoteActionsDialogStateMethod(true)
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                navigationController.navigate(NavigationRoutes.NoteViewScreen.route)
+                                            },
+                                            onLongClick = {
+                                                updateNoteActionsDialogStateMethod(true)
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                            updateSelectedNoteUuidStateMethod(note.uuid)
+                                                updateSelectedNoteUuidStateMethod(note.uuid)
+                                            }
+                                        )
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 5.dp)
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = note.name,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                                            )
+
+                                            Text(
+                                                text = note.dateTime,
+                                                fontWeight = FontWeight.Light,
+                                                fontSize = 10.sp,
+                                                modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                                            )
+
+                                            note.lastEditDateTime?.let { dateTime ->
+                                                HorizontalDivider(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    color = currentThemeColor.getAdaptedCurrentThemeColor(
+                                                        false
+                                                    )
+                                                )
+
+                                                Row {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Edit,
+                                                        contentDescription = "Last note edit decoration icon."
+                                                    )
+
+                                                    Text(
+                                                        text = "last edit:",
+                                                        fontStyle = FontStyle.Italic,
+                                                        fontSize = 10.sp,
+                                                        modifier = Modifier
+                                                            .padding(start = 3.dp)
+                                                            .basicMarquee(Int.MAX_VALUE)
+                                                    )
+
+                                                    Text(
+                                                        text = dateTime,
+                                                        fontWeight = FontWeight.Light,
+                                                        fontSize = 10.sp,
+                                                        modifier = Modifier
+                                                            .padding(start = 5.dp)
+                                                            .basicMarquee(Int.MAX_VALUE)
+                                                    )
+                                                }
+                                            }
                                         }
+                                    }
+                                }
+                            }
+                        },
+                        scrollableGridContent = {
+                            item(span = { GridItemSpan(2) }) {
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    Text(
+                                        text = "notes count: ${notesList.size}", //test
+                                        fontSize = 20.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
                                     )
-                            ) {
-                                Row(
+
+                                    HorizontalDivider(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+
+                            items(
+                                items = notesList,
+                                key = { note -> note.uuid }
+                            ) { note ->
+                                CardUiItem(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .padding(horizontal = 5.dp)
+                                        .combinedClickable(
+                                            onClick = {
+                                                updateSelectedNoteUuidStateMethod(note.uuid)
+
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                navigationController.navigate(NavigationRoutes.NoteViewScreen.route)
+                                            },
+                                            onLongClick = {
+                                                updateNoteActionsDialogStateMethod(true)
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                                                updateSelectedNoteUuidStateMethod(note.uuid)
+                                            }
+                                        )
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = note.name,
-                                            fontWeight = FontWeight.Bold,
-                                            modifier = Modifier.basicMarquee(Int.MAX_VALUE)
-                                        )
-
-                                        Text(
-                                            text = note.dateTime,
-                                            fontWeight = FontWeight.Light,
-                                            fontSize = 10.sp,
-                                            modifier = Modifier.basicMarquee(Int.MAX_VALUE)
-                                        )
-
-                                        note.lastEditDateTime?.let { dateTime ->
-                                            HorizontalDivider(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                color = currentThemeColor.getAdaptedCurrentThemeColor(
-                                                    false
-                                                )
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 5.dp)
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = note.name,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.basicMarquee(Int.MAX_VALUE)
                                             )
 
-                                            Row {
-                                                Icon(
-                                                    imageVector = Icons.Default.Edit,
-                                                    contentDescription = "Last note edit decoration icon."
+                                            Text(
+                                                text = note.dateTime,
+                                                fontWeight = FontWeight.Light,
+                                                fontSize = 10.sp,
+                                                modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                                            )
+
+                                            note.lastEditDateTime?.let { dateTime ->
+                                                HorizontalDivider(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    color = currentThemeColor.getAdaptedCurrentThemeColor(
+                                                        false
+                                                    )
                                                 )
 
-                                                Text(
-                                                    text = "last edit:",
-                                                    fontStyle = FontStyle.Italic,
-                                                    fontSize = 10.sp,
-                                                    modifier = Modifier
-                                                        .padding(start = 3.dp)
-                                                        .basicMarquee(Int.MAX_VALUE)
-                                                )
+                                                Row {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Edit,
+                                                        contentDescription = "Last note edit decoration icon."
+                                                    )
 
-                                                Text(
-                                                    text = dateTime,
-                                                    fontWeight = FontWeight.Light,
-                                                    fontSize = 10.sp,
-                                                    modifier = Modifier
-                                                        .padding(start = 5.dp)
-                                                        .basicMarquee(Int.MAX_VALUE)
-                                                )
+                                                    Text(
+                                                        text = "last edit:",
+                                                        fontStyle = FontStyle.Italic,
+                                                        fontSize = 10.sp,
+                                                        modifier = Modifier
+                                                            .padding(start = 3.dp)
+                                                            .basicMarquee(Int.MAX_VALUE)
+                                                    )
+
+                                                    Text(
+                                                        text = dateTime,
+                                                        fontWeight = FontWeight.Light,
+                                                        fontSize = 10.sp,
+                                                        modifier = Modifier
+                                                            .padding(start = 5.dp)
+                                                            .basicMarquee(Int.MAX_VALUE)
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
+                    )
                 }
             }
 

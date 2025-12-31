@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class UiViewModel : ViewModel() {
     var noteActionsDialogState by mutableStateOf(false)
@@ -13,6 +15,8 @@ class UiViewModel : ViewModel() {
     var errorOfEmptyNotAlertMessageDialogState by mutableStateOf(false)
     var errorOfNoteChangesAlertMessageDialogState by mutableStateOf(false)
     var deleteAllNotesAlertMessageDialogState by mutableStateOf(false)
+    private val _isGridEnabledState = MutableStateFlow(false)
+    val isGridEnabledState = _isGridEnabledState.asStateFlow()
 
     fun updateNoteActionsDialogState(state: Boolean) { noteActionsDialogState = state }
     fun updateNoteNameState(text: String) { noteNameState = text }
@@ -24,4 +28,5 @@ class UiViewModel : ViewModel() {
     fun updateErrorOfEmptyNotAlertMessageDialogState(state: Boolean) { errorOfEmptyNotAlertMessageDialogState = state }
     fun updateErrorOfNoteChangesAlertMessageDialogState(state: Boolean) { errorOfNoteChangesAlertMessageDialogState = state }
     fun updateDeleteAllNotesAlertMessageDialogState(state: Boolean) { deleteAllNotesAlertMessageDialogState = state }
+    fun updateIsGridEnabledState(state: Boolean) { _isGridEnabledState.value = state }
 }

@@ -53,7 +53,6 @@ fun NoteUiEditScreen(
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
     clearNoteNameStateMethod: () -> Unit,
-    clearNoteContentStateMethod: () -> Unit,
     isNoteNameAnContentEmptyMethod: () -> Boolean,
     errorOfNoteChangesAlertMessageDialogState: Boolean,
     updateErrorOfEmptyNotAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
@@ -114,9 +113,6 @@ fun NoteUiEditScreen(
                 barIcon = {
                     IconButton(onClick = {
                         navigationController.navigate(NavigationRoutes.MainScreen.route)
-
-                        clearNoteNameStateMethod()
-                        clearNoteContentStateMethod()
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -167,12 +163,7 @@ fun NoteUiEditScreen(
                                     dateTimePicker.pickDateTimeNow(),
                                     currentNote.uuid
                                 )
-
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                clearNoteNameStateMethod()
-                                clearNoteContentStateMethod()
-
                                 navigationController.navigate(NavigationRoutes.MainScreen.route)
                             } else {
                                 updateErrorOfNoteChangesAlertMessageDialogStateMethod(true)

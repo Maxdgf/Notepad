@@ -21,6 +21,7 @@ import com.example.notepad.ui.screens.MainUiScreen
 import com.example.notepad.ui.screens.NoteUiCreationScreen
 import com.example.notepad.ui.screens.NoteUiEditScreen
 import com.example.notepad.ui.screens.NoteUiViewScreen
+import com.example.notepad.ui.screens.SettingsUiScreen
 import com.example.notepad.ui.utils.CurrentThemeColor
 
 @Composable
@@ -35,6 +36,7 @@ fun MainUiNotePad(
 
     val allNotesList by notesViewModel.noteList.collectAsState()
     val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
+    val isGridEnabledState by uiViewModel.isGridEnabledState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -56,7 +58,8 @@ fun MainUiNotePad(
                     deleteAllNotesMethod = notesViewModel::deleteAllNotes,
                     currentThemeColor = currentThemeColor,
                     selectedNoteUuidState = uiViewModel.selectedNoteUuidState,
-                    isNotesLoadingState = notesLoadingState
+                    isNotesLoadingState = notesLoadingState,
+                    isGridEnabledState = isGridEnabledState
                 )
             }
 
@@ -94,7 +97,6 @@ fun MainUiNotePad(
                     updateNoteNameStateMethod = uiViewModel::updateNoteNameState,
                     updateNoteContentStateMethod = uiViewModel::updateNoteContentState,
                     clearNoteNameStateMethod = uiViewModel::clearNoteNameState,
-                    clearNoteContentStateMethod = uiViewModel::clearNoteContentState,
                     isNoteNameAnContentEmptyMethod = uiViewModel::isNoteNameAnContentEmpty,
                     updateErrorOfEmptyNotAlertMessageDialogStateMethod = uiViewModel::updateErrorOfEmptyNotAlertMessageDialogState,
                     editNoteMethod = notesViewModel::editNote,
@@ -102,7 +104,15 @@ fun MainUiNotePad(
                     updateErrorOfNoteChangesAlertMessageDialogStateMethod = uiViewModel::updateErrorOfNoteChangesAlertMessageDialogState,
                     dateTimePicker = dateTimePicker,
                     selectedNoteUuidState = uiViewModel.selectedNoteUuidState,
-                    notesList = allNotesList,
+                    notesList = allNotesList
+                )
+            }
+            
+            composable(NavigationRoutes.NoteSettingsScreen.route) {
+                SettingsUiScreen(
+                    isGridEnabledState = isGridEnabledState,
+                    updateIsGridEnabledStateMethod = uiViewModel::updateIsGridEnabledState,
+                    navigationController = navController,
                 )
             }
         }

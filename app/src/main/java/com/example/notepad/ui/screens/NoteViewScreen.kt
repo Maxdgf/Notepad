@@ -1,7 +1,10 @@
 package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,8 +35,6 @@ fun NoteUiViewScreen(
     notesList: List<NoteEntity>
 ) {
     val noteViewVerticalScrollState = rememberScrollState()
-    val noteViewHorizontalScrollState = rememberScrollState()
-
     val currentNote = notesList[notesList.indexOfFirst { it.uuid == selectedNoteUuidState }]
 
     Scaffold(
@@ -70,7 +71,6 @@ fun NoteUiViewScreen(
                 barIcon = {
                     IconButton(onClick = {
                         navigationController.navigate(NavigationRoutes.MainScreen.route)
-                        //clearSelectedNoteStateMethod()
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -87,7 +87,6 @@ fun NoteUiViewScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(noteViewVerticalScrollState)
-                    .horizontalScroll(noteViewHorizontalScrollState),
             )
         }
     )

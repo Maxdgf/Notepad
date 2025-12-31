@@ -11,6 +11,7 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.No
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onCompletion
@@ -27,7 +28,10 @@ class NoteViewModel @Inject constructor(
 
     val noteList = noteRepository.allNotesFromLocalStorage()
         .onStart { _isNotesLoadingState.value = true } // update loading state to true, when flow is started
-        .onEach { _isNotesLoadingState.value = false } // update loading state to false after emission
+        .onEach {
+            delay(100) // mini-delay
+            _isNotesLoadingState.value = false
+        } // update loading state to false after emission
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
