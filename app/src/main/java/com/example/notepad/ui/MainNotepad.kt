@@ -3,10 +3,13 @@ package com.example.notepad.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.preferences.core.edit
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -16,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.notepad.core.data_management.view_models.NoteViewModel
 import com.example.notepad.core.data_management.view_models.UiViewModel
 import com.example.notepad.core.utils.DateTimePicker
+import com.example.notepad.dataStore
+import com.example.notepad.gridEnabledState
 import com.example.notepad.ui.screens.NavigationRoutes
 import com.example.notepad.ui.screens.MainUiScreen
 import com.example.notepad.ui.screens.NoteUiCreationScreen
@@ -23,20 +28,40 @@ import com.example.notepad.ui.screens.NoteUiEditScreen
 import com.example.notepad.ui.screens.NoteUiViewScreen
 import com.example.notepad.ui.screens.SettingsUiScreen
 import com.example.notepad.ui.utils.CurrentThemeColor
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun MainUiNotePad(
     uiViewModel: UiViewModel = viewModel(),
     notesViewModel: NoteViewModel = hiltViewModel()
 ) {
-   val currentThemeColor = remember { CurrentThemeColor() }
-   val dateTimePicker = remember { DateTimePicker() }
+    val context = LocalContext.current
+    val dataStore = context.dataStore
 
+    val currentThemeColor = remember { CurrentThemeColor() }
+    val dateTimePicker = remember { DateTimePicker() }
     val navController = rememberNavController()
 
     val allNotesList by notesViewModel.noteList.collectAsState()
     val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
     val isGridEnabledState by uiViewModel.isGridEnabledState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        val state = dataStore.data.map {
+            it[gridEnabledState]
+        }
+
+        state.collect {
+            it?.let { uiViewModel.updateIsGridEnabledState(it) } ?: uiViewModel.updateIsGridEnabledState(false)
+        }
+    }
+
+    LaunchedEffect(uiViewModel.selectedNoteUuidState) {
+        if (uiViewModel.selectedNoteUuidState.isNotEmpty()) {
+            val currentNote = allNotesList[allNotesList.indexOfFirst { it.uuid == uiViewModel.selectedNoteUuidState }]
+            uiViewModel.updateCurrentSelectedNote(currentNote)
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -83,8 +108,7 @@ fun MainUiNotePad(
             composable(NavigationRoutes.NoteViewScreen.route) { 
                 NoteUiViewScreen(
                     navigationController = navController,
-                    selectedNoteUuidState = uiViewModel.selectedNoteUuidState,
-                    notesList = allNotesList,
+                    currentNote = uiViewModel.currentSelectedNote!!,
                 )
             }
 
@@ -103,16 +127,20 @@ fun MainUiNotePad(
                     errorOfNoteChangesAlertMessageDialogState = uiViewModel.errorOfNoteChangesAlertMessageDialogState,
                     updateErrorOfNoteChangesAlertMessageDialogStateMethod = uiViewModel::updateErrorOfNoteChangesAlertMessageDialogState,
                     dateTimePicker = dateTimePicker,
-                    selectedNoteUuidState = uiViewModel.selectedNoteUuidState,
-                    notesList = allNotesList
+                    currentNote = uiViewModel.currentSelectedNote!!,
                 )
             }
-            
+
             composable(NavigationRoutes.NoteSettingsScreen.route) {
                 SettingsUiScreen(
                     isGridEnabledState = isGridEnabledState,
                     updateIsGridEnabledStateMethod = uiViewModel::updateIsGridEnabledState,
                     navigationController = navController,
+                    updateIsGridEnabledDatastore = {
+                        dataStore.edit {
+                            it[gridEnabledState] = isGridEnabledState
+                        }
+                    },
                 )
             }
         }

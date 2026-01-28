@@ -8,6 +8,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
@@ -15,13 +16,20 @@ import androidx.navigation.NavController
 import com.example.notepad.R
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.CheckBoxWithUiText
+import kotlinx.coroutines.delay
 
 @Composable
 fun SettingsUiScreen(
     navigationController: NavController,
     isGridEnabledState: Boolean,
-    updateIsGridEnabledStateMethod: (state: Boolean) -> Unit
+    updateIsGridEnabledStateMethod: (state: Boolean) -> Unit,
+    updateIsGridEnabledDatastore: suspend () -> Unit
 ) {
+    LaunchedEffect(isGridEnabledState) {
+        updateIsGridEnabledDatastore()
+        delay(10) // delay
+    }
+
     Scaffold(
         topBar = {
             TopUiBar(
@@ -50,7 +58,7 @@ fun SettingsUiScreen(
         ) {
             CheckBoxWithUiText(
                 checked = isGridEnabledState,
-                text = "grid view",
+                text = "notes list grid view",
                 onCheckedChange = { state -> updateIsGridEnabledStateMethod(state) }
             )
         }

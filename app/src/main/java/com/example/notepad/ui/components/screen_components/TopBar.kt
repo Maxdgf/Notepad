@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 fun TopUiBar(
     titleContent: @Composable () -> Unit,
-    barIcon: @Composable () -> Unit,
+    barIcon: @Composable () -> Unit = {},
     barActionElements: @Composable () -> Unit = {},
     containerColor: Color? = null,
 ) {

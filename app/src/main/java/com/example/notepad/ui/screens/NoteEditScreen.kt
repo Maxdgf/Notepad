@@ -47,8 +47,7 @@ fun NoteUiEditScreen(
     dateTimePicker: DateTimePicker,
     noteNameState: String,
     noteContentState: String,
-    selectedNoteUuidState: String,
-    notesList: List<NoteEntity>,
+    currentNote: NoteEntity,
     errorOfEmptyNotAlertMessageDialogState: Boolean,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
@@ -68,8 +67,6 @@ fun NoteUiEditScreen(
 
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
     val noteContentInputFieldHorizontalScrollState = rememberScrollState()
-
-    val currentNote = notesList[notesList.indexOfFirst { it.uuid == selectedNoteUuidState }]
 
     LaunchedEffect(Unit) {
         updateNoteNameStateMethod(currentNote.name)

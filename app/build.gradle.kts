@@ -42,6 +42,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.dataStore)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)

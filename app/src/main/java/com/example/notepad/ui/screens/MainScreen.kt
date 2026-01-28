@@ -80,12 +80,6 @@ fun MainUiScreen(
         topBar = {
             TopUiBar(
                 titleContent = { Text(text = "Notepad") },
-                barIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Edit,
-                        contentDescription = "Top bar icon."
-                    )
-                },
                 barActionElements = {
                     IconButton(onClick = { updateDeleteAllNotesAlertMessageDialogStateMethod(true) }) {
                         Icon(

@@ -1,10 +1,6 @@
 package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,11 +27,9 @@ import com.example.notepad.ui.components.screen_components.TopUiBar
 @Composable
 fun NoteUiViewScreen(
     navigationController: NavController,
-    selectedNoteUuidState: String,
-    notesList: List<NoteEntity>
+    currentNote: NoteEntity
 ) {
     val noteViewVerticalScrollState = rememberScrollState()
-    val currentNote = notesList[notesList.indexOfFirst { it.uuid == selectedNoteUuidState }]
 
     Scaffold(
         topBar = {
