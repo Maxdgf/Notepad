@@ -52,22 +52,23 @@ import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
 import com.example.notepad.ui.components.ui_components.CardUiItem
-import com.example.notepad.ui.components.ui_components.CheckBoxWithUiText
 import com.example.notepad.ui.components.ui_components.ScrollableUiItemsList
+import com.example.notepad.ui.navigation.NavigationRoutes
+import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.utils.CurrentThemeColor
 
 @Composable
 fun MainUiScreen(
-    navigationController: NavController,
+    navigator: Navigator,
     currentThemeColor: CurrentThemeColor,
     noteActionsDialogState: Boolean,
     isNotesLoadingState: Boolean,
     notesList: List<NoteEntity>,
     isGridEnabledState: Boolean,
-    selectedNoteUuidState: String,
+    selectedNoteUuidState: String?,
     deleteAllNotesAlertMessageDialogState: Boolean,
     updateDeleteAllNotesAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
-    updateSelectedNoteUuidStateMethod: (uuid: String) -> Unit,
+    updateSelectedNoteUuidStateMethod: (uuid: String?) -> Unit,
     updateNoteActionsDialogStateMethod: (state: Boolean) -> Unit,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
@@ -88,7 +89,7 @@ fun MainUiScreen(
                         )
                     }
 
-                    IconButton(onClick = { navigationController.navigate(NavigationRoutes.NoteSettingsScreen.route) }) {
+                    IconButton(onClick = { navigator.navigateTo(NavigationRoutes.NoteSettingsScreen.route) }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_settings_24),
                             contentDescription = null
@@ -101,7 +102,9 @@ fun MainUiScreen(
             SimpleFloatingUiIconButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    navigationController.navigate(NavigationRoutes.NoteCreationScreen.route)
+                    updateNoteNameStateMethod("")
+                    updateNoteContentStateMethod("")
+                    navigator.navigateTo(NavigationRoutes.NoteCreationScreen.route)
                 },
                 imageVector = Icons.Default.Add,
                 iconDescription = "Icon of simple icon add action floating button.",
@@ -162,7 +165,7 @@ fun MainUiScreen(
                                                 updateSelectedNoteUuidStateMethod(note.uuid)
 
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                navigationController.navigate(NavigationRoutes.NoteViewScreen.route)
+                                                navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
                                             },
                                             onLongClick = {
                                                 updateNoteActionsDialogStateMethod(true)
@@ -259,7 +262,7 @@ fun MainUiScreen(
                                                 updateSelectedNoteUuidStateMethod(note.uuid)
 
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                navigationController.navigate(NavigationRoutes.NoteViewScreen.route)
+                                                navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
                                             },
                                             onLongClick = {
                                                 updateNoteActionsDialogStateMethod(true)
@@ -335,7 +338,7 @@ fun MainUiScreen(
                 color = MaterialTheme.colorScheme.error,
                 state = deleteAllNotesAlertMessageDialogState
             ) {
-                Column {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Text(
                         text = "Are you sure you want to delete all notes?",
                         color = Color.White
@@ -379,68 +382,70 @@ fun MainUiScreen(
                 onDismissRequestFunction = { updateNoteActionsDialogStateMethod(false) },
                 isExpanded = false
             ) {
-                val currentNote = notesList[notesList.indexOfFirst { it.uuid == selectedNoteUuidState }]
-                
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp)
-                    ) {
-                        Text(text = "Actions with note:")
-                        Text(
-                            text = currentNote.name,
+                val currentNote = notesList.find { note -> selectedNoteUuidState == note.uuid }
+
+                currentNote?.let { note ->
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
                             modifier = Modifier
-                                .weight(1f)
-                                .basicMarquee(Int.MAX_VALUE),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                updateNoteActionsDialogStateMethod(false)
-
-                                updateSelectedNoteUuidStateMethod(currentNote.uuid)
-                                updateNoteNameStateMethod(currentNote.name)
-                                updateNoteContentStateMethod(currentNote.content)
-
-                                navigationController.navigate(NavigationRoutes.NoteEditScreen.route)
-                            },
-                            modifier = Modifier.weight(0.5f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            ),
-                            shape = RoundedCornerShape(10.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Edit,
-                                contentDescription = "Edit note button."
+                            Text(text = "Actions with note:")
+                            Text(
+                                text = note.name,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .basicMarquee(Int.MAX_VALUE),
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
                             )
                         }
 
-                        Button(
-                            onClick = {
-                                deleteNoteMethod(currentNote.uuid)
-                                updateNoteActionsDialogStateMethod(false)
-                            },
-                            modifier = Modifier.weight(0.5f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                            shape = RoundedCornerShape(10.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(20.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Delete,
-                                contentDescription = "Delete note button."
-                            )
+                            Button(
+                                onClick = {
+                                    updateNoteActionsDialogStateMethod(false)
+
+                                    updateSelectedNoteUuidStateMethod(note.uuid)
+                                    updateNoteNameStateMethod(note.name)
+                                    updateNoteContentStateMethod(note.content)
+
+                                    navigator.navigateTo(NavigationRoutes.NoteEditScreen.route)
+                                },
+                                modifier = Modifier.weight(0.5f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Edit,
+                                    contentDescription = "Edit note button."
+                                )
+                            }
+
+                            Button(
+                                onClick = {
+                                    deleteNoteMethod(note.uuid)
+                                    updateNoteActionsDialogStateMethod(false)
+                                },
+                                modifier = Modifier.weight(0.5f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError
+                                ),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = "Delete note button."
+                                )
+                            }
                         }
                     }
                 }

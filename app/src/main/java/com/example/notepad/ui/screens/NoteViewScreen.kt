@@ -19,15 +19,16 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.ui.components.screen_components.TopUiBar
+import com.example.notepad.ui.navigation.NavigationRoutes
+import com.example.notepad.ui.navigation.Navigator
 
 @Composable
 fun NoteUiViewScreen(
-    navigationController: NavController,
-    currentNote: NoteEntity
+    navigator: Navigator,
+    currentNote: NoteEntity?
 ) {
     val noteViewVerticalScrollState = rememberScrollState()
 
@@ -35,36 +36,38 @@ fun NoteUiViewScreen(
         topBar = {
             TopUiBar(
                 titleContent = {
-                    Column {
-                        Text(
-                            text = currentNote.name,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                            fontSize = 16.sp
-                        )
-
-                        Row {
+                    currentNote?.let {
+                        Column {
                             Text(
-                                text = currentNote.dateTime,
-                                fontWeight = FontWeight.Light,
+                                text = it.name,
+                                fontWeight = FontWeight.Bold,
                                 modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                fontSize = 10.sp
+                                fontSize = 16.sp
                             )
 
-                            Text(
-                                text = "${currentNote.content.length} symbols",
-                                fontStyle = FontStyle.Italic,
-                                modifier = Modifier
-                                    .padding(start = 10.dp)
-                                    .basicMarquee(Int.MAX_VALUE),
-                                fontSize = 10.sp
-                            )
+                            Row {
+                                Text(
+                                    text = it.dateTime,
+                                    fontWeight = FontWeight.Light,
+                                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                                    fontSize = 10.sp
+                                )
+
+                                Text(
+                                    text = "${it.content.length} symbols",
+                                    fontStyle = FontStyle.Italic,
+                                    modifier = Modifier
+                                        .padding(start = 10.dp)
+                                        .basicMarquee(Int.MAX_VALUE),
+                                    fontSize = 10.sp
+                                )
+                            }
                         }
                     }
                 },
                 barIcon = {
                     IconButton(onClick = {
-                        navigationController.navigate(NavigationRoutes.MainScreen.route)
+                        navigator.navigateTo(NavigationRoutes.MainScreen.route)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -75,13 +78,15 @@ fun NoteUiViewScreen(
             )
         },
         content = { innerPadding ->
-            Text(
-                text = currentNote.content,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(noteViewVerticalScrollState)
-            )
+            currentNote?.let {
+                Text(
+                    text = it.content,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(noteViewVerticalScrollState)
+                )
+            }
         }
     )
 }

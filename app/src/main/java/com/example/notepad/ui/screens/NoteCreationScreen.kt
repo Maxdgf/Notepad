@@ -45,11 +45,13 @@ import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
 import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
+import com.example.notepad.ui.navigation.NavigationRoutes
+import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.utils.CurrentThemeColor
 
 @Composable
 fun NoteUiCreationScreen(
-    navigationController: NavController,
+    navigator: Navigator,
     dateTimePicker: DateTimePicker,
     noteNameState: String,
     noteContentState: String,
@@ -63,9 +65,7 @@ fun NoteUiCreationScreen(
     addNoteMethod: (note: NoteEntity) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
-    val noteContentInputFieldHorizontalScrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
@@ -103,7 +103,7 @@ fun NoteUiCreationScreen(
                 },
                 barIcon = {
                     IconButton(onClick = {
-                        navigationController.navigate(NavigationRoutes.MainScreen.route)
+                        navigator.navigateTo(NavigationRoutes.MainScreen.route)
 
                         clearNoteNameStateMethod()
                         clearNoteContentStateMethod()
@@ -127,8 +127,7 @@ fun NoteUiCreationScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .verticalScroll(noteContentInputFieldVerticalScrollState)
-                        .horizontalScroll(noteContentInputFieldHorizontalScrollState),
+                        .verticalScroll(noteContentInputFieldVerticalScrollState),
                     value = noteContentState,
                     onValueChange = { newValue -> updateNoteContentStateMethod(newValue) },
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
@@ -165,7 +164,7 @@ fun NoteUiCreationScreen(
                             clearNoteNameStateMethod()
                             clearNoteContentStateMethod()
 
-                            navigationController.navigate(NavigationRoutes.MainScreen.route)
+                            navigator.navigateTo(NavigationRoutes.MainScreen.route)
                         }
                     },
                     modifier = Modifier
@@ -184,7 +183,7 @@ fun NoteUiCreationScreen(
                 color = MaterialTheme.colorScheme.error,
                 state = errorOfEmptyNotAlertMessageDialogState
             ) {
-                Column {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Text(
                         text = "Note couldn't be empty!\n- Check note name and content.",
                         color = Color.White

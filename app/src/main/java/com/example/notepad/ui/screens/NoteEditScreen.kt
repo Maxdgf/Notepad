@@ -41,13 +41,16 @@ import com.example.notepad.core.utils.DateTimePicker
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
+import com.example.notepad.ui.navigation.NavigationRoutes
+import com.example.notepad.ui.navigation.Navigator
+
 @Composable
 fun NoteUiEditScreen(
-    navigationController: NavController,
+    navigator: Navigator,
     dateTimePicker: DateTimePicker,
     noteNameState: String,
     noteContentState: String,
-    currentNote: NoteEntity,
+    currentNote: NoteEntity?,
     errorOfEmptyNotAlertMessageDialogState: Boolean,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
@@ -64,14 +67,7 @@ fun NoteUiEditScreen(
     updateErrorOfNoteChangesAlertMessageDialogStateMethod: (state: Boolean) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
-    val noteContentInputFieldHorizontalScrollState = rememberScrollState()
-
-    LaunchedEffect(Unit) {
-        updateNoteNameStateMethod(currentNote.name)
-        updateNoteContentStateMethod(currentNote.content)
-    }
 
     Scaffold(
         topBar = {
@@ -109,7 +105,7 @@ fun NoteUiEditScreen(
                 },
                 barIcon = {
                     IconButton(onClick = {
-                        navigationController.navigate(NavigationRoutes.MainScreen.route)
+                        navigator.navigateTo(NavigationRoutes.MainScreen.route)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -130,8 +126,7 @@ fun NoteUiEditScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .verticalScroll(noteContentInputFieldVerticalScrollState)
-                        .horizontalScroll(noteContentInputFieldHorizontalScrollState),
+                        .verticalScroll(noteContentInputFieldVerticalScrollState),
                     value = noteContentState,
                     onValueChange = { newValue -> updateNoteContentStateMethod(newValue) },
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
@@ -149,21 +144,23 @@ fun NoteUiEditScreen(
 
                 Button(
                     onClick = {
-                        if (isNoteNameAnContentEmptyMethod()) {
-                            updateErrorOfEmptyNotAlertMessageDialogStateMethod(true)
-                        } else {
-                            //checking changes in note content.
-                            if (noteContentState != currentNote.content || noteNameState != currentNote.name) {
-                                editNoteMethod(
-                                    noteNameState,
-                                    noteContentState,
-                                    dateTimePicker.pickDateTimeNow(),
-                                    currentNote.uuid
-                                )
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                navigationController.navigate(NavigationRoutes.MainScreen.route)
+                        currentNote?.let { note ->
+                            if (isNoteNameAnContentEmptyMethod()) {
+                                updateErrorOfEmptyNotAlertMessageDialogStateMethod(true)
                             } else {
-                                updateErrorOfNoteChangesAlertMessageDialogStateMethod(true)
+                                //checking changes in note content.
+                                if (noteContentState != note.content || noteNameState != note.name) {
+                                    editNoteMethod(
+                                        noteNameState,
+                                        noteContentState,
+                                        dateTimePicker.pickDateTimeNow(),
+                                        note.uuid
+                                    )
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    navigator.navigateTo(NavigationRoutes.MainScreen.route)
+                                } else {
+                                    updateErrorOfNoteChangesAlertMessageDialogStateMethod(true)
+                                }
                             }
                         }
                     },
@@ -183,7 +180,7 @@ fun NoteUiEditScreen(
                 color = MaterialTheme.colorScheme.error,
                 state = errorOfEmptyNotAlertMessageDialogState
             ) {
-                Column {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Text(
                         text = "Note couldn't be empty!\n- Check note name and content.",
                         color = Color.White

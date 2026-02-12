@@ -26,6 +26,9 @@ class NoteViewModel @Inject constructor(
     private val _isNotesLoadingState = MutableStateFlow(false)
     val isNotesLoadingState = _isNotesLoadingState.asStateFlow()
 
+    private val _selectedNoteUuid = MutableStateFlow<String?>(null)
+    val selectedNoteUuid = _selectedNoteUuid.asStateFlow()
+
     val noteList = noteRepository.allNotesFromLocalStorage()
         .onStart { _isNotesLoadingState.value = true } // update loading state to true, when flow is started
         .onEach {
@@ -37,6 +40,8 @@ class NoteViewModel @Inject constructor(
             SharingStarted.Lazily,
             emptyList()
         )
+
+    fun updateSelectedNoteUuid(uuid: String?) { _selectedNoteUuid.value = uuid }
 
     fun addNote(note: NoteEntity) {
         viewModelScope.launch {

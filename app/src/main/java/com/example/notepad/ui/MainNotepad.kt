@@ -21,7 +21,8 @@ import com.example.notepad.core.data_management.view_models.UiViewModel
 import com.example.notepad.core.utils.DateTimePicker
 import com.example.notepad.dataStore
 import com.example.notepad.gridEnabledState
-import com.example.notepad.ui.screens.NavigationRoutes
+import com.example.notepad.ui.navigation.NavigationRoutes
+import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.screens.MainUiScreen
 import com.example.notepad.ui.screens.NoteUiCreationScreen
 import com.example.notepad.ui.screens.NoteUiEditScreen
@@ -41,10 +42,12 @@ fun MainUiNotePad(
     val currentThemeColor = remember { CurrentThemeColor() }
     val dateTimePicker = remember { DateTimePicker() }
     val navController = rememberNavController()
+    val navigator = remember { Navigator(navController) }
 
     val allNotesList by notesViewModel.noteList.collectAsState()
     val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
     val isGridEnabledState by uiViewModel.isGridEnabledState.collectAsState()
+    val selectedNoteUuid by notesViewModel.selectedNoteUuid.collectAsState()
 
     LaunchedEffect(Unit) {
         val state = dataStore.data.map {
@@ -56,13 +59,6 @@ fun MainUiNotePad(
         }
     }
 
-    LaunchedEffect(uiViewModel.selectedNoteUuidState) {
-        if (uiViewModel.selectedNoteUuidState.isNotEmpty()) {
-            val currentNote = allNotesList[allNotesList.indexOfFirst { it.uuid == uiViewModel.selectedNoteUuidState }]
-            uiViewModel.updateCurrentSelectedNote(currentNote)
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
@@ -70,10 +66,10 @@ fun MainUiNotePad(
         ) {
             composable(NavigationRoutes.MainScreen.route) { 
                 MainUiScreen(
-                    navigationController = navController,
+                    navigator = navigator,
                     noteActionsDialogState = uiViewModel.noteActionsDialogState,
                     notesList = allNotesList,
-                    updateSelectedNoteUuidStateMethod = uiViewModel::updateSelectedNoteUuidState,
+                    updateSelectedNoteUuidStateMethod = notesViewModel::updateSelectedNoteUuid,
                     updateNoteActionsDialogStateMethod = uiViewModel::updateNoteActionsDialogState,
                     updateNoteNameStateMethod = uiViewModel::updateNoteNameState,
                     updateNoteContentStateMethod = uiViewModel::updateNoteContentState,
@@ -82,7 +78,7 @@ fun MainUiNotePad(
                     updateDeleteAllNotesAlertMessageDialogStateMethod = uiViewModel::updateDeleteAllNotesAlertMessageDialogState,
                     deleteAllNotesMethod = notesViewModel::deleteAllNotes,
                     currentThemeColor = currentThemeColor,
-                    selectedNoteUuidState = uiViewModel.selectedNoteUuidState,
+                    selectedNoteUuidState = selectedNoteUuid,
                     isNotesLoadingState = notesLoadingState,
                     isGridEnabledState = isGridEnabledState
                 )
@@ -90,7 +86,7 @@ fun MainUiNotePad(
 
             composable(NavigationRoutes.NoteCreationScreen.route) { 
                 NoteUiCreationScreen(
-                    navigationController = navController,
+                    navigator = navigator,
                     noteNameState = uiViewModel.noteNameState,
                     noteContentState = uiViewModel.noteContentState,
                     errorOfEmptyNotAlertMessageDialogState = uiViewModel.errorOfEmptyNotAlertMessageDialogState,
@@ -107,14 +103,14 @@ fun MainUiNotePad(
 
             composable(NavigationRoutes.NoteViewScreen.route) { 
                 NoteUiViewScreen(
-                    navigationController = navController,
-                    currentNote = uiViewModel.currentSelectedNote!!,
+                    navigator = navigator,
+                    currentNote = allNotesList.find { note -> selectedNoteUuid == note.uuid },
                 )
             }
 
             composable(NavigationRoutes.NoteEditScreen.route) {
                 NoteUiEditScreen(
-                    navigationController = navController,
+                    navigator = navigator,
                     noteNameState = uiViewModel.noteNameState,
                     noteContentState = uiViewModel.noteContentState,
                     errorOfEmptyNotAlertMessageDialogState = uiViewModel.errorOfEmptyNotAlertMessageDialogState,
@@ -127,7 +123,7 @@ fun MainUiNotePad(
                     errorOfNoteChangesAlertMessageDialogState = uiViewModel.errorOfNoteChangesAlertMessageDialogState,
                     updateErrorOfNoteChangesAlertMessageDialogStateMethod = uiViewModel::updateErrorOfNoteChangesAlertMessageDialogState,
                     dateTimePicker = dateTimePicker,
-                    currentNote = uiViewModel.currentSelectedNote!!,
+                    currentNote = allNotesList.find { note -> selectedNoteUuid == note.uuid },
                 )
             }
 
@@ -135,7 +131,7 @@ fun MainUiNotePad(
                 SettingsUiScreen(
                     isGridEnabledState = isGridEnabledState,
                     updateIsGridEnabledStateMethod = uiViewModel::updateIsGridEnabledState,
-                    navigationController = navController,
+                    navigator = navigator,
                     updateIsGridEnabledDatastore = {
                         dataStore.edit {
                             it[gridEnabledState] = isGridEnabledState

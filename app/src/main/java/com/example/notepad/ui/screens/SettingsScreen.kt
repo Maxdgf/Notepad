@@ -16,11 +16,13 @@ import androidx.navigation.NavController
 import com.example.notepad.R
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.CheckBoxWithUiText
+import com.example.notepad.ui.navigation.NavigationRoutes
+import com.example.notepad.ui.navigation.Navigator
 import kotlinx.coroutines.delay
 
 @Composable
 fun SettingsUiScreen(
-    navigationController: NavController,
+    navigator: Navigator,
     isGridEnabledState: Boolean,
     updateIsGridEnabledStateMethod: (state: Boolean) -> Unit,
     updateIsGridEnabledDatastore: suspend () -> Unit
@@ -35,7 +37,7 @@ fun SettingsUiScreen(
             TopUiBar(
                 titleContent = { Text(text = "Settings") },
                 barIcon = {
-                    IconButton(onClick = { navigationController.navigate(NavigationRoutes.MainScreen.route) }) {
+                    IconButton(onClick = { navigator.navigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_arrow_back_24),
                             contentDescription = null
