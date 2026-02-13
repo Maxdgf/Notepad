@@ -1,7 +1,6 @@
 package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,24 +29,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import java.util.UUID
 import kotlin.random.Random
 
-import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.core.utils.DateTimePicker
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
-import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
-import com.example.notepad.ui.utils.CurrentThemeColor
 
 @Composable
 fun NoteUiCreationScreen(
@@ -58,8 +52,6 @@ fun NoteUiCreationScreen(
     errorOfEmptyNotAlertMessageDialogState: Boolean,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
-    clearNoteNameStateMethod: () -> Unit,
-    clearNoteContentStateMethod: () -> Unit,
     isNoteNameAnContentEmptyMethod: () -> Boolean,
     updateErrorOfEmptyNotAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
     addNoteMethod: (note: NoteEntity) -> Unit
@@ -78,7 +70,7 @@ fun NoteUiCreationScreen(
                             value = noteNameState,
                             onValueChange = { newValue -> updateNoteNameStateMethod(newValue) },
                             trailingIcon = {
-                                IconButton(onClick = { clearNoteNameStateMethod() }) {
+                                IconButton(onClick = { updateNoteNameStateMethod("") }) {
                                     Icon(
                                         imageVector = Icons.Default.Clear,
                                         contentDescription = "Note name input field clear text icon."
@@ -105,8 +97,8 @@ fun NoteUiCreationScreen(
                     IconButton(onClick = {
                         navigator.navigateTo(NavigationRoutes.MainScreen.route)
 
-                        clearNoteNameStateMethod()
-                        clearNoteContentStateMethod()
+                        updateNoteNameStateMethod("")
+                        updateNoteContentStateMethod("")
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -161,8 +153,8 @@ fun NoteUiCreationScreen(
 
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                            clearNoteNameStateMethod()
-                            clearNoteContentStateMethod()
+                            updateNoteNameStateMethod("")
+                            updateNoteContentStateMethod("")
 
                             navigator.navigateTo(NavigationRoutes.MainScreen.route)
                         }
@@ -183,23 +175,21 @@ fun NoteUiCreationScreen(
                 color = MaterialTheme.colorScheme.error,
                 state = errorOfEmptyNotAlertMessageDialogState
             ) {
-                Column(modifier = Modifier.padding(10.dp)) {
+                Text(
+                    text = "Note couldn't be empty!\n- Check note name and content.",
+                    color = Color.White
+                )
+
+                Button(
+                    onClick = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                ) {
                     Text(
-                        text = "Note couldn't be empty!\n- Check note name and content.",
+                        text = "Ok",
                         color = Color.White
                     )
-
-                    Button(
-                        onClick = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                    ) {
-                        Text(
-                            text = "Ok",
-                            color = Color.White
-                        )
-                    }
                 }
             }
         }

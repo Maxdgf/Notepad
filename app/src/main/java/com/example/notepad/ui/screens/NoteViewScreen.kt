@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.ui.components.screen_components.TopUiBar
+import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 
@@ -66,9 +67,7 @@ fun NoteUiViewScreen(
                     }
                 },
                 barIcon = {
-                    IconButton(onClick = {
-                        navigator.navigateTo(NavigationRoutes.MainScreen.route)
-                    }) {
+                    IconButton(onClick = { navigator.navigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Return to main screen icon button."

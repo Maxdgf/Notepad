@@ -11,12 +11,14 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.No
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
@@ -26,8 +28,8 @@ class NoteViewModel @Inject constructor(
     private val _isNotesLoadingState = MutableStateFlow(false)
     val isNotesLoadingState = _isNotesLoadingState.asStateFlow()
 
-    private val _selectedNoteUuid = MutableStateFlow<String?>(null)
-    val selectedNoteUuid = _selectedNoteUuid.asStateFlow()
+    private val _selectedNote = MutableStateFlow<NoteEntity?>(null)
+    val selectedNote = _selectedNote.asStateFlow()
 
     val noteList = noteRepository.allNotesFromLocalStorage()
         .onStart { _isNotesLoadingState.value = true } // update loading state to true, when flow is started
@@ -41,7 +43,14 @@ class NoteViewModel @Inject constructor(
             emptyList()
         )
 
-    fun updateSelectedNoteUuid(uuid: String?) { _selectedNoteUuid.value = uuid }
+    fun selectNote(uuid: String) {
+        viewModelScope.launch {
+            val foundedNote = withContext(Dispatchers.Default) {
+                noteList.value.find { note -> uuid == note.uuid } // find note by uuid
+            }
+            _selectedNote.value = foundedNote
+        }
+    }
 
     fun addNote(note: NoteEntity) {
         viewModelScope.launch {

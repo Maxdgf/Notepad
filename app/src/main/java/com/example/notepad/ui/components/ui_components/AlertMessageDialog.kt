@@ -1,5 +1,7 @@
 package com.example.notepad.ui.components.ui_components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.AlertDialogDefaults
@@ -10,12 +12,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlertUiMessageDialog(
     onDismissRequestFunction: () -> Unit,
-    color: Color,
+    color: Color? = null,
     state: Boolean,
     dialogContent: @Composable () -> Unit
 ) {
@@ -26,9 +29,13 @@ fun AlertUiMessageDialog(
                     .wrapContentWidth()
                     .wrapContentHeight(),
                 shape = MaterialTheme.shapes.large,
-                color = color,
+                color = color ?: Color.Unspecified,
                 tonalElevation = AlertDialogDefaults.TonalElevation
-            ) { dialogContent() }
+            ) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    dialogContent()
+                }
+            }
         }
     }
 }

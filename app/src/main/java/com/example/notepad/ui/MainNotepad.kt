@@ -47,7 +47,7 @@ fun MainUiNotePad(
     val allNotesList by notesViewModel.noteList.collectAsState()
     val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
     val isGridEnabledState by uiViewModel.isGridEnabledState.collectAsState()
-    val selectedNoteUuid by notesViewModel.selectedNoteUuid.collectAsState()
+    val selectedNote by notesViewModel.selectedNote.collectAsState()
 
     LaunchedEffect(Unit) {
         val state = dataStore.data.map {
@@ -69,16 +69,16 @@ fun MainUiNotePad(
                     navigator = navigator,
                     noteActionsDialogState = uiViewModel.noteActionsDialogState,
                     notesList = allNotesList,
-                    updateSelectedNoteUuidStateMethod = notesViewModel::updateSelectedNoteUuid,
+                    updateSelectedNoteStateMethod = notesViewModel::selectNote,
                     updateNoteActionsDialogStateMethod = uiViewModel::updateNoteActionsDialogState,
-                    updateNoteNameStateMethod = uiViewModel::updateNoteNameState,
-                    updateNoteContentStateMethod = uiViewModel::updateNoteContentState,
+                    updateNoteNameStateMethod = uiViewModel::updateEditNoteNameState,
+                    updateNoteContentStateMethod = uiViewModel::updateEditNoteContentState,
                     deleteNoteMethod = notesViewModel::deleteNote,
                     deleteAllNotesAlertMessageDialogState = uiViewModel.deleteAllNotesAlertMessageDialogState,
                     updateDeleteAllNotesAlertMessageDialogStateMethod = uiViewModel::updateDeleteAllNotesAlertMessageDialogState,
                     deleteAllNotesMethod = notesViewModel::deleteAllNotes,
                     currentThemeColor = currentThemeColor,
-                    selectedNoteUuidState = selectedNoteUuid,
+                    selectedNoteUuidState = selectedNote?.uuid,
                     isNotesLoadingState = notesLoadingState,
                     isGridEnabledState = isGridEnabledState
                 )
@@ -92,9 +92,7 @@ fun MainUiNotePad(
                     errorOfEmptyNotAlertMessageDialogState = uiViewModel.errorOfEmptyNotAlertMessageDialogState,
                     updateNoteNameStateMethod = uiViewModel::updateNoteNameState,
                     updateNoteContentStateMethod = uiViewModel::updateNoteContentState,
-                    clearNoteNameStateMethod = uiViewModel::clearNoteNameState,
-                    clearNoteContentStateMethod = uiViewModel::clearNoteContentState,
-                    isNoteNameAnContentEmptyMethod = uiViewModel::isNoteNameAnContentEmpty,
+                    isNoteNameAnContentEmptyMethod = uiViewModel::isNoteNameAndContentEmpty,
                     updateErrorOfEmptyNotAlertMessageDialogStateMethod = uiViewModel::updateErrorOfEmptyNotAlertMessageDialogState,
                     addNoteMethod = notesViewModel::addNote,
                     dateTimePicker = dateTimePicker
@@ -104,26 +102,25 @@ fun MainUiNotePad(
             composable(NavigationRoutes.NoteViewScreen.route) { 
                 NoteUiViewScreen(
                     navigator = navigator,
-                    currentNote = allNotesList.find { note -> selectedNoteUuid == note.uuid },
+                    currentNote = selectedNote,
                 )
             }
 
             composable(NavigationRoutes.NoteEditScreen.route) {
                 NoteUiEditScreen(
                     navigator = navigator,
-                    noteNameState = uiViewModel.noteNameState,
-                    noteContentState = uiViewModel.noteContentState,
+                    noteNameState = uiViewModel.editNoteNameState,
+                    noteContentState = uiViewModel.editNoteContentState,
                     errorOfEmptyNotAlertMessageDialogState = uiViewModel.errorOfEmptyNotAlertMessageDialogState,
-                    updateNoteNameStateMethod = uiViewModel::updateNoteNameState,
-                    updateNoteContentStateMethod = uiViewModel::updateNoteContentState,
-                    clearNoteNameStateMethod = uiViewModel::clearNoteNameState,
-                    isNoteNameAnContentEmptyMethod = uiViewModel::isNoteNameAnContentEmpty,
+                    updateNoteNameStateMethod = uiViewModel::updateEditNoteNameState,
+                    updateNoteContentStateMethod = uiViewModel::updateEditNoteContentState,
+                    isNoteNameAndContentEmptyMethod = uiViewModel::isEditNoteNameAndContentEmpty,
                     updateErrorOfEmptyNotAlertMessageDialogStateMethod = uiViewModel::updateErrorOfEmptyNotAlertMessageDialogState,
                     editNoteMethod = notesViewModel::editNote,
                     errorOfNoteChangesAlertMessageDialogState = uiViewModel.errorOfNoteChangesAlertMessageDialogState,
                     updateErrorOfNoteChangesAlertMessageDialogStateMethod = uiViewModel::updateErrorOfNoteChangesAlertMessageDialogState,
                     dateTimePicker = dateTimePicker,
-                    currentNote = allNotesList.find { note -> selectedNoteUuid == note.uuid },
+                    currentNote = selectedNote,
                 )
             }
 

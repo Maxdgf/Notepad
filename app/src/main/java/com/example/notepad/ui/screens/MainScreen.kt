@@ -43,7 +43,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.example.notepad.R
 
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
@@ -68,7 +67,7 @@ fun MainUiScreen(
     selectedNoteUuidState: String?,
     deleteAllNotesAlertMessageDialogState: Boolean,
     updateDeleteAllNotesAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
-    updateSelectedNoteUuidStateMethod: (uuid: String?) -> Unit,
+    updateSelectedNoteStateMethod: (uuid: String) -> Unit,
     updateNoteActionsDialogStateMethod: (state: Boolean) -> Unit,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
@@ -162,7 +161,7 @@ fun MainUiScreen(
                                         .fillMaxSize()
                                         .combinedClickable(
                                             onClick = {
-                                                updateSelectedNoteUuidStateMethod(note.uuid)
+                                                updateSelectedNoteStateMethod(note.uuid)
 
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
@@ -171,7 +170,7 @@ fun MainUiScreen(
                                                 updateNoteActionsDialogStateMethod(true)
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                                updateSelectedNoteUuidStateMethod(note.uuid)
+                                                updateSelectedNoteStateMethod(note.uuid)
                                             }
                                         )
                                 ) {
@@ -197,9 +196,7 @@ fun MainUiScreen(
                                             note.lastEditDateTime?.let { dateTime ->
                                                 HorizontalDivider(
                                                     modifier = Modifier.fillMaxWidth(),
-                                                    color = currentThemeColor.getAdaptedCurrentThemeColor(
-                                                        false
-                                                    )
+                                                    color = currentThemeColor.getAdaptedCurrentThemeColor(false)
                                                 )
 
                                                 Row {
@@ -259,7 +256,7 @@ fun MainUiScreen(
                                         .padding(horizontal = 5.dp)
                                         .combinedClickable(
                                             onClick = {
-                                                updateSelectedNoteUuidStateMethod(note.uuid)
+                                                updateSelectedNoteStateMethod(note.uuid)
 
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
@@ -268,7 +265,7 @@ fun MainUiScreen(
                                                 updateNoteActionsDialogStateMethod(true)
                                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-                                                updateSelectedNoteUuidStateMethod(note.uuid)
+                                                updateSelectedNoteStateMethod(note.uuid)
                                             }
                                         )
                                 ) {
@@ -338,41 +335,39 @@ fun MainUiScreen(
                 color = MaterialTheme.colorScheme.error,
                 state = deleteAllNotesAlertMessageDialogState
             ) {
-                Column(modifier = Modifier.padding(10.dp)) {
-                    Text(
-                        text = "Are you sure you want to delete all notes?",
-                        color = Color.White
-                    )
+                Text(
+                    text = "Are you sure you want to delete all notes?",
+                    color = Color.White
+                )
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Button(
-                            onClick = { updateDeleteAllNotesAlertMessageDialogStateMethod(false) },
-                            modifier = Modifier.weight(0.5f),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                        ) {
-                            Text(
-                                text = "Cancel",
-                                color = Color.White
-                            )
-                        }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = { updateDeleteAllNotesAlertMessageDialogStateMethod(false) },
+                        modifier = Modifier.weight(0.5f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            color = Color.White
+                        )
+                    }
 
-                        Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                        Button(
-                            onClick = {
-                                updateDeleteAllNotesAlertMessageDialogStateMethod(false)
-                                deleteAllNotesMethod()
-                            },
-                            modifier = Modifier.weight(0.5f),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                        ) {
-                            Text(
-                                text = "Delete",
-                                color = Color.White
-                            )
-                        }
+                    Button(
+                        onClick = {
+                            updateDeleteAllNotesAlertMessageDialogStateMethod(false)
+                            deleteAllNotesMethod()
+                        },
+                        modifier = Modifier.weight(0.5f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                    ) {
+                        Text(
+                            text = "Delete",
+                            color = Color.White
+                        )
                     }
                 }
             }
@@ -410,7 +405,7 @@ fun MainUiScreen(
                                 onClick = {
                                     updateNoteActionsDialogStateMethod(false)
 
-                                    updateSelectedNoteUuidStateMethod(note.uuid)
+                                    updateSelectedNoteStateMethod(note.uuid)
                                     updateNoteNameStateMethod(note.name)
                                     updateNoteContentStateMethod(note.content)
 
