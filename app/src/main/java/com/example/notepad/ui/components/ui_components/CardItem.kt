@@ -1,18 +1,102 @@
 package com.example.notepad.ui.components.ui_components
 
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.notepad.R
 
+/**
+ * Creates card adapted to note entity data.
+ * @param onClick on click function.
+ * @param onLongClick on long click function.
+ * @param noteName note name.
+ * @param noteDatetimeCreation note datetime creation.
+ * @param noteLastEditDatetime note last edit datetime.
+ */
 @Composable
-fun CardUiItem(
-    modifier: Modifier,
-    content: @Composable () -> Unit
+fun NoteUiCard(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    noteName: String,
+    noteDatetimeCreation: String,
+    noteLastEditDatetime: String?
 ) {
     Card(
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(10.dp)
-    ) { content () }
+        modifier = Modifier
+            .fillMaxSize()
+            .combinedClickable(
+                onClick = { onClick() },
+                onLongClick = { onLongClick() }
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 5.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = noteName,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                )
+
+                Text(
+                    text = noteDatetimeCreation,
+                    fontWeight = FontWeight.Light,
+                    fontSize = 10.sp,
+                    modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                )
+
+                noteLastEditDatetime?.let { dateTime ->
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = if (isSystemInDarkTheme()) Color.White else Color.Black
+                    )
+
+                    Row {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_edit_24),
+                            contentDescription = null
+                        )
+
+                        Text(
+                            text = "last edit:",
+                            fontStyle = FontStyle.Italic,
+                            fontSize = 10.sp,
+                            modifier = Modifier
+                                .padding(start = 3.dp)
+                                .basicMarquee(Int.MAX_VALUE)
+                        )
+
+                        Text(
+                            text = dateTime,
+                            fontWeight = FontWeight.Light,
+                            fontSize = 10.sp,
+                            modifier = Modifier
+                                .padding(start = 5.dp)
+                                .basicMarquee(Int.MAX_VALUE)
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

@@ -11,9 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -25,18 +22,20 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.UUID
+import com.example.notepad.R
 import kotlin.random.Random
 
-import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
-import com.example.notepad.core.utils.DateTimePicker
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+import com.example.notepad.utils.DateTimePicker
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
@@ -59,6 +58,11 @@ fun NoteUiCreationScreen(
     val haptic = LocalHapticFeedback.current
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
 
+    // text field auto scroll
+    LaunchedEffect(noteContentInputFieldVerticalScrollState.maxValue) {
+        noteContentInputFieldVerticalScrollState.animateScrollTo(noteContentInputFieldVerticalScrollState.maxValue)
+    }
+
     Scaffold(
         topBar = {
             TopUiBar(
@@ -72,8 +76,8 @@ fun NoteUiCreationScreen(
                             trailingIcon = {
                                 IconButton(onClick = { updateNoteNameStateMethod("") }) {
                                     Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = "Note name input field clear text icon."
+                                        painter = painterResource(R.drawable.baseline_clear_24),
+                                        contentDescription = null
                                     )
                                 }
                             },
@@ -101,8 +105,8 @@ fun NoteUiCreationScreen(
                         updateNoteContentStateMethod("")
                     }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Return to main screen icon button."
+                            painter = painterResource(R.drawable.baseline_arrow_back_24),
+                            contentDescription = null
                         )
                     }
                 }
@@ -140,23 +144,23 @@ fun NoteUiCreationScreen(
                         if (isNoteNameAnContentEmptyMethod()) {
                             updateErrorOfEmptyNotAlertMessageDialogStateMethod(true)
                         } else {
+                            // add note to database
                             addNoteMethod(
                                 NoteEntity(
                                     id = Random.nextInt(),
                                     name = noteNameState,
                                     content = noteContentState,
-                                    uuid = UUID.randomUUID().toString(),
-                                    dateTime = dateTimePicker.pickDateTimeNow(),
-                                    lastEditDateTime = null
+                                    dateTime = dateTimePicker.pickDateTimeNow()
                                 )
                             )
 
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
 
+                            // clear note name and content states
                             updateNoteNameStateMethod("")
                             updateNoteContentStateMethod("")
 
-                            navigator.navigateTo(NavigationRoutes.MainScreen.route)
+                            navigator.navigateTo(NavigationRoutes.MainScreen.route) // navigate to main screen
                         }
                     },
                     modifier = Modifier
@@ -173,7 +177,9 @@ fun NoteUiCreationScreen(
             AlertUiMessageDialog(
                 onDismissRequestFunction = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
                 color = MaterialTheme.colorScheme.error,
-                state = errorOfEmptyNotAlertMessageDialogState
+                state = errorOfEmptyNotAlertMessageDialogState,
+                titleIcon = painterResource(R.drawable.outline_error_outline_24),
+                titleText = "Error"
             ) {
                 Text(
                     text = "Note couldn't be empty!\n- Check note name and content.",

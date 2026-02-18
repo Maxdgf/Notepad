@@ -3,24 +3,20 @@ package com.example.notepad.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.datastore.preferences.core.edit
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-import com.example.notepad.core.data_management.view_models.NoteViewModel
-import com.example.notepad.core.data_management.view_models.UiViewModel
-import com.example.notepad.core.utils.DateTimePicker
-import com.example.notepad.dataStore
-import com.example.notepad.gridEnabledState
+import com.example.notepad.ui.view_models.NoteViewModel
+import com.example.notepad.ui.view_models.UiViewModel
+import com.example.notepad.utils.DateTimePicker
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.screens.MainUiScreen
@@ -28,36 +24,27 @@ import com.example.notepad.ui.screens.NoteUiCreationScreen
 import com.example.notepad.ui.screens.NoteUiEditScreen
 import com.example.notepad.ui.screens.NoteUiViewScreen
 import com.example.notepad.ui.screens.SettingsUiScreen
-import com.example.notepad.ui.utils.CurrentThemeColor
-import kotlinx.coroutines.flow.map
+import com.example.notepad.ui.view_models.AppDataStoreViewModel
+import com.example.notepad.utils.ClipBoardManager
 
 @Composable
 fun MainUiNotePad(
     uiViewModel: UiViewModel = viewModel(),
-    notesViewModel: NoteViewModel = hiltViewModel()
+    notesViewModel: NoteViewModel = hiltViewModel(),
+    appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val dataStore = context.dataStore
 
-    val currentThemeColor = remember { CurrentThemeColor() }
     val dateTimePicker = remember { DateTimePicker() }
     val navController = rememberNavController()
     val navigator = remember { Navigator(navController) }
+    val clipBoardManager = remember { ClipBoardManager(context) }
 
     val allNotesList by notesViewModel.noteList.collectAsState()
     val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
-    val isGridEnabledState by uiViewModel.isGridEnabledState.collectAsState()
+    val isGridEnabledState by appDataStoreViewModel.state.collectAsState()
     val selectedNote by notesViewModel.selectedNote.collectAsState()
-
-    LaunchedEffect(Unit) {
-        val state = dataStore.data.map {
-            it[gridEnabledState]
-        }
-
-        state.collect {
-            it?.let { uiViewModel.updateIsGridEnabledState(it) } ?: uiViewModel.updateIsGridEnabledState(false)
-        }
-    }
+    val noteTextSize by appDataStoreViewModel.noteTextSize.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -77,7 +64,6 @@ fun MainUiNotePad(
                     deleteAllNotesAlertMessageDialogState = uiViewModel.deleteAllNotesAlertMessageDialogState,
                     updateDeleteAllNotesAlertMessageDialogStateMethod = uiViewModel::updateDeleteAllNotesAlertMessageDialogState,
                     deleteAllNotesMethod = notesViewModel::deleteAllNotes,
-                    currentThemeColor = currentThemeColor,
                     selectedNoteUuidState = selectedNote?.uuid,
                     isNotesLoadingState = notesLoadingState,
                     isGridEnabledState = isGridEnabledState
@@ -103,6 +89,11 @@ fun MainUiNotePad(
                 NoteUiViewScreen(
                     navigator = navigator,
                     currentNote = selectedNote,
+                    currentFontSize = noteTextSize,
+                    updateCurrentFontSize = appDataStoreViewModel::saveNoteTextSize,
+                    changeFontSizeDialogState = uiViewModel.changeFontSizeDialogState,
+                    updateChangeFontSizeDialogStateMethod = uiViewModel::updateChangeFontSizeDialogState,
+                    clipBoardManager = clipBoardManager
                 )
             }
 
@@ -127,13 +118,8 @@ fun MainUiNotePad(
             composable(NavigationRoutes.NoteSettingsScreen.route) {
                 SettingsUiScreen(
                     isGridEnabledState = isGridEnabledState,
-                    updateIsGridEnabledStateMethod = uiViewModel::updateIsGridEnabledState,
+                    updateIsGridEnabledStateMethod = appDataStoreViewModel::saveState,
                     navigator = navigator,
-                    updateIsGridEnabledDatastore = {
-                        dataStore.edit {
-                            it[gridEnabledState] = isGridEnabledState
-                        }
-                    },
                 )
             }
         }

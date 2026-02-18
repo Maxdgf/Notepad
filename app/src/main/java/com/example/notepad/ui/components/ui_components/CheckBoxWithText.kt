@@ -10,24 +10,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Creates checkbox with a text description.
+ * @param checked checkbox checked state.
+ * @param text description text.
+ * @param onCheckedChange on checkbox checked state change function.
+ */
 @Composable
 fun CheckBoxWithUiText(
     checked: Boolean,
     text: String,
     onCheckedChange: (state: Boolean) -> Unit
 ) {
-    Row {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(
             checked = checked,
-            onCheckedChange = { state -> onCheckedChange(state) },
-            modifier = Modifier.align(Alignment.CenterVertically)
+            onCheckedChange = { state -> onCheckedChange(state) }
         )
 
         Spacer(modifier = Modifier.width(5.dp))
 
-        Text(
-            text = text,
-            modifier = Modifier.align(Alignment.CenterVertically)
-        )
+        Text(text = text)
     }
 }

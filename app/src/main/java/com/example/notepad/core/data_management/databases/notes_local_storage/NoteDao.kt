@@ -3,6 +3,7 @@ package com.example.notepad.core.data_management.databases.notes_local_storage
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 
 import kotlinx.coroutines.flow.Flow
 

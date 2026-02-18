@@ -1,7 +1,6 @@
 package com.example.notepad.ui.components.ui_components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,24 +14,24 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ScrollableUiItemsList(
-    contentPaddingValues: PaddingValues,
-    verticalArrangementValue: Arrangement.Vertical,
     isGridEnabled: Boolean = false,
     scrollableGridContent: LazyGridScope.() -> Unit = {},
     scrollableContent: LazyListScope.() -> Unit
 ) {
-    if (isGridEnabled) {
+    if (isGridEnabled)
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 5.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) { scrollableGridContent() }
-    } else {
+    else
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = contentPaddingValues,
-            verticalArrangement = verticalArrangementValue,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 5.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) { scrollableContent() }
-    }
 }

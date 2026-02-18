@@ -6,14 +6,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 
+/**
+ * Creates floating button with icon.
+ * @param onClick on click function.
+ * @param icon button icon painter.
+ * @param buttonShape button shape.
+ * @param containerColor button container color.
+ * @param contentColor button content color.
+ */
 @Composable
 fun SimpleFloatingUiIconButton(
     onClick: () -> Unit,
-    imageVector: ImageVector,
-    iconDescription: String,
+    icon: Painter,
     buttonShape: Shape,
     containerColor: Color,
     contentColor: Color
@@ -26,8 +33,8 @@ fun SimpleFloatingUiIconButton(
         contentColor = contentColor
     ) {
         Icon(
-            imageVector = imageVector,
-            contentDescription = iconDescription,
+            painter = icon,
+            contentDescription = null,
         )
     }
 }

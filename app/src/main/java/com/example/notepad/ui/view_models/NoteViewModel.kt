@@ -1,4 +1,4 @@
-package com.example.notepad.core.data_management.view_models
+package com.example.notepad.ui.view_models
 
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -7,36 +7,32 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import javax.inject.Inject
 
-import com.example.notepad.core.data_management.databases.notes_local_storage.NoteDao
-import com.example.notepad.core.data_management.databases.notes_local_storage.NoteEntity
-import com.example.notepad.core.data_management.databases.notes_local_storage.NoteRepository
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 
 @HiltViewModel
-class NoteViewModel @Inject constructor(
-    private val noteDao: NoteDao,
-    noteRepository: NoteRepository
-) : ViewModel() {
+class NoteViewModel @Inject constructor(private val noteRepository: NoteRepository) : ViewModel() {
     private val _isNotesLoadingState = MutableStateFlow(false)
     val isNotesLoadingState = _isNotesLoadingState.asStateFlow()
 
     private val _selectedNote = MutableStateFlow<NoteEntity?>(null)
     val selectedNote = _selectedNote.asStateFlow()
 
-    val noteList = noteRepository.allNotesFromLocalStorage()
+    val noteList = noteRepository.getAllNotes()
         .onStart { _isNotesLoadingState.value = true } // update loading state to true, when flow is started
         .onEach {
             delay(100) // mini-delay
             _isNotesLoadingState.value = false
         } // update loading state to false after emission
+
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
@@ -54,13 +50,13 @@ class NoteViewModel @Inject constructor(
 
     fun addNote(note: NoteEntity) {
         viewModelScope.launch {
-            noteDao.addNote(note)
+            noteRepository.addNote(note)
         }
     }
 
     fun deleteNote(uuid: String) {
         viewModelScope.launch {
-            noteDao.deleteNote(uuid)
+            noteRepository.deleteNote(uuid)
         }
     }
 
@@ -71,7 +67,7 @@ class NoteViewModel @Inject constructor(
         uuid: String
     ) {
         viewModelScope.launch {
-            noteDao.updateNote(
+            noteRepository.editNote(
                 name,
                 content,
                 lastEditDateTime,
@@ -82,7 +78,7 @@ class NoteViewModel @Inject constructor(
 
     fun deleteAllNotes() {
         viewModelScope.launch {
-            noteDao.deleteAllNotes()
+            noteRepository.deleteAllNotes()
         }
     }
 }
