@@ -47,7 +47,6 @@ fun NoteUiViewScreen(
     updateChangeFontSizeDialogStateMethod: (Boolean) -> Unit,
     clipBoardManager: ClipBoardManager
 ) {
-    val haptic = LocalHapticFeedback.current
     val noteViewVerticalScrollState = rememberScrollState()
 
     Scaffold(
@@ -128,10 +127,7 @@ fun NoteUiViewScreen(
                     value = currentFontSize / 100f,
                     steps = 8,
                     valueRange = 0.1f..0.3f,
-                    onValueChange = { value ->
-                        updateCurrentFontSize((value * 100).roundToInt())
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
-                    }
+                    onValueChange = { value -> updateCurrentFontSize((value * 100).roundToInt()) }
                 )
 
                 Row {
