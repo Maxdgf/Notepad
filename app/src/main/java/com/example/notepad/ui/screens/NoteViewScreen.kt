@@ -159,9 +159,7 @@ fun NoteUiViewScreen(
                     value = currentFontSize / 100f,
                     steps = 8,
                     valueRange = 0.1f..0.3f,
-                    onValueChange = { value ->
-                        updateCurrentFontSize((value * 100).roundToInt())
-                    }
+                    onValueChange = { value -> updateCurrentFontSize((value * 100).roundToInt()) }
                 )
 
                 Row {
