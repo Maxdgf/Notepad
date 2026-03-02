@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -63,7 +65,9 @@ fun MainUiScreen(
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,
     deleteNoteMethod: (uuid: String) -> Unit,
-    deleteAllNotesMethod: () -> Unit
+    deleteAllNotesMethod: () -> Unit,
+    state: Boolean,
+    updateStateMethod: (Boolean) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -72,18 +76,50 @@ fun MainUiScreen(
             TopUiBar(
                 titleContent = { Text(text = "Notepad") },
                 barActionElements = {
-                    IconButton(onClick = { updateDeleteAllNotesAlertMessageDialogStateMethod(true) }) {
-                        Icon(
-                            painterResource(R.drawable.baseline_delete_24),
-                            contentDescription = null
-                        )
-                    }
+                    Box {
+                        IconButton(onClick = { updateStateMethod(true) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_more_vert_24),
+                                contentDescription = null
+                            )
+                        }
 
-                    IconButton(onClick = { navigator.navigateTo(NavigationRoutes.NoteSettingsScreen.route) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_settings_24),
-                            contentDescription = null
-                        )
+                        DropdownMenu(
+                            expanded = state,
+                            onDismissRequest = { updateStateMethod(false) }
+                        ) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    updateStateMethod(false) // hide menu
+                                    navigator.navigateTo(NavigationRoutes.NoteSettingsScreen.route)
+                                },
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.baseline_settings_24),
+                                            contentDescription = null
+                                        )
+                                        Text(text = "settings")
+                                    }
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                onClick = {
+                                    updateStateMethod(false) // hide menu
+                                    updateDeleteAllNotesAlertMessageDialogStateMethod(true)
+                                },
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.baseline_delete_24),
+                                            contentDescription = null
+                                        )
+                                        Text(text = "delete all")
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             )

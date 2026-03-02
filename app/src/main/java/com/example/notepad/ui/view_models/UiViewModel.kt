@@ -15,6 +15,8 @@ class UiViewModel : ViewModel() {
     var errorOfNoteChangesAlertMessageDialogState by mutableStateOf(false)
     var deleteAllNotesAlertMessageDialogState by mutableStateOf(false)
     var changeFontSizeDialogState by mutableStateOf(false)
+    var noteViewScreenDropdownMenuState by mutableStateOf(false)
+    var mainScreenDropdownMenuState by mutableStateOf(false)
 
     fun updateChangeFontSizeDialogState(state: Boolean) { changeFontSizeDialogState = state }
     fun updateNoteActionsDialogState(state: Boolean) { noteActionsDialogState = state }
@@ -27,4 +29,6 @@ class UiViewModel : ViewModel() {
     fun updateErrorOfEmptyNotAlertMessageDialogState(state: Boolean) { errorOfEmptyNotAlertMessageDialogState = state }
     fun updateErrorOfNoteChangesAlertMessageDialogState(state: Boolean) { errorOfNoteChangesAlertMessageDialogState = state }
     fun updateDeleteAllNotesAlertMessageDialogState(state: Boolean) { deleteAllNotesAlertMessageDialogState = state }
+    fun updateNoteViewScreenDropdownMenuState(state: Boolean) { noteViewScreenDropdownMenuState = state }
+    fun updateMainScreenDropdownMenuState(state: Boolean) { mainScreenDropdownMenuState = state }
 }

@@ -2,17 +2,18 @@ package com.example.notepad.core.data_management.databases.notes_local_storage
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-
 import kotlinx.coroutines.flow.Flow
+
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 
 @Dao
 interface NoteDao {
     @Query("SELECT * FROM notes_storage")
     fun getNotesFromDeviceLocalStorage(): Flow<List<NoteEntity>>
 
-    @Insert
+    @Insert(onConflict = REPLACE)
     suspend fun addNote(note: NoteEntity)
 
     @Query("DELETE FROM notes_storage WHERE note_uuid = :uuid")

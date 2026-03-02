@@ -66,7 +66,9 @@ fun MainUiNotePad(
                     deleteAllNotesMethod = notesViewModel::deleteAllNotes,
                     selectedNoteUuidState = selectedNote?.uuid,
                     isNotesLoadingState = notesLoadingState,
-                    isGridEnabledState = isGridEnabledState
+                    isGridEnabledState = isGridEnabledState,
+                    state = uiViewModel.mainScreenDropdownMenuState,
+                    updateStateMethod = uiViewModel::updateMainScreenDropdownMenuState
                 )
             }
 
@@ -93,7 +95,9 @@ fun MainUiNotePad(
                     updateCurrentFontSize = appDataStoreViewModel::saveNoteTextSize,
                     changeFontSizeDialogState = uiViewModel.changeFontSizeDialogState,
                     updateChangeFontSizeDialogStateMethod = uiViewModel::updateChangeFontSizeDialogState,
-                    clipBoardManager = clipBoardManager
+                    clipBoardManager = clipBoardManager,
+                    state = uiViewModel.noteViewScreenDropdownMenuState,
+                    updateStateMethod = uiViewModel::updateNoteViewScreenDropdownMenuState
                 )
             }
 

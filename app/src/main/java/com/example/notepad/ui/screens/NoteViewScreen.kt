@@ -1,6 +1,7 @@
 package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,16 +13,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -41,13 +43,14 @@ import com.example.notepad.utils.ClipBoardManager
 fun NoteUiViewScreen(
     navigator: Navigator,
     currentNote: NoteEntity?,
+    state: Boolean,
+    updateStateMethod: (Boolean) -> Unit,
     currentFontSize: Int,
     updateCurrentFontSize: (Int) -> Unit,
     changeFontSizeDialogState: Boolean,
     updateChangeFontSizeDialogStateMethod: (Boolean) -> Unit,
     clipBoardManager: ClipBoardManager
 ) {
-    val haptic = LocalHapticFeedback.current
     val noteViewVerticalScrollState = rememberScrollState()
 
     Scaffold(
@@ -92,24 +95,52 @@ fun NoteUiViewScreen(
                     }
                 },
                 barActionElements = {
-                    IconButton(
-                        onClick = {
-                            currentNote?.content?.let {
-                                clipBoardManager.setTextToClipboard(it)
-                            }
+                    Box {
+                        IconButton(onClick = { updateStateMethod(true) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_more_vert_24),
+                                contentDescription = null
+                            )
                         }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_content_copy_24),
-                            contentDescription = null
-                        )
-                    }
 
-                    IconButton(onClick = { updateChangeFontSizeDialogStateMethod(true) }) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_text_format_24),
-                            contentDescription = null
-                        )
+                        DropdownMenu(
+                            expanded = state,
+                            onDismissRequest = { updateStateMethod(false) }
+                        ) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    updateStateMethod(false) // hide menu
+                                    updateChangeFontSizeDialogStateMethod(true)
+                                },
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.baseline_text_format_24),
+                                            contentDescription = null
+                                        )
+                                        Text(text = "text size")
+                                    }
+                                }
+                            )
+
+                            DropdownMenuItem(
+                                onClick = {
+                                    updateStateMethod(false) // hide menu
+                                    currentNote?.content?.let {
+                                        clipBoardManager.setTextToClipboard(it)
+                                    }
+                                },
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.baseline_content_copy_24),
+                                            contentDescription = null
+                                        )
+                                        Text(text = "copy")
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             )
@@ -130,7 +161,6 @@ fun NoteUiViewScreen(
                     valueRange = 0.1f..0.3f,
                     onValueChange = { value ->
                         updateCurrentFontSize((value * 100).roundToInt())
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
                     }
                 )
 
