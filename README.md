@@ -21,9 +21,6 @@ Based on *Room* and *Jetpack Compose*.
         <td>
             <img src="previews/preview (5).jpg">
         </td>
-        <td>
-            <img src="previews/preview (6).jpg">
-        </td>
     </tr>
 </table>
 
