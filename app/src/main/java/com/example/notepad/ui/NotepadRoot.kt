@@ -1,5 +1,6 @@
 package com.example.notepad.ui
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -25,8 +26,10 @@ import com.example.notepad.ui.screens.NoteUiEditScreen
 import com.example.notepad.ui.screens.NoteUiViewScreen
 import com.example.notepad.ui.screens.SettingsUiScreen
 import com.example.notepad.ui.view_models.AppDataStoreViewModel
+import com.example.notepad.utils.AppManager
 import com.example.notepad.utils.ClipBoardManager
 
+/**Main screen root.*/
 @Composable
 fun MainUiNotePad(
     uiViewModel: UiViewModel = viewModel(),
@@ -34,11 +37,13 @@ fun MainUiNotePad(
     appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val activity = LocalActivity.current
 
     val dateTimePicker = remember { DateTimePicker() }
     val navController = rememberNavController()
     val navigator = remember { Navigator(navController) }
     val clipBoardManager = remember { ClipBoardManager(context) }
+    val appManager = remember { AppManager(activity, context) }
 
     val allNotesList by notesViewModel.noteList.collectAsState()
     val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
@@ -68,7 +73,8 @@ fun MainUiNotePad(
                     isNotesLoadingState = notesLoadingState,
                     isGridEnabledState = isGridEnabledState,
                     state = uiViewModel.mainScreenDropdownMenuState,
-                    updateStateMethod = uiViewModel::updateMainScreenDropdownMenuState
+                    updateStateMethod = uiViewModel::updateMainScreenDropdownMenuState,
+                    exitAppMethod = appManager::breakApp
                 )
             }
 

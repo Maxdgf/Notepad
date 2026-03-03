@@ -1,6 +1,7 @@
 package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -95,6 +97,7 @@ fun NoteUiViewScreen(
                     }
                 },
                 barActionElements = {
+                    // dropdown menu
                     Box {
                         IconButton(onClick = { updateStateMethod(true) }) {
                             Icon(
@@ -113,7 +116,10 @@ fun NoteUiViewScreen(
                                     updateChangeFontSizeDialogStateMethod(true)
                                 },
                                 text = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
                                         Icon(
                                             painter = painterResource(R.drawable.baseline_text_format_24),
                                             contentDescription = null
@@ -131,7 +137,10 @@ fun NoteUiViewScreen(
                                     }
                                 },
                                 text = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
                                         Icon(
                                             painter = painterResource(R.drawable.baseline_content_copy_24),
                                             contentDescription = null
@@ -159,7 +168,9 @@ fun NoteUiViewScreen(
                     value = currentFontSize / 100f,
                     steps = 8,
                     valueRange = 0.1f..0.3f,
-                    onValueChange = { value -> updateCurrentFontSize((value * 100).roundToInt()) }
+                    onValueChange = { value ->
+                        updateCurrentFontSize((value * 100).roundToInt())
+                    }
                 )
 
                 Row {

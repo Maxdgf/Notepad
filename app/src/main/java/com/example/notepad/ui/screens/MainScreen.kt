@@ -67,7 +67,8 @@ fun MainUiScreen(
     deleteNoteMethod: (uuid: String) -> Unit,
     deleteAllNotesMethod: () -> Unit,
     state: Boolean,
-    updateStateMethod: (Boolean) -> Unit
+    updateStateMethod: (Boolean) -> Unit,
+    exitAppMethod: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -76,6 +77,7 @@ fun MainUiScreen(
             TopUiBar(
                 titleContent = { Text(text = "Notepad") },
                 barActionElements = {
+                    // dropdown menu
                     Box {
                         IconButton(onClick = { updateStateMethod(true) }) {
                             Icon(
@@ -94,7 +96,10 @@ fun MainUiScreen(
                                     navigator.navigateTo(NavigationRoutes.NoteSettingsScreen.route)
                                 },
                                 text = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
                                         Icon(
                                             painter = painterResource(R.drawable.baseline_settings_24),
                                             contentDescription = null
@@ -110,12 +115,36 @@ fun MainUiScreen(
                                     updateDeleteAllNotesAlertMessageDialogStateMethod(true)
                                 },
                                 text = {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
                                         Icon(
                                             painter = painterResource(R.drawable.baseline_delete_24),
                                             contentDescription = null
                                         )
                                         Text(text = "delete all")
+                                    }
+                                }
+                            )
+
+                            HorizontalDivider()
+
+                            DropdownMenuItem(
+                                onClick = {
+                                    updateStateMethod(false) // hide menu
+                                    exitAppMethod() // exit app
+                                },
+                                text = {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.baseline_exit_to_app_24),
+                                            contentDescription = null
+                                        )
+                                        Text(text = "exit")
                                     }
                                 }
                             )
