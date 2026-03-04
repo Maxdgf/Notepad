@@ -40,14 +40,16 @@ import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
+import com.example.notepad.ui.view_models.Note
 
+/**Creates a note edit app screen.*/
 @Composable
 fun NoteUiEditScreen(
     navigator: Navigator,
     dateTimePicker: DateTimePicker,
     noteNameState: String,
     noteContentState: String,
-    currentNote: NoteEntity?,
+    currentNote: Note?,
     errorOfEmptyNotAlertMessageDialogState: Boolean,
     updateNoteNameStateMethod: (newValue: String) -> Unit,
     updateNoteContentStateMethod: (newValue: String) -> Unit,

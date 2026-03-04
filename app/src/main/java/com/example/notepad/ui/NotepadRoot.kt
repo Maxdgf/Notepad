@@ -43,13 +43,14 @@ fun MainUiNotePad(
     val navController = rememberNavController()
     val navigator = remember { Navigator(navController) }
     val clipBoardManager = remember { ClipBoardManager(context) }
-    val appManager = remember { AppManager(activity, context) }
+    val appManager = remember { AppManager(activity) }
 
     val allNotesList by notesViewModel.noteList.collectAsState()
     val notesLoadingState by notesViewModel.isNotesLoadingState.collectAsState()
     val isGridEnabledState by appDataStoreViewModel.state.collectAsState()
-    val selectedNote by notesViewModel.selectedNote.collectAsState()
+    val selectedNote by notesViewModel.currentNote.collectAsState()
     val noteTextSize by appDataStoreViewModel.noteTextSize.collectAsState()
+    val textWrapState by appDataStoreViewModel.textWrapMode.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -103,7 +104,9 @@ fun MainUiNotePad(
                     updateChangeFontSizeDialogStateMethod = uiViewModel::updateChangeFontSizeDialogState,
                     clipBoardManager = clipBoardManager,
                     state = uiViewModel.noteViewScreenDropdownMenuState,
-                    updateStateMethod = uiViewModel::updateNoteViewScreenDropdownMenuState
+                    updateStateMethod = uiViewModel::updateNoteViewScreenDropdownMenuState,
+                    textWrapState = textWrapState,
+                    updateTextWrapStateMethod = appDataStoreViewModel::saveTextWrapState
                 )
             }
 

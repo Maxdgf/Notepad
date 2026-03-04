@@ -4,12 +4,7 @@ import android.app.Activity
 import android.content.Context
 import kotlin.system.exitProcess
 
-class AppManager(
-    private val activity: Activity?,
-    context: Context
-) {
-    private val packageManager = context.packageManager // package manager
-
+class AppManager(private val activity: Activity?) {
     /**Exits app.*/
     fun breakApp() {
         activity?.finish() // finish activity

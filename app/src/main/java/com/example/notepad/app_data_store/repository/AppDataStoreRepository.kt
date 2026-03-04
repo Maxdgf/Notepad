@@ -7,4 +7,6 @@ interface AppDataStoreRepository {
     fun getGridEnabledState(): Flow<Boolean>
     suspend fun saveNoteTextSize(size: Int)
     fun getNoteTextSize(): Flow<Int>
+    suspend fun saveTextWrapState(state: Boolean)
+    fun getTextWrapState(): Flow<Boolean>
 }

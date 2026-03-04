@@ -50,6 +50,7 @@ import com.example.notepad.ui.components.ui_components.ScrollableUiItemsList
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 
+/**Creates a main app screen.*/
 @Composable
 fun MainUiScreen(
     navigator: Navigator,

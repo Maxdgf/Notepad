@@ -17,11 +17,12 @@ import com.example.notepad.ui.components.ui_components.CheckBoxWithUiText
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 
+/**Creates a settings app screen.*/
 @Composable
 fun SettingsUiScreen(
     navigator: Navigator,
     isGridEnabledState: Boolean,
-    updateIsGridEnabledStateMethod: (state: Boolean) -> Unit
+    updateIsGridEnabledStateMethod: (Boolean) -> Unit
 ) {
     Scaffold(
         topBar = {

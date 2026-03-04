@@ -1,6 +1,7 @@
 package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -39,19 +41,23 @@ import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
+import com.example.notepad.ui.view_models.Note
 import com.example.notepad.utils.ClipBoardManager
 
+/**Creates a note view app screen.*/
 @Composable
 fun NoteUiViewScreen(
     navigator: Navigator,
-    currentNote: NoteEntity?,
+    currentNote: Note?,
     state: Boolean,
     updateStateMethod: (Boolean) -> Unit,
     currentFontSize: Int,
     updateCurrentFontSize: (Int) -> Unit,
     changeFontSizeDialogState: Boolean,
     updateChangeFontSizeDialogStateMethod: (Boolean) -> Unit,
-    clipBoardManager: ClipBoardManager
+    clipBoardManager: ClipBoardManager,
+    textWrapState: Boolean,
+    updateTextWrapStateMethod: (Boolean) -> Unit
 ) {
     val noteViewVerticalScrollState = rememberScrollState()
 
@@ -70,7 +76,7 @@ fun NoteUiViewScreen(
 
                             Row {
                                 Text(
-                                    text = it.dateTime,
+                                    text = it.creationDate,
                                     fontWeight = FontWeight.Light,
                                     modifier = Modifier.basicMarquee(Int.MAX_VALUE),
                                     fontSize = 10.sp
@@ -149,6 +155,23 @@ fun NoteUiViewScreen(
                                     }
                                 }
                             )
+
+                            HorizontalDivider()
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Checkbox(
+                                    checked = textWrapState,
+                                    onCheckedChange = { state ->
+                                        updateTextWrapStateMethod(state)
+                                        updateStateMethod(false) // hide menu
+                                    }
+                                )
+
+                                Text(text = "text wrap")
+                            }
                         }
                     }
                 }
@@ -189,14 +212,27 @@ fun NoteUiViewScreen(
 
             currentNote?.let {
                 SelectionContainer {
-                    Text(
-                        text = it.content,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                            .verticalScroll(noteViewVerticalScrollState),
-                        fontSize = currentFontSize.sp
-                    )
+                    if (textWrapState) {
+                        Text(
+                            text = it.content,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                                .verticalScroll(noteViewVerticalScrollState),
+                            fontSize = currentFontSize.sp
+                        )
+                    } else {
+                        val horizontalScrollState = rememberScrollState()
+                        Text(
+                            text = it.content,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
+                                .horizontalScroll(horizontalScrollState)
+                                .verticalScroll(noteViewVerticalScrollState),
+                            fontSize = currentFontSize.sp
+                        )
+                    }
                 }
             }
         }

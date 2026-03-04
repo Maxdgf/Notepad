@@ -3,6 +3,7 @@ package com.example.notepad.di
 import android.content.Context
 import androidx.room.Room
 import com.example.notepad.app_data_store.repository.AppDataStoreImpl
+import com.example.notepad.app_data_store.repository.AppDataStoreRepository
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteDao
 import dagger.Module
 import dagger.Provides
@@ -36,5 +37,5 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAppDataStoreManager(@ApplicationContext context: Context) = AppDataStoreImpl(context)
+    fun provideAppDataStoreManager(@ApplicationContext context: Context): AppDataStoreRepository = AppDataStoreImpl(context)
 }

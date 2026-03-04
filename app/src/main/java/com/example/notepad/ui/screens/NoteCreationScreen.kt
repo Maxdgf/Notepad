@@ -42,6 +42,7 @@ import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlacehold
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 
+/**Creates a note creation app screen.*/
 @Composable
 fun NoteUiCreationScreen(
     navigator: Navigator,

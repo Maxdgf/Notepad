@@ -15,6 +15,7 @@ class AppDataStoreImpl @Inject constructor(private val context: Context) : AppDa
     companion object {
         val gridEnabledState = booleanPreferencesKey(name = "is_grid_enabled")
         val noteTextSize = intPreferencesKey(name = "note_text_size")
+        val isTextWrapEnabled = booleanPreferencesKey(name = "note_text_wrap_mode")
     }
 
     override suspend fun saveGridEnabledState(state: Boolean) {
@@ -35,5 +36,15 @@ class AppDataStoreImpl @Inject constructor(private val context: Context) : AppDa
 
     override fun getNoteTextSize(): Flow<Int> = context.dataStore.data.map {
         it[noteTextSize] ?: 10
+    }
+
+    override suspend fun saveTextWrapState(state: Boolean) {
+        context.dataStore.edit {
+            it[isTextWrapEnabled] = state
+        }
+    }
+
+    override fun getTextWrapState(): Flow<Boolean> = context.dataStore.data.map {
+        it[isTextWrapEnabled] == true
     }
 }
