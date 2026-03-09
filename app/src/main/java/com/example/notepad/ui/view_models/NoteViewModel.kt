@@ -50,7 +50,6 @@ class NoteViewModel @Inject constructor(
             delay(100) // mini-delay 100 ms
             _isNotesLoadingState.value = false
         } // update loading state to false after emission
-
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,

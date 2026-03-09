@@ -45,6 +45,7 @@ import com.example.notepad.ui.components.screen_components.SimpleFloatingUiIconB
 import com.example.notepad.ui.components.screen_components.TopUiBar
 import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
 import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
+import com.example.notepad.ui.components.ui_components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.components.ui_components.NoteUiCard
 import com.example.notepad.ui.components.ui_components.ScrollableUiItemsList
 import com.example.notepad.ui.navigation.NavigationRoutes
@@ -185,49 +186,12 @@ fun MainUiScreen(
                         )
                     }
                 } else {
-                    ScrollableUiItemsList(
-                        isGridEnabled = isGridEnabledState,
-                        scrollableContent = {
-                            item {
-                                Text(
-                                    text = "notes count: ${notesList.size}", //test
-                                    fontSize = 20.sp,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-
-                                HorizontalDivider(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-
-                            items(
-                                items = notesList,
-                                key = { note -> note.uuid }
-                            ) { note ->
-                                NoteUiCard(
-                                    onClick = {
-                                        updateSelectedNoteStateMethod(note.uuid)
-
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
-                                    },
-                                    onLongClick = {
-                                        updateNoteActionsDialogStateMethod(true)
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                        updateSelectedNoteStateMethod(note.uuid)
-                                    },
-                                    noteName = note.name,
-                                    noteDatetimeCreation = note.dateTime,
-                                    noteLastEditDatetime = note.lastEditDateTime
-                                )
-                            }
-                        },
-                        scrollableGridContent = {
-                            item(span = { GridItemSpan(2) }) {
-                                Column(modifier = Modifier.fillMaxSize()) {
+                    // check notes list is not empty
+                    if (notesList.isNotEmpty())
+                        ScrollableUiItemsList(
+                            isGridEnabled = isGridEnabledState,
+                            scrollableContent = {
+                                item {
                                     Text(
                                         text = "notes count: ${notesList.size}", //test
                                         fontSize = 20.sp,
@@ -240,32 +204,77 @@ fun MainUiScreen(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
+
+                                items(
+                                    items = notesList,
+                                    key = { note -> note.uuid }
+                                ) { note ->
+                                    NoteUiCard(
+                                        onClick = {
+                                            updateSelectedNoteStateMethod(note.uuid)
+
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
+                                        },
+                                        onLongClick = {
+                                            updateNoteActionsDialogStateMethod(true)
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                                            updateSelectedNoteStateMethod(note.uuid)
+                                        },
+                                        noteName = note.name,
+                                        noteDatetimeCreation = note.dateTime,
+                                        noteLastEditDatetime = note.lastEditDateTime
+                                    )
+                                }
+                            },
+                            scrollableGridContent = {
+                                item(span = { GridItemSpan(2) }) {
+                                    Column(modifier = Modifier.fillMaxSize()) {
+                                        Text(
+                                            text = "notes count: ${notesList.size}", //test
+                                            fontSize = 20.sp,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+
+                                        HorizontalDivider(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+
+                                items(
+                                    items = notesList,
+                                    key = { note -> note.uuid }
+                                ) { note ->
+                                    NoteUiCard(
+                                        onClick = {
+                                            updateSelectedNoteStateMethod(note.uuid)
+
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
+                                        },
+                                        onLongClick = {
+                                            updateNoteActionsDialogStateMethod(true)
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                                            updateSelectedNoteStateMethod(note.uuid)
+                                        },
+                                        noteName = note.name,
+                                        noteDatetimeCreation = note.dateTime,
+                                        noteLastEditDatetime = note.lastEditDateTime
+                                    )
+                                }
                             }
-
-                            items(
-                                items = notesList,
-                                key = { note -> note.uuid }
-                            ) { note ->
-                                NoteUiCard(
-                                    onClick = {
-                                        updateSelectedNoteStateMethod(note.uuid)
-
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
-                                    },
-                                    onLongClick = {
-                                        updateNoteActionsDialogStateMethod(true)
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                        updateSelectedNoteStateMethod(note.uuid)
-                                    },
-                                    noteName = note.name,
-                                    noteDatetimeCreation = note.dateTime,
-                                    noteLastEditDatetime = note.lastEditDateTime
-                                )
-                            }
-                        }
-                    )
+                        )
+                    else
+                        // show no-data description
+                        NoDataUiDescriptionBlock(
+                            description = "No notes :(",
+                            modifier = Modifier.fillMaxSize()
+                        )
                 }
             }
 
