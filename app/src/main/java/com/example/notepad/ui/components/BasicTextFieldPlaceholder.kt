@@ -1,4 +1,4 @@
-package com.example.notepad.ui.components.ui_components
+package com.example.notepad.ui.components
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box

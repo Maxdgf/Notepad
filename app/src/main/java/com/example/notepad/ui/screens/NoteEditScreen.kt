@@ -33,11 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notepad.R
 
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.utils.DateTimePicker
-import com.example.notepad.ui.components.screen_components.TopUiBar
-import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
-import com.example.notepad.ui.components.ui_components.BasicTextFieldUiPlaceholder
+import com.example.notepad.ui.components.TopUiBar
+import com.example.notepad.ui.components.AlertUiMessageDialog
+import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.Note

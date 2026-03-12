@@ -1,4 +1,4 @@
-package com.example.notepad.ui.components.ui_components
+package com.example.notepad.ui.components
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement

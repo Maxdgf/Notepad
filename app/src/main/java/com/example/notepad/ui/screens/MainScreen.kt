@@ -4,7 +4,6 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,13 +40,13 @@ import androidx.compose.ui.unit.sp
 
 import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.ui.components.screen_components.SimpleFloatingUiIconButton
-import com.example.notepad.ui.components.screen_components.TopUiBar
-import com.example.notepad.ui.components.ui_components.AlertUiMessageDialog
-import com.example.notepad.ui.components.ui_components.BottomUiSheetActionDialog
-import com.example.notepad.ui.components.ui_components.NoDataUiDescriptionBlock
-import com.example.notepad.ui.components.ui_components.NoteUiCard
-import com.example.notepad.ui.components.ui_components.ScrollableUiItemsList
+import com.example.notepad.ui.components.SimpleFloatingUiIconButton
+import com.example.notepad.ui.components.TopUiBar
+import com.example.notepad.ui.components.AlertUiMessageDialog
+import com.example.notepad.ui.components.BottomUiSheetActionDialog
+import com.example.notepad.ui.components.NoDataUiDescriptionBlock
+import com.example.notepad.ui.components.NoteUiCard
+import com.example.notepad.ui.components.ScrollableUiItemsList
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 

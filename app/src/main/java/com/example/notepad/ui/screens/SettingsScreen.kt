@@ -12,8 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 
 import com.example.notepad.R
-import com.example.notepad.ui.components.screen_components.TopUiBar
-import com.example.notepad.ui.components.ui_components.CheckBoxWithUiText
+import com.example.notepad.ui.components.TopUiBar
+import com.example.notepad.ui.components.CheckBoxWithUiText
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 

@@ -1,4 +1,4 @@
-package com.example.notepad.ui.components.ui_components
+package com.example.notepad.ui.components
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet

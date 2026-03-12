@@ -1,11 +1,10 @@
-package com.example.notepad.ui.components.screen_components
+package com.example.notepad.ui.components
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 /**
  * Creates top app bar.

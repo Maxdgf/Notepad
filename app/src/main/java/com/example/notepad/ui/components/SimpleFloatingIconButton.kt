@@ -1,4 +1,4 @@
-package com.example.notepad.ui.components.screen_components
+package com.example.notepad.ui.components
 
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
