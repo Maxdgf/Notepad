@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.dp
 /**
  * Creates and setups compose alert dialog with custom content.
  * @param state dialog state.
- * @param color dialog color (optional).
+ * @param containerColor dialog color (optional).
+ * @param contentColor dialog's content color (optional).
  * @param onDismissRequestFunction on dismiss request function.
  * @param dialogContent composable dialog content.
  * @param titleIcon dialog title icon painter.
@@ -36,7 +37,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun AlertUiMessageDialog(
     onDismissRequestFunction: () -> Unit,
-    color: Color? = null,
+    containerColor: Color? = null,
+    contentColor: Color? = null,
     state: Boolean,
     titleIcon: Painter,
     titleText: String,
@@ -44,45 +46,13 @@ fun AlertUiMessageDialog(
 ) {
     if (state)
         BasicAlertDialog(onDismissRequest = { onDismissRequestFunction() }) {
-            color?.let { color -> // with color
-                Surface(
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .wrapContentHeight(),
-                    shape = MaterialTheme.shapes.large,
-                    color = color, // set surface color
-                    tonalElevation = AlertDialogDefaults.TonalElevation
-                ) {
-                    Column(
-                        modifier = Modifier.padding(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        // dialog title with icon and text
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Icon(
-                                painter = titleIcon,
-                                contentDescription = null
-                            )
-
-                            Text(
-                                text = titleText,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE)
-                            )
-                        }
-
-                        dialogContent() // other dialog content
-                    }
-                }
-            } ?: Surface( // without color
+            Surface(
                 modifier = Modifier
                     .wrapContentWidth()
                     .wrapContentHeight(),
                 shape = MaterialTheme.shapes.large,
+                color = containerColor ?: MaterialTheme.colorScheme.surface, // set surface color
+                contentColor = contentColor ?: MaterialTheme.colorScheme.onSurface, // set color to surface's elements
                 tonalElevation = AlertDialogDefaults.TonalElevation
             ) {
                 Column(

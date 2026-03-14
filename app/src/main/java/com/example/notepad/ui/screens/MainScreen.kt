@@ -279,15 +279,13 @@ fun MainUiScreen(
 
             AlertUiMessageDialog(
                 onDismissRequestFunction = { updateDeleteAllNotesAlertMessageDialogStateMethod(false) },
-                color = MaterialTheme.colorScheme.error,
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = Color.White,
                 state = deleteAllNotesAlertMessageDialogState,
                 titleIcon = painterResource(R.drawable.outline_warning_amber_24),
                 titleText = "Warning"
             ) {
-                Text(
-                    text = "Are you sure you want to delete all notes?",
-                    color = Color.White
-                )
+                Text(text = "Are you sure you want to delete all notes?")
 
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
@@ -295,12 +293,7 @@ fun MainUiScreen(
                         modifier = Modifier.weight(0.5f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                    ) {
-                        Text(
-                            text = "Cancel",
-                            color = Color.White
-                        )
-                    }
+                    ) { Text(text = "Cancel") }
 
                     Spacer(modifier = Modifier.width(10.dp))
 
@@ -312,12 +305,7 @@ fun MainUiScreen(
                         modifier = Modifier.weight(0.5f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                    ) {
-                        Text(
-                            text = "Delete",
-                            color = Color.White
-                        )
-                    }
+                    ) { Text(text = "Delete") }
                 }
             }
 

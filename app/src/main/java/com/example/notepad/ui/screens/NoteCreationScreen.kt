@@ -177,27 +177,20 @@ fun NoteUiCreationScreen(
 
             AlertUiMessageDialog(
                 onDismissRequestFunction = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
-                color = MaterialTheme.colorScheme.error,
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = Color.White,
                 state = errorOfEmptyNotAlertMessageDialogState,
                 titleIcon = painterResource(R.drawable.outline_error_outline_24),
                 titleText = "Error"
             ) {
-                Text(
-                    text = "Note couldn't be empty!\n- Check note name and content.",
-                    color = Color.White
-                )
+                Text(text = "Note couldn't be empty!\n- Check note name and content.")
 
                 Button(
                     onClick = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                ) {
-                    Text(
-                        text = "Ok",
-                        color = Color.White
-                    )
-                }
+                ) { Text(text = "Ok") }
             }
         }
     )
