@@ -47,7 +47,10 @@ import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.NoteViewModel
 
-/**Creates a note creation app screen.*/
+/**
+ * Creates a note creation app screen.
+ * @param navigator navigation utility.
+ */
 @Composable
 fun NoteUiCreationScreen(
     navigator: Navigator,

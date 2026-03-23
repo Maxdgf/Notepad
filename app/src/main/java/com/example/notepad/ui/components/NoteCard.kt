@@ -6,9 +6,13 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,13 +42,15 @@ fun NoteUiCard(
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onShare: () -> Unit,
     noteName: String,
     noteDatetimeCreation: String,
     noteLastEditDatetime: String?
 ) {
     Card(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .height(150.dp)
             .clickable(
                 onClick = { onClick() }
             )
@@ -52,9 +58,9 @@ fun NoteUiCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 5.dp)
+                .padding(5.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.fillMaxHeight()) {
                 Text(
                     text = noteName,
                     fontWeight = FontWeight.Bold,
@@ -69,24 +75,28 @@ fun NoteUiCard(
                 )
 
                 noteLastEditDatetime?.let { dateTime ->
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = if (isSystemInDarkTheme()) Color.White else Color.Black
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
 
-                    Row {
-                        Icon(
-                            painter = painterResource(R.drawable.outline_edit_24),
-                            contentDescription = null
-                        )
+                    Column {
+                        Row {
+                            Icon(
+                                painter = painterResource(R.drawable.outline_edit_24),
+                                contentDescription = null
+                            )
 
-                        Text(
-                            text = "last edit:",
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 10.sp,
-                            modifier = Modifier
-                                .padding(start = 3.dp)
-                                .basicMarquee(Int.MAX_VALUE)
+                            Text(
+                                text = "last edit",
+                                fontStyle = FontStyle.Italic,
+                                fontSize = 10.sp,
+                                modifier = Modifier
+                                    .padding(start = 3.dp)
+                                    .basicMarquee(Int.MAX_VALUE)
+                            )
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.width(130.dp),
+                            color = if (isSystemInDarkTheme()) Color.White else Color.Black
                         )
 
                         Text(
@@ -101,6 +111,8 @@ fun NoteUiCard(
                 }
             }
 
+            Spacer(modifier = Modifier.weight(1f))
+
             Column {
                 IconButton(onClick = { onEdit() }) {
                     Icon(
@@ -112,6 +124,13 @@ fun NoteUiCard(
                 IconButton(onClick = { onDelete() }) {
                     Icon(
                         painter = painterResource(R.drawable.baseline_delete_24),
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(onClick = { onShare() }) {
+                    Icon(
+                        painter = painterResource(R.drawable.outline_share_24),
                         contentDescription = null
                     )
                 }

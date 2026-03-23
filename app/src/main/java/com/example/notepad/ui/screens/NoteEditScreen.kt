@@ -47,7 +47,11 @@ import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.NoteViewModel
 
-/**Creates a note edit app screen.*/
+/**
+ * Creates a note edit app screen.
+ * @param navigator navigation utility.
+ * @param noteId id of the note to be edited.
+ */
 @Composable
 fun NoteUiEditScreen(
     navigator: Navigator,

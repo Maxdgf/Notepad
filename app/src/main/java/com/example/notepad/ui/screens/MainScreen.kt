@@ -1,6 +1,10 @@
 package com.example.notepad.ui.screens
 
+import android.content.Intent
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,18 +16,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -36,8 +43,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +68,11 @@ import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.NoteViewModel
 import com.example.notepad.utils.AppManager
 
-/**Creates a main app screen.*/
+/**
+ * Creates a main app screen.
+ * @param navigator navigation utility.
+ * @param isGridEnabledState notes grid enabled state.
+ */
 @Composable
 fun MainUiScreen(
     navigator: Navigator,
@@ -64,6 +80,7 @@ fun MainUiScreen(
     noteViewModel: NoteViewModel = hiltViewModel()
 ) {
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
     val activity = LocalActivity.current
 
     val appManager = remember { AppManager(activity) }
@@ -157,6 +174,7 @@ fun MainUiScreen(
                 }
             )
         },
+        floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             SimpleFloatingUiIconButton(
                 onClick = {
@@ -189,6 +207,9 @@ fun MainUiScreen(
                     // check notes list is not empty
                     if (notesList.isNotEmpty())
                         ScrollableUiItemsList(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 5.dp),
                             isGridEnabled = isGridEnabledState,
                             scrollableContent = {
                                 item {
@@ -224,6 +245,23 @@ fun MainUiScreen(
                                         onDelete = {
                                             selectedNoteIdToEdit = note.id
                                             deleteNoteAlertMessageDialogState = true
+                                        },
+                                        onShare = {
+                                            // configure send intent
+                                            val sendIntent = Intent().apply {
+                                                action = Intent.ACTION_SEND
+                                                putExtra(
+                                                    Intent.EXTRA_TEXT,
+                                                    note.name + "\n" +
+                                                            note.dateTime + "\n\n" +
+                                                            note.content
+                                                )
+                                                type = "text/plain"
+                                            }
+
+                                            // create chooser
+                                            val shareIntent = Intent.createChooser(sendIntent, null)
+                                            context.startActivity(shareIntent)
                                         }
                                     )
                                 }
@@ -264,6 +302,23 @@ fun MainUiScreen(
                                         onDelete = {
                                             selectedNoteIdToEdit = note.id
                                             deleteNoteAlertMessageDialogState = true
+                                        },
+                                        onShare = {
+                                            // configure send intent
+                                            val sendIntent = Intent().apply {
+                                                action = Intent.ACTION_SEND
+                                                putExtra(
+                                                    Intent.EXTRA_TEXT,
+                                                    note.name + "\n" +
+                                                            note.dateTime + "\n\n" +
+                                                            note.content
+                                                )
+                                                type = "text/plain"
+                                            }
+
+                                            // create chooser
+                                            val shareIntent = Intent.createChooser(sendIntent, null)
+                                            context.startActivity(shareIntent)
                                         }
                                     )
                                 }

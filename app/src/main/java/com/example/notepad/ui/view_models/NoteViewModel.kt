@@ -51,9 +51,11 @@ class NoteViewModel @Inject constructor(
         val id = noteId ?: return
 
         viewModelScope.launch {
+            // get note by id
             val foundedNote = noteRepository.getNoteById(id).firstOrNull()
 
             foundedNote?.let { note ->
+                // set founded note to saved state handle
                 savedStateHandle[CURRENT_NOTE_KEY] = Note(
                     id = note.id,
                     name = note.name,

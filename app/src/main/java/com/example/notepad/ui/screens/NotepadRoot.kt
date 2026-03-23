@@ -15,7 +15,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
-import com.example.notepad.utils.DateTimePicker
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.AppDataStoreViewModel
@@ -23,12 +22,9 @@ import com.example.notepad.utils.ClipBoardManager
 
 /**Main screen root.*/
 @Composable
-fun MainUiNotePad(
-    appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
-) {
+fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()) {
     val context = LocalContext.current
 
-    val dateTimePicker = remember { DateTimePicker() }
     val navController = rememberNavController()
     val navigator = remember { Navigator(navController) }
 
@@ -39,6 +35,7 @@ fun MainUiNotePad(
             navController = navController,
             startDestination = NavigationRoutes.MainScreen.route
         ) {
+            // main screen
             composable(route = NavigationRoutes.MainScreen.route) {
                 MainUiScreen(
                     navigator = navigator,
@@ -46,10 +43,12 @@ fun MainUiNotePad(
                 )
             }
 
+            // note creation screen
             composable(route = NavigationRoutes.NoteCreationScreen.route) {
                 NoteUiCreationScreen(navigator = navigator,)
             }
 
+            // note view screen
             composable(
                 route = "${NavigationRoutes.NoteViewScreen.route}/{noteId}",
                 arguments = listOf(
@@ -74,6 +73,7 @@ fun MainUiNotePad(
                 )
             }
 
+            // note edit screen
             composable(
                 route = "${NavigationRoutes.NoteEditScreen.route}/{noteId}",
                 arguments = listOf(
@@ -88,6 +88,7 @@ fun MainUiNotePad(
                 )
             }
 
+            // settings screen
             composable(route = NavigationRoutes.NoteSettingsScreen.route) {
                 SettingsUiScreen(
                     isGridEnabledState = isGridEnabledState,
