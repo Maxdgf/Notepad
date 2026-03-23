@@ -17,9 +17,6 @@ Based on *Room* and *Jetpack Compose*.
             <img src="previews/preview (2).jpg">
         </td>
         <td>
-            <img src="previews/preview (3).jpg">
-        </td>
-        <td>
             <img src="previews/preview (4).jpg">
         </td>
         <td>
