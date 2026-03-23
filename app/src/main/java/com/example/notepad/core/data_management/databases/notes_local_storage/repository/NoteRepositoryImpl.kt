@@ -2,21 +2,24 @@ package com.example.notepad.core.data_management.databases.notes_local_storage.r
 
 import com.example.notepad.core.data_management.databases.notes_local_storage.NoteDao
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : NoteRepository {
     override fun getAllNotes() = noteDao.getNotesFromDeviceLocalStorage()
 
+    override fun getNoteById(id: Long): Flow<NoteEntity?> = noteDao.getNoteById(id)
+
     override suspend fun addNote(note: NoteEntity) = noteDao.addNote(note)
 
-    override suspend fun deleteNote(uuid: String) = noteDao.deleteNote(uuid)
+    override suspend fun deleteNote(id: Long) = noteDao.deleteNote(id)
 
     override suspend fun editNote(
         name: String,
         content: String,
         lastEditDateTime: String,
-        uuid: String
-    ) = noteDao.updateNote(name, content, lastEditDateTime, uuid)
+        id: Long
+    ) = noteDao.updateNote(name, content, lastEditDateTime, id)
 
     override suspend fun deleteAllNotes() = noteDao.deleteAllNotes()
 }

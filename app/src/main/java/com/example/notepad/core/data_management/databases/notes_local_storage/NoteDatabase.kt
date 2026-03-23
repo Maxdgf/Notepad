@@ -6,7 +6,7 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.en
 
 @Database(
     entities = [NoteEntity::class],
-    version = 12
+    version = 13
 )
 abstract class NoteDatabase : RoomDatabase() {
     abstract fun getNoteDao(): NoteDao

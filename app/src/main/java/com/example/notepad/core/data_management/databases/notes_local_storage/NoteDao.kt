@@ -13,18 +13,21 @@ interface NoteDao {
     @Query("SELECT * FROM notes_storage")
     fun getNotesFromDeviceLocalStorage(): Flow<List<NoteEntity>>
 
+    @Query("SELECT * FROM notes_storage WHERE id = :id")
+    fun getNoteById(id: Long): Flow<NoteEntity?>
+
     @Insert(onConflict = REPLACE)
     suspend fun addNote(note: NoteEntity)
 
-    @Query("DELETE FROM notes_storage WHERE note_uuid = :uuid")
-    suspend fun deleteNote(uuid: String)
+    @Query("DELETE FROM notes_storage WHERE id = :id")
+    suspend fun deleteNote(id: Long)
 
-    @Query("UPDATE notes_storage SET note_name = :name, note_content = :content, note_last_edit_datetime = :lastEditDateTime WHERE note_uuid = :uuid")
+    @Query("UPDATE notes_storage SET note_name = :name, note_content = :content, note_last_edit_datetime = :lastEditDateTime WHERE id = :id")
     suspend fun updateNote(
         name: String,
         content: String,
         lastEditDateTime: String,
-        uuid: String,
+        id: Long,
     )
 
     @Query("DELETE FROM notes_storage")

@@ -2,7 +2,6 @@ package com.example.notepad.ui.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notepad.app_data_store.repository.AppDataStoreImpl
 import com.example.notepad.app_data_store.repository.AppDataStoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

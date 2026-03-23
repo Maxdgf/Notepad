@@ -1,6 +1,5 @@
 package com.example.notepad.ui.view_models
 
-import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -11,29 +10,21 @@ import javax.inject.Inject
 
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
+import com.example.notepad.utils.DateTimePicker
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.withContext
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
-data class Note(
-    val uuid: String,
-    val name: String,
-    val content: String,
-    val creationDate: String
-) : Parcelable
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val dateTimePicker: DateTimePicker
 ) : ViewModel() {
     companion object {
         private const val CURRENT_NOTE_KEY = "current_note"
@@ -56,15 +47,15 @@ class NoteViewModel @Inject constructor(
             emptyList()
         )
 
-    fun selectNote(uuid: String) {
+    fun selectNote(noteId: Long?) {
+        val id = noteId ?: return
+
         viewModelScope.launch {
-            val foundedNote = withContext(Dispatchers.Default) {
-                noteList.value.find { note -> uuid == note.uuid } // find note by uuid
-            }
+            val foundedNote = noteRepository.getNoteById(id).firstOrNull()
 
             foundedNote?.let { note ->
                 savedStateHandle[CURRENT_NOTE_KEY] = Note(
-                    uuid = note.uuid,
+                    id = note.id,
                     name = note.name,
                     content = note.content,
                     creationDate = note.dateTime
@@ -73,30 +64,38 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-    fun addNote(note: NoteEntity) {
+    fun addNote(
+        name: String,
+        content: String
+    ) {
         viewModelScope.launch {
-            noteRepository.addNote(note)
+            noteRepository.addNote(
+                NoteEntity(
+                    name = name,
+                    content = content,
+                    dateTime = dateTimePicker.pickDateTimeNow(),
+                )
+            )
         }
     }
 
-    fun deleteNote(uuid: String) {
+    fun deleteNote(id: Long) {
         viewModelScope.launch {
-            noteRepository.deleteNote(uuid)
+            noteRepository.deleteNote(id)
         }
     }
 
     fun editNote(
         name: String,
         content: String,
-        lastEditDateTime: String,
-        uuid: String
+        id: Long
     ) {
         viewModelScope.launch {
             noteRepository.editNote(
                 name,
                 content,
-                lastEditDateTime,
-                uuid
+                dateTimePicker.pickDateTimeNow(),
+                id
             )
         }
     }

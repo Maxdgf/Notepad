@@ -1,6 +1,6 @@
 package com.example.notepad.ui.screens
 
-import androidx.compose.foundation.basicMarquee
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,50 +28,53 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 import com.example.notepad.R
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.ui.components.SimpleFloatingUiIconButton
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
-import com.example.notepad.ui.components.BottomUiSheetActionDialog
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.components.NoteUiCard
 import com.example.notepad.ui.components.ScrollableUiItemsList
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
+import com.example.notepad.ui.view_models.NoteViewModel
+import com.example.notepad.utils.AppManager
 
 /**Creates a main app screen.*/
 @Composable
 fun MainUiScreen(
     navigator: Navigator,
-    noteActionsDialogState: Boolean,
-    isNotesLoadingState: Boolean,
-    notesList: List<NoteEntity>,
     isGridEnabledState: Boolean,
-    selectedNoteUuidState: String?,
-    deleteAllNotesAlertMessageDialogState: Boolean,
-    updateDeleteAllNotesAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
-    updateSelectedNoteStateMethod: (uuid: String) -> Unit,
-    updateNoteActionsDialogStateMethod: (state: Boolean) -> Unit,
-    updateNoteNameStateMethod: (newValue: String) -> Unit,
-    updateNoteContentStateMethod: (newValue: String) -> Unit,
-    deleteNoteMethod: (uuid: String) -> Unit,
-    deleteAllNotesMethod: () -> Unit,
-    state: Boolean,
-    updateStateMethod: (Boolean) -> Unit,
-    exitAppMethod: () -> Unit
+    noteViewModel: NoteViewModel = hiltViewModel()
 ) {
     val haptic = LocalHapticFeedback.current
+    val activity = LocalActivity.current
+
+    val appManager = remember { AppManager(activity) }
+
+    var deleteAllNotesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+    var deleteNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+    var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
+    var selectedNoteIdToEdit: Long? by rememberSaveable { mutableStateOf(null) }
+
+    val notesList by noteViewModel.noteList.collectAsState()
+    val isNotesLoadingState by noteViewModel.isNotesLoadingState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -80,7 +83,7 @@ fun MainUiScreen(
                 barActionElements = {
                     // dropdown menu
                     Box {
-                        IconButton(onClick = { updateStateMethod(true) }) {
+                        IconButton(onClick = { dropdownMenuState = true }) {
                             Icon(
                                 painter = painterResource(R.drawable.baseline_more_vert_24),
                                 contentDescription = null
@@ -88,12 +91,12 @@ fun MainUiScreen(
                         }
 
                         DropdownMenu(
-                            expanded = state,
-                            onDismissRequest = { updateStateMethod(false) }
+                            expanded = dropdownMenuState,
+                            onDismissRequest = { dropdownMenuState = false }
                         ) {
                             DropdownMenuItem(
                                 onClick = {
-                                    updateStateMethod(false) // hide menu
+                                    dropdownMenuState = false // hide menu
                                     navigator.navigateTo(NavigationRoutes.NoteSettingsScreen.route)
                                 },
                                 text = {
@@ -112,8 +115,8 @@ fun MainUiScreen(
 
                             DropdownMenuItem(
                                 onClick = {
-                                    updateStateMethod(false) // hide menu
-                                    updateDeleteAllNotesAlertMessageDialogStateMethod(true)
+                                    dropdownMenuState = false // hide menu
+                                    deleteAllNotesAlertMessageDialogState = true
                                 },
                                 text = {
                                     Row(
@@ -133,8 +136,8 @@ fun MainUiScreen(
 
                             DropdownMenuItem(
                                 onClick = {
-                                    updateStateMethod(false) // hide menu
-                                    exitAppMethod() // exit app
+                                    dropdownMenuState = false // hide menu
+                                    appManager.breakApp() // exit app
                                 },
                                 text = {
                                     Row(
@@ -158,8 +161,6 @@ fun MainUiScreen(
             SimpleFloatingUiIconButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    updateNoteNameStateMethod("")
-                    updateNoteContentStateMethod("")
                     navigator.navigateTo(NavigationRoutes.NoteCreationScreen.route)
                 },
                 icon = painterResource(R.drawable.outline_add_24),
@@ -206,24 +207,24 @@ fun MainUiScreen(
 
                                 items(
                                     items = notesList,
-                                    key = { note -> note.uuid }
+                                    key = { note -> note.id }
                                 ) { note ->
                                     NoteUiCard(
                                         onClick = {
-                                            updateSelectedNoteStateMethod(note.uuid)
-
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
-                                        },
-                                        onLongClick = {
-                                            updateNoteActionsDialogStateMethod(true)
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                            updateSelectedNoteStateMethod(note.uuid)
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
+                                            navigator.navigateTo("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
                                         },
                                         noteName = note.name,
                                         noteDatetimeCreation = note.dateTime,
-                                        noteLastEditDatetime = note.lastEditDateTime
+                                        noteLastEditDatetime = note.lastEditDateTime,
+                                        onEdit = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
+                                            navigator.navigateTo("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
+                                        },
+                                        onDelete = {
+                                            selectedNoteIdToEdit = note.id
+                                            deleteNoteAlertMessageDialogState = true
+                                        }
                                     )
                                 }
                             },
@@ -246,24 +247,24 @@ fun MainUiScreen(
 
                                 items(
                                     items = notesList,
-                                    key = { note -> note.uuid }
+                                    key = { note -> note.id }
                                 ) { note ->
                                     NoteUiCard(
                                         onClick = {
-                                            updateSelectedNoteStateMethod(note.uuid)
-
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            navigator.navigateTo(NavigationRoutes.NoteViewScreen.route)
-                                        },
-                                        onLongClick = {
-                                            updateNoteActionsDialogStateMethod(true)
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                                            updateSelectedNoteStateMethod(note.uuid)
+                                            navigator.navigateTo("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
                                         },
                                         noteName = note.name,
                                         noteDatetimeCreation = note.dateTime,
-                                        noteLastEditDatetime = note.lastEditDateTime
+                                        noteLastEditDatetime = note.lastEditDateTime,
+                                        onEdit = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
+                                            navigator.navigateTo("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
+                                        },
+                                        onDelete = {
+                                            selectedNoteIdToEdit = note.id
+                                            deleteNoteAlertMessageDialogState = true
+                                        }
                                     )
                                 }
                             }
@@ -278,7 +279,7 @@ fun MainUiScreen(
             }
 
             AlertUiMessageDialog(
-                onDismissRequestFunction = { updateDeleteAllNotesAlertMessageDialogStateMethod(false) },
+                onDismissRequestFunction = { deleteAllNotesAlertMessageDialogState = false },
                 containerColor = MaterialTheme.colorScheme.error,
                 contentColor = Color.White,
                 state = deleteAllNotesAlertMessageDialogState,
@@ -289,7 +290,7 @@ fun MainUiScreen(
 
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
-                        onClick = { updateDeleteAllNotesAlertMessageDialogStateMethod(false) },
+                        onClick = { deleteAllNotesAlertMessageDialogState = false },
                         modifier = Modifier.weight(0.5f),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
@@ -299,8 +300,8 @@ fun MainUiScreen(
 
                     Button(
                         onClick = {
-                            updateDeleteAllNotesAlertMessageDialogStateMethod(false)
-                            deleteAllNotesMethod()
+                            deleteAllNotesAlertMessageDialogState = false
+                            noteViewModel.deleteAllNotes()
                         },
                         modifier = Modifier.weight(0.5f),
                         shape = RoundedCornerShape(10.dp),
@@ -309,79 +310,38 @@ fun MainUiScreen(
                 }
             }
 
-            BottomUiSheetActionDialog(
-                state = noteActionsDialogState,
-                onDismissRequestFunction = { updateNoteActionsDialogStateMethod(false) },
-                isExpanded = false
+            AlertUiMessageDialog(
+                onDismissRequestFunction = { deleteNoteAlertMessageDialogState = false },
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = Color.White,
+                state = deleteNoteAlertMessageDialogState,
+                titleIcon = painterResource(R.drawable.outline_warning_amber_24),
+                titleText = "Warning"
             ) {
-                val currentNote = notesList.find { note -> selectedNoteUuidState == note.uuid }
+                Text(text = "Are you sure you want to delete this note?")
 
-                currentNote?.let { note ->
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 10.dp)
-                        ) {
-                            Text(text = "Actions with note:")
-                            Text(
-                                text = note.name,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .basicMarquee(Int.MAX_VALUE),
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
-                            )
-                        }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = { deleteNoteAlertMessageDialogState = false },
+                        modifier = Modifier.weight(0.5f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                    ) { Text(text = "Cancel") }
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 5.dp),
-                            horizontalArrangement = Arrangement.spacedBy(20.dp)
-                        ) {
-                            Button(
-                                onClick = {
-                                    updateNoteActionsDialogStateMethod(false)
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                                    updateSelectedNoteStateMethod(note.uuid)
-                                    updateNoteNameStateMethod(note.name)
-                                    updateNoteContentStateMethod(note.content)
+                    Button(
+                        onClick = {
+                            deleteNoteAlertMessageDialogState = false
 
-                                    navigator.navigateTo(NavigationRoutes.NoteEditScreen.route)
-                                },
-                                modifier = Modifier.weight(0.5f),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary,
-                                    contentColor = MaterialTheme.colorScheme.onSecondary
-                                ),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.outline_edit_24),
-                                    contentDescription = "Edit note button."
-                                )
+                            selectedNoteIdToEdit?.let { id ->
+                                noteViewModel.deleteNote(id)
                             }
-
-                            Button(
-                                onClick = {
-                                    deleteNoteMethod(note.uuid)
-                                    updateNoteActionsDialogStateMethod(false)
-                                },
-                                modifier = Modifier.weight(0.5f),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError
-                                ),
-                                shape = RoundedCornerShape(10.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.baseline_delete_24),
-                                    contentDescription = "Delete note button."
-                                )
-                            }
-                        }
-                    }
+                        },
+                        modifier = Modifier.weight(0.5f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                    ) { Text(text = "Delete") }
                 }
             }
         }

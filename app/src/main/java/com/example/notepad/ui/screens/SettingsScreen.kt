@@ -35,12 +35,6 @@ fun SettingsUiScreen(
                             contentDescription = null
                         )
                     }
-                },
-                barActionElements = {
-                    Icon(
-                        painter = painterResource(R.drawable.baseline_settings_24),
-                        contentDescription = null
-                    )
                 }
             )
         }

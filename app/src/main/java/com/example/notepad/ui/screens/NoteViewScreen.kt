@@ -25,6 +25,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +39,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlin.math.roundToInt
 
 import com.example.notepad.R
@@ -40,25 +47,31 @@ import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
-import com.example.notepad.ui.view_models.Note
+import com.example.notepad.ui.view_models.NoteViewModel
 import com.example.notepad.utils.ClipBoardManager
 
 /**Creates a note view app screen.*/
 @Composable
 fun NoteUiViewScreen(
     navigator: Navigator,
-    currentNote: Note?,
-    state: Boolean,
-    updateStateMethod: (Boolean) -> Unit,
+    noteId: Long?,
     currentFontSize: Int,
     updateCurrentFontSize: (Int) -> Unit,
-    changeFontSizeDialogState: Boolean,
-    updateChangeFontSizeDialogStateMethod: (Boolean) -> Unit,
     clipBoardManager: ClipBoardManager,
     textWrapState: Boolean,
-    updateTextWrapStateMethod: (Boolean) -> Unit
+    updateTextWrapStateMethod: (Boolean) -> Unit,
+    noteViewModel: NoteViewModel = hiltViewModel()
 ) {
     val noteViewVerticalScrollState = rememberScrollState()
+
+    var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
+    var fontSizeDialogState by rememberSaveable { mutableStateOf(false) }
+
+    val currentNote by noteViewModel.currentNote.collectAsState()
+
+    LaunchedEffect(Unit) {
+        noteViewModel.selectNote(noteId)
+    }
 
     Scaffold(
         topBar = {
@@ -104,7 +117,7 @@ fun NoteUiViewScreen(
                 barActionElements = {
                     // dropdown menu
                     Box {
-                        IconButton(onClick = { updateStateMethod(true) }) {
+                        IconButton(onClick = { dropdownMenuState = true }) {
                             Icon(
                                 painter = painterResource(R.drawable.baseline_more_vert_24),
                                 contentDescription = null
@@ -112,13 +125,13 @@ fun NoteUiViewScreen(
                         }
 
                         DropdownMenu(
-                            expanded = state,
-                            onDismissRequest = { updateStateMethod(false) }
+                            expanded = dropdownMenuState,
+                            onDismissRequest = { dropdownMenuState = false }
                         ) {
                             DropdownMenuItem(
                                 onClick = {
-                                    updateStateMethod(false) // hide menu
-                                    updateChangeFontSizeDialogStateMethod(true)
+                                    dropdownMenuState = false // hide menu
+                                    fontSizeDialogState = true
                                 },
                                 text = {
                                     Row(
@@ -136,7 +149,7 @@ fun NoteUiViewScreen(
 
                             DropdownMenuItem(
                                 onClick = {
-                                    updateStateMethod(false) // hide menu
+                                    dropdownMenuState = false // hide menu
                                     currentNote?.content?.let {
                                         clipBoardManager.setTextToClipboard(it)
                                     }
@@ -159,13 +172,14 @@ fun NoteUiViewScreen(
 
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.padding(horizontal = 5.dp)
                             ) {
                                 Checkbox(
                                     checked = textWrapState,
                                     onCheckedChange = { state ->
                                         updateTextWrapStateMethod(state)
-                                        updateStateMethod(false) // hide menu
+                                        dropdownMenuState = false // hide menu
                                     }
                                 )
 
@@ -178,8 +192,8 @@ fun NoteUiViewScreen(
         },
         content = { innerPadding ->
             AlertUiMessageDialog(
-                state = changeFontSizeDialogState,
-                onDismissRequestFunction = { updateChangeFontSizeDialogStateMethod(false) },
+                state = fontSizeDialogState,
+                onDismissRequestFunction = { fontSizeDialogState = false },
                 titleIcon = painterResource(R.drawable.baseline_text_format_24),
                 titleText = "Text format"
             ) {
@@ -198,7 +212,7 @@ fun NoteUiViewScreen(
                 Row {
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
-                        onClick = { updateChangeFontSizeDialogStateMethod(false) },
+                        onClick = { fontSizeDialogState = false },
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(

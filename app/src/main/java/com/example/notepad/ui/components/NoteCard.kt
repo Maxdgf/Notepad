@@ -1,6 +1,7 @@
 package com.example.notepad.ui.components
 
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -25,7 +27,8 @@ import com.example.notepad.R
 /**
  * Creates card adapted to note entity data.
  * @param onClick on click function.
- * @param onLongClick on long click function.
+ * @param onEdit edit note function.
+ * @param onDelete delete note function.
  * @param noteName note name.
  * @param noteDatetimeCreation note datetime creation.
  * @param noteLastEditDatetime note last edit datetime.
@@ -33,7 +36,8 @@ import com.example.notepad.R
 @Composable
 fun NoteUiCard(
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     noteName: String,
     noteDatetimeCreation: String,
     noteLastEditDatetime: String?
@@ -41,9 +45,8 @@ fun NoteUiCard(
     Card(
         modifier = Modifier
             .fillMaxSize()
-            .combinedClickable(
-                onClick = { onClick() },
-                onLongClick = { onLongClick() }
+            .clickable(
+                onClick = { onClick() }
             )
     ) {
         Row(
@@ -95,6 +98,22 @@ fun NoteUiCard(
                                 .basicMarquee(Int.MAX_VALUE)
                         )
                     }
+                }
+            }
+
+            Column {
+                IconButton(onClick = { onEdit() }) {
+                    Icon(
+                        painter = painterResource(R.drawable.outline_edit_24),
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(onClick = { onDelete() }) {
+                    Icon(
+                        painter = painterResource(R.drawable.baseline_delete_24),
+                        contentDescription = null
+                    )
                 }
             }
         }

@@ -1,8 +1,8 @@
 package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -23,48 +23,57 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.notepad.R
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
-import com.example.notepad.utils.DateTimePicker
+import com.example.notepad.R
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
-import com.example.notepad.ui.view_models.Note
+import com.example.notepad.ui.view_models.NoteViewModel
 
 /**Creates a note edit app screen.*/
 @Composable
 fun NoteUiEditScreen(
     navigator: Navigator,
-    dateTimePicker: DateTimePicker,
-    noteNameState: String,
-    noteContentState: String,
-    currentNote: Note?,
-    errorOfEmptyNotAlertMessageDialogState: Boolean,
-    updateNoteNameStateMethod: (newValue: String) -> Unit,
-    updateNoteContentStateMethod: (newValue: String) -> Unit,
-    isNoteNameAndContentEmptyMethod: () -> Boolean,
-    errorOfNoteChangesAlertMessageDialogState: Boolean,
-    updateErrorOfEmptyNotAlertMessageDialogStateMethod: (state: Boolean) -> Unit,
-    editNoteMethod: (
-        name: String,
-        content: String,
-        lastEditDateTime: String,
-        uuid: String
-    ) -> Unit,
-    updateErrorOfNoteChangesAlertMessageDialogStateMethod: (state: Boolean) -> Unit
+    noteId: Long?,
+    noteViewModel: NoteViewModel = hiltViewModel()
 ) {
     val haptic = LocalHapticFeedback.current
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
+
+    var errorOfEmptyNotAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+    var errorOfNoteChangesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+    var noteNameState by rememberSaveable { mutableStateOf("") }
+    var noteContentState by rememberSaveable { mutableStateOf("") }
+
+    val currentNote by noteViewModel.currentNote.collectAsState()
+
+    LaunchedEffect(Unit) {
+        noteViewModel.selectNote(noteId)
+    }
+
+    LaunchedEffect(currentNote) {
+        currentNote?.let { note ->
+            noteNameState = note.name
+            noteContentState = note.content
+        }
+    }
 
     // text field auto scroll
     LaunchedEffect(noteContentInputFieldVerticalScrollState.maxValue) {
@@ -75,35 +84,34 @@ fun NoteUiEditScreen(
         topBar = {
             TopUiBar(
                 titleContent = {
-                    Row {
-                        OutlinedTextField(
-                            maxLines = 1,
-                            modifier = Modifier.fillMaxWidth(),
-                            value = noteNameState,
-                            onValueChange = { newValue -> updateNoteNameStateMethod(newValue) },
-                            trailingIcon = {
-                                IconButton(onClick = { updateNoteNameStateMethod("") }) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.baseline_clear_24),
-                                        contentDescription = null
-                                    )
-                                }
-                            },
-                            textStyle = TextStyle(fontSize = 15.sp),
-                            placeholder = {
-                                Text(
-                                    text = "Enter your note name here...",
-                                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                    fontSize = 15.sp
+                    OutlinedTextField(
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth(),
+                        value = noteNameState,
+                        onValueChange = { newValue -> noteNameState = newValue },
+                        trailingIcon = {
+                            IconButton(onClick = { noteNameState = "" }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.baseline_clear_24),
+                                    contentDescription = null
                                 )
-                            },
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                                cursorColor = MaterialTheme.colorScheme.onPrimary
+                            }
+                        },
+                        textStyle = TextStyle(fontSize = 15.sp),
+                        placeholder = {
+                            Text(
+                                text = "Enter your note name here...",
+                                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                                fontSize = 15.sp
                             )
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                            cursorColor = MaterialTheme.colorScheme.onPrimary
                         )
-                    }
+                    )
                 },
                 barIcon = {
                     IconButton(onClick = { navigator.navigateTo(NavigationRoutes.MainScreen.route) }) {
@@ -128,8 +136,9 @@ fun NoteUiEditScreen(
                         .weight(1f)
                         .verticalScroll(noteContentInputFieldVerticalScrollState),
                     value = noteContentState,
-                    onValueChange = { newValue -> updateNoteContentStateMethod(newValue) },
+                    onValueChange = { newValue -> noteContentState = newValue },
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
+                    cursorBrush = SolidColor(if (isSystemInDarkTheme()) Color.White else Color.Black),
                     decorationBox = @Composable { innerTextField ->
                         BasicTextFieldUiPlaceholder(
                             value = noteContentState,
@@ -144,23 +153,21 @@ fun NoteUiEditScreen(
 
                 Button(
                     onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
+
                         currentNote?.let { note ->
-                            if (isNoteNameAndContentEmptyMethod()) {
-                                updateErrorOfEmptyNotAlertMessageDialogStateMethod(true)
+                            if (noteNameState.isEmpty() || noteContentState.isEmpty()) {
+                                errorOfEmptyNotAlertMessageDialogState = true
                             } else {
-                                //checking changes in note content.
+                                // check changes in note
                                 if (noteContentState != note.content || noteNameState != note.name) {
-                                    editNoteMethod(
+                                    noteViewModel.editNote(
                                         noteNameState,
                                         noteContentState,
-                                        dateTimePicker.pickDateTimeNow(),
-                                        note.uuid
+                                        note.id
                                     )
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     navigator.navigateTo(NavigationRoutes.MainScreen.route)
-                                } else {
-                                    updateErrorOfNoteChangesAlertMessageDialogStateMethod(true)
-                                }
+                                } else errorOfNoteChangesAlertMessageDialogState = true
                             }
                         }
                     },
@@ -176,7 +183,7 @@ fun NoteUiEditScreen(
             }
 
             AlertUiMessageDialog(
-                onDismissRequestFunction = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
+                onDismissRequestFunction = { errorOfEmptyNotAlertMessageDialogState = false },
                 containerColor = MaterialTheme.colorScheme.error,
                 contentColor = Color.White,
                 state = errorOfEmptyNotAlertMessageDialogState,
@@ -186,7 +193,7 @@ fun NoteUiEditScreen(
                 Text(text = "Note couldn't be empty!\n- Check note name and content.")
 
                 Button(
-                    onClick = { updateErrorOfEmptyNotAlertMessageDialogStateMethod(false) },
+                    onClick = { errorOfEmptyNotAlertMessageDialogState = false },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError),
                     shape = RoundedCornerShape(10.dp)
@@ -194,7 +201,7 @@ fun NoteUiEditScreen(
             }
 
             AlertUiMessageDialog(
-                onDismissRequestFunction = { updateErrorOfNoteChangesAlertMessageDialogStateMethod(false) },
+                onDismissRequestFunction = { errorOfNoteChangesAlertMessageDialogState = false },
                 containerColor = MaterialTheme.colorScheme.error,
                 contentColor = Color.White,
                 state = errorOfNoteChangesAlertMessageDialogState,
@@ -204,7 +211,7 @@ fun NoteUiEditScreen(
                 Text(text = "Changes not detected! Note cannot be edited.")
 
                 Button(
-                    onClick = { updateErrorOfNoteChangesAlertMessageDialogStateMethod(false) },
+                    onClick = { errorOfNoteChangesAlertMessageDialogState = false },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
