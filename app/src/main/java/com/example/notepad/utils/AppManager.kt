@@ -1,7 +1,6 @@
 package com.example.notepad.utils
 
 import android.app.Activity
-import android.content.Context
 import kotlin.system.exitProcess
 
 class AppManager(private val activity: Activity?) {

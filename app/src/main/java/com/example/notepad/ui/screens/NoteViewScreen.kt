@@ -29,11 +29,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -57,11 +59,13 @@ fun NoteUiViewScreen(
     noteId: Long?,
     currentFontSize: Int,
     updateCurrentFontSize: (Int) -> Unit,
-    clipBoardManager: ClipBoardManager,
     textWrapState: Boolean,
     updateTextWrapStateMethod: (Boolean) -> Unit,
     noteViewModel: NoteViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+
+    val clipBoardManager = remember { ClipBoardManager(context) }
     val noteViewVerticalScrollState = rememberScrollState()
 
     var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
@@ -70,7 +74,9 @@ fun NoteUiViewScreen(
     val currentNote by noteViewModel.currentNote.collectAsState()
 
     LaunchedEffect(Unit) {
-        noteViewModel.selectNote(noteId)
+        noteId?.let {
+            noteViewModel.selectNote(it)
+        }
     }
 
     Scaffold(
@@ -88,7 +94,7 @@ fun NoteUiViewScreen(
 
                             Row {
                                 Text(
-                                    text = it.creationDate,
+                                    text = it.dateTime,
                                     fontWeight = FontWeight.Light,
                                     modifier = Modifier.basicMarquee(Int.MAX_VALUE),
                                     fontSize = 10.sp

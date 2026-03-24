@@ -7,18 +7,20 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import javax.inject.Inject
-
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
-import com.example.notepad.utils.DateTimePicker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+
+import com.example.notepad.utils.DateTimePicker
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
@@ -33,7 +35,19 @@ class NoteViewModel @Inject constructor(
     private val _isNotesLoadingState = MutableStateFlow(false)
     val isNotesLoadingState = _isNotesLoadingState.asStateFlow()
 
-    val currentNote: StateFlow<Note?> = savedStateHandle.getStateFlow(CURRENT_NOTE_KEY, null) // current note saved state
+    val currentNoteId: StateFlow<Long?> = savedStateHandle.getStateFlow(CURRENT_NOTE_KEY, null) // current note id saved state
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val currentNote = currentNoteId
+        .filterNotNull()
+        .flatMapLatest { id ->
+            noteRepository.getNoteById(id)
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            null
+        )
 
     val noteList = noteRepository.getAllNotes()
         .onStart { _isNotesLoadingState.value = true } // update loading state to true, when flow is started
@@ -47,23 +61,9 @@ class NoteViewModel @Inject constructor(
             emptyList()
         )
 
-    fun selectNote(noteId: Long?) {
-        val id = noteId ?: return
-
-        viewModelScope.launch {
-            // get note by id
-            val foundedNote = noteRepository.getNoteById(id).firstOrNull()
-
-            foundedNote?.let { note ->
-                // set founded note to saved state handle
-                savedStateHandle[CURRENT_NOTE_KEY] = Note(
-                    id = note.id,
-                    name = note.name,
-                    content = note.content,
-                    creationDate = note.dateTime
-                )
-            }
-        }
+    fun selectNote(noteId: Long) {
+        // set selected note id to saved state handle
+        savedStateHandle[CURRENT_NOTE_KEY] = noteId
     }
 
     fun addNote(

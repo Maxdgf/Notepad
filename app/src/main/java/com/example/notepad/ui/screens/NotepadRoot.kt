@@ -7,7 +7,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,13 +17,10 @@ import androidx.navigation.navArgument
 import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.AppDataStoreViewModel
-import com.example.notepad.utils.ClipBoardManager
 
 /**Main screen root.*/
 @Composable
 fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()) {
-    val context = LocalContext.current
-
     val navController = rememberNavController()
     val navigator = remember { Navigator(navController) }
 
@@ -57,8 +53,6 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
             ) { navBackStackEntry ->
                 val noteId = navBackStackEntry.arguments?.getLong("noteId")
 
-                val clipBoardManager = remember { ClipBoardManager(context) }
-
                 val noteTextSize by appDataStoreViewModel.noteTextSize.collectAsState()
                 val textWrapState by appDataStoreViewModel.textWrapMode.collectAsState()
 
@@ -66,10 +60,9 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
                     navigator = navigator,
                     currentFontSize = noteTextSize,
                     updateCurrentFontSize = appDataStoreViewModel::saveNoteTextSize,
-                    clipBoardManager = clipBoardManager,
                     textWrapState = textWrapState,
                     updateTextWrapStateMethod = appDataStoreViewModel::saveTextWrapState,
-                    noteId = noteId,
+                    noteId = noteId
                 )
             }
 

@@ -69,7 +69,9 @@ fun NoteUiEditScreen(
     val currentNote by noteViewModel.currentNote.collectAsState()
 
     LaunchedEffect(Unit) {
-        noteViewModel.selectNote(noteId)
+        noteId?.let {
+            noteViewModel.selectNote(it)
+        }
     }
 
     LaunchedEffect(currentNote) {
