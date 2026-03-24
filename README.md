@@ -1,4 +1,4 @@
-# Notepad
+<h1 align="center">Notepad</h1>
 
 ![Compose BOM](https://img.shields.io/badge/Compose%20Bom-2026.03.00-blue)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-purple)
