@@ -9,6 +9,6 @@ data class NoteEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo(name = "note_name") val name: String,
     @ColumnInfo(name = "note_content") val content: String,
-    @ColumnInfo(name = "note_creation_datetime") val dateTime: String,
-    @ColumnInfo(name = "note_last_edit_datetime") val lastEditDateTime: String? = null,
+    @ColumnInfo(name = "note_creation_datetime") val dateTime: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "note_last_edit_datetime") val lastEditDateTime: Long? = null,
 )

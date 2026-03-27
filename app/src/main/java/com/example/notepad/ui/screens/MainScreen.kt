@@ -58,6 +58,7 @@ import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.NoteViewModel
 import com.example.notepad.utils.AppManager
+import com.example.notepad.utils.DateTimeFormatter
 
 /**
  * Creates a main app screen.
@@ -74,6 +75,7 @@ fun MainUiScreen(
     val context = LocalContext.current
     val activity = LocalActivity.current
 
+    val dateTimeFormatter = remember { DateTimeFormatter() }
     val appManager = remember { AppManager(activity) }
 
     var deleteAllNotesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
@@ -83,6 +85,23 @@ fun MainUiScreen(
 
     val notesList by noteViewModel.noteList.collectAsState()
     val isNotesLoadingState by noteViewModel.isNotesLoadingState.collectAsState()
+
+    /**
+     * Configures intent for send note text.
+     * @return intent object.
+     */
+    val sendNoteIntent: (String) -> Intent = remember {
+        { textToSend ->
+            Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    textToSend
+                )
+                type = "text/plain"
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -227,8 +246,8 @@ fun MainUiScreen(
                                             navigator.navigateTo("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
                                         },
                                         noteName = note.name,
-                                        noteDatetimeCreation = note.dateTime,
-                                        noteLastEditDatetime = note.lastEditDateTime,
+                                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
+                                        noteLastEditDatetime = note.lastEditDateTime?.let { dateTimeFormatter.formatDatetimeNow(it) },
                                         onEdit = {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
                                             navigator.navigateTo("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
@@ -239,17 +258,7 @@ fun MainUiScreen(
                                         },
                                         onShare = {
                                             // configure send intent
-                                            val sendIntent = Intent().apply {
-                                                action = Intent.ACTION_SEND
-                                                putExtra(
-                                                    Intent.EXTRA_TEXT,
-                                                    note.name + "\n" +
-                                                            note.dateTime + "\n\n" +
-                                                            note.content
-                                                )
-                                                type = "text/plain"
-                                            }
-
+                                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
                                             // create chooser
                                             val shareIntent = Intent.createChooser(sendIntent, null)
                                             context.startActivity(shareIntent)
@@ -284,8 +293,8 @@ fun MainUiScreen(
                                             navigator.navigateTo("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
                                         },
                                         noteName = note.name,
-                                        noteDatetimeCreation = note.dateTime,
-                                        noteLastEditDatetime = note.lastEditDateTime,
+                                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
+                                        noteLastEditDatetime = note.lastEditDateTime?.let { dateTimeFormatter.formatDatetimeNow(it) },
                                         onEdit = {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
                                             navigator.navigateTo("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
@@ -296,17 +305,7 @@ fun MainUiScreen(
                                         },
                                         onShare = {
                                             // configure send intent
-                                            val sendIntent = Intent().apply {
-                                                action = Intent.ACTION_SEND
-                                                putExtra(
-                                                    Intent.EXTRA_TEXT,
-                                                    note.name + "\n" +
-                                                            note.dateTime + "\n\n" +
-                                                            note.content
-                                                )
-                                                type = "text/plain"
-                                            }
-
+                                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
                                             // create chooser
                                             val shareIntent = Intent.createChooser(sendIntent, null)
                                             context.startActivity(shareIntent)

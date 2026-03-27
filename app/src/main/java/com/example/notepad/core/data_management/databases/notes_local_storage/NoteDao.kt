@@ -26,7 +26,7 @@ interface NoteDao {
     suspend fun updateNote(
         name: String,
         content: String,
-        lastEditDateTime: String,
+        lastEditDateTime: Long,
         id: Long,
     )
 

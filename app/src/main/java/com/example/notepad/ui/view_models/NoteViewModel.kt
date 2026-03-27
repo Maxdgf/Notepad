@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
-import com.example.notepad.utils.DateTimePicker
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,8 +24,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
-    private val savedStateHandle: SavedStateHandle,
-    private val dateTimePicker: DateTimePicker
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     companion object {
         private const val CURRENT_NOTE_KEY = "current_note"
@@ -75,7 +73,7 @@ class NoteViewModel @Inject constructor(
                 NoteEntity(
                     name = name,
                     content = content,
-                    dateTime = dateTimePicker.pickDateTimeNow(),
+                    dateTime = System.currentTimeMillis(),
                 )
             )
         }
@@ -96,7 +94,7 @@ class NoteViewModel @Inject constructor(
             noteRepository.editNote(
                 name,
                 content,
-                dateTimePicker.pickDateTimeNow(),
+                System.currentTimeMillis(),
                 id
             )
         }

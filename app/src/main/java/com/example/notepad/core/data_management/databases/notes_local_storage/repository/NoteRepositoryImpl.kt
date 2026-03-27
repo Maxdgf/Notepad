@@ -17,7 +17,7 @@ class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : Not
     override suspend fun editNote(
         name: String,
         content: String,
-        lastEditDateTime: String,
+        lastEditDateTime: Long,
         id: Long
     ) = noteDao.updateNote(name, content, lastEditDateTime, id)
 

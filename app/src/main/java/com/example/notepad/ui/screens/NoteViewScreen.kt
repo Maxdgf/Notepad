@@ -51,6 +51,7 @@ import com.example.notepad.ui.navigation.NavigationRoutes
 import com.example.notepad.ui.navigation.Navigator
 import com.example.notepad.ui.view_models.NoteViewModel
 import com.example.notepad.utils.ClipBoardManager
+import com.example.notepad.utils.DateTimeFormatter
 
 /**Creates a note view app screen.*/
 @Composable
@@ -66,6 +67,7 @@ fun NoteUiViewScreen(
     val context = LocalContext.current
 
     val clipBoardManager = remember { ClipBoardManager(context) }
+    val dateTimeFormatter = remember { DateTimeFormatter() }
     val noteViewVerticalScrollState = rememberScrollState()
 
     var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
@@ -94,7 +96,7 @@ fun NoteUiViewScreen(
 
                             Row {
                                 Text(
-                                    text = it.dateTime,
+                                    text = dateTimeFormatter.formatDatetimeNow(it.dateTime),
                                     fontWeight = FontWeight.Light,
                                     modifier = Modifier.basicMarquee(Int.MAX_VALUE),
                                     fontSize = 10.sp

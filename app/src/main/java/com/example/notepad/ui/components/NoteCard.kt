@@ -44,7 +44,7 @@ fun NoteUiCard(
     onShare: () -> Unit,
     noteName: String,
     noteDatetimeCreation: String,
-    noteLastEditDatetime: String?
+    noteLastEditDatetime: String? = null
 ) {
     Card(
         modifier = Modifier
