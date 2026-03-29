@@ -7,44 +7,80 @@
 **Notepad** a simple and minimalistic android app📱 for notes📃
 Based on *Room* and *Jetpack Compose*.
 
-## 🖼️Gallery (light and dark themes)
+## 🖼️Gallery
+#### Screenshots in ☀️light/🌙dark themes
 <table>
     <tr>
         <td>
             <img src="previews/preview (1).jpg">
+            <p align="center">1</p>
         </td>
         <td>
             <img src="previews/preview (2).jpg">
+            <p align="center">2</p>
         </td>
         <td>
             <img src="previews/preview (4).jpg">
+            <p align="center">3</p>
         </td>
         <td>
             <img src="previews/preview (5).jpg">
+            <p align="center">4</p>
         </td>
     </tr>
 </table>
 
+#### 📃Descriptions for screenshots
+<table>
+    <tr>
+        <td>1</td>
+        <td>
+            Main screen, list of all notes in grid view, light theme
+        </td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>
+            Main screen, list of all notes, dark theme
+        </td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>
+            Note viewing screen, light theme
+        </td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>
+            Note viewing screen with enabled resize note text size dialog, light theme
+        </td>
+    </tr>
+</table>
+
+## 🔃Android Versions
+Android **8.0** and later
+
 ## 🦾Possibilities
+#### 👉Here you can:
 * creating a note
 * deleting a note
 * editing a note
 * deleting all notes
+* sharing a note
 
 ## 🌟Features
 * grid notes list mode
 * note last edit time view
 * edit note text size
+* enable/disable note text wrap mode
 
-## 📚Tech stack:
-* Dagger-Hilt
-* Room
-* Ksp
-* Viewmodel
-* data store
-
-## 🔃Android Versions
-Android **8.0** and later
+## 📚Tech stack
+* **Dagger-Hilt** - dependency injection
+* **Room** - store all notes in database (*repository pattern* with dependency injection)
+* **Ksp** - Room and Dagger-Hilt implementation
+* **Viewmodel** - store and update states
+* **Data store** - store app settings parameters (*repository pattern* with dependency injection)
 
 ## 📖How to use?
-The functionality is fairly standard and straightforward. The plus button at the bottom creates a new note. A single tap on a note will view it, and a long press will bring up a menu with options for editing or deleting it. You can also delete all notes, and there are also mini settings where you can change the notes list display mode to grid.
+App functionality is simple and easy. The plus button at the bottom creates a new note. A single tap on a note will view it, and a long press will bring up a menu with options for editing or deleting it. You can also delete all notes, and there are also mini settings where you can change the notes list display mode to grid.
