@@ -2,7 +2,6 @@ package com.example.notepad.ui.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notepad.app_data_store.repository.AppDataStoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -10,9 +9,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.example.notepad.app_data_store.repository.AppDataStoreRepository
+
 @HiltViewModel
 class AppDataStoreViewModel @Inject constructor(private val appDataStoreRepository: AppDataStoreRepository) : ViewModel() {
-    val state = appDataStoreRepository.getGridEnabledState().stateIn(
+    val notesGridEnabledMode = appDataStoreRepository.getGridEnabledState().stateIn(
         viewModelScope,
         SharingStarted.Lazily,
         false
@@ -30,7 +31,7 @@ class AppDataStoreViewModel @Inject constructor(private val appDataStoreReposito
         false
     )
 
-    fun saveState(state: Boolean) {
+    fun saveNotesGridEnabledState(state: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             appDataStoreRepository.saveGridEnabledState(state)
         }

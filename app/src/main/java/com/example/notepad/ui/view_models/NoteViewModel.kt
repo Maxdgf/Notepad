@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(

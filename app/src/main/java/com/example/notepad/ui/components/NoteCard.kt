@@ -59,7 +59,11 @@ fun NoteUiCard(
                 .fillMaxSize()
                 .padding(5.dp)
         ) {
-            Column(modifier = Modifier.fillMaxHeight()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+            ) {
                 Text(
                     text = noteName,
                     fontWeight = FontWeight.Bold,
@@ -109,8 +113,6 @@ fun NoteUiCard(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
 
             Column {
                 IconButton(onClick = { onEdit() }) {

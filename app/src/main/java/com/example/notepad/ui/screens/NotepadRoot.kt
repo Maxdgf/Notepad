@@ -24,7 +24,7 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
     val navController = rememberNavController()
     val navigator = remember { Navigator(navController) }
 
-    val isGridEnabledState by appDataStoreViewModel.state.collectAsState()
+    val isGridEnabledState by appDataStoreViewModel.notesGridEnabledMode.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -85,7 +85,7 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
             composable(route = NavigationRoutes.NoteSettingsScreen.route) {
                 SettingsUiScreen(
                     isGridEnabledState = isGridEnabledState,
-                    updateIsGridEnabledStateMethod = appDataStoreViewModel::saveState,
+                    updateIsGridEnabledStateMethod = appDataStoreViewModel::saveNotesGridEnabledState,
                     navigator = navigator,
                 )
             }
