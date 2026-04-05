@@ -1,28 +1,32 @@
 package com.example.notepad.ui.screens
 
+import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FabPosition
@@ -30,7 +34,6 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,33 +46,205 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 import com.example.notepad.R
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.ui.components.SimpleFloatingUiIconButton
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
+import com.example.notepad.ui.components.LoadingUiBlock
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.components.NoteUiCard
-import com.example.notepad.ui.components.ScrollableUiItemsList
-import com.example.notepad.ui.navigation.NavigationRoutes
-import com.example.notepad.ui.navigation.Navigator
+import com.example.notepad.ui.screens.navigation.NavigationRoutes
+import com.example.notepad.ui.states.NotesListResult
 import com.example.notepad.ui.view_models.NoteViewModel
 import com.example.notepad.utils.AppManager
 import com.example.notepad.utils.DateTimeFormatter
 
+@Composable
+private fun ScrollableNoteItemsList(
+    modifier: Modifier = Modifier,
+    context: Context,
+    isGridEnabled: Boolean,
+    isDisplayOrderNumEnabledState: Boolean,
+    isAlternatingNoteColorsEnabledState: Boolean,
+    allNotes: List<NoteEntity>,
+    onPerformHaptic: (HapticFeedbackType) -> Unit,
+    onNavigate: (String) -> Unit,
+    onFormatTimeMillis: (Long) -> String,
+    onDeleteNoteById: (Long) -> Unit
+) {
+    // check notes list(is empty or not)
+    if (allNotes.isNotEmpty()) {
+        var deleteNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+        var selectedNoteIdToEdit: Long? by rememberSaveable { mutableStateOf(null) }
+
+        /**
+         * Configures intent for send note text.
+         * @return intent object.
+         */
+        val sendNoteIntent: (String) -> Intent = remember {
+            { textToSend ->
+                Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        textToSend
+                    )
+                    type = "text/plain"
+                }
+            }
+        }
+
+        if (isGridEnabled) {
+            // grid list
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), // 2 cells
+                modifier = modifier,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                itemsIndexed(
+                    items = allNotes,
+                    key = { index, note -> note.id }
+                ) { index, note ->
+                    val column = index % 2 // find column num by formula: k % C
+                    val row = index / 2 // find row num by formula: k / C
+                    val isNoteCardDark = (column + row) % 2 == 0 // is sum even state
+
+                    NoteUiCard(
+                        onClick = {
+                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                            onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
+                        },
+                        noteName = note.name,
+                        noteOrderNum = if (isDisplayOrderNumEnabledState) index + 1 else null,
+                        noteDatetimeCreation = onFormatTimeMillis(note.dateTime),
+                        noteLastEditDatetime = note.lastEditDateTime?.let { onFormatTimeMillis(it) },
+                        onEdit = {
+                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                            onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
+                        },
+                        onDelete = {
+                            selectedNoteIdToEdit = note.id
+                            deleteNoteAlertMessageDialogState = true
+                        },
+                        onShare = {
+                            // configure send intent
+                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
+                            // create chooser
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        },
+                        useBrightBg =
+                            if (isAlternatingNoteColorsEnabledState)
+                                if (isNoteCardDark) false // dark bg
+                                else true // light bg
+                            else false
+                    )
+                }
+            }
+        } else {
+            // normal list
+            LazyColumn(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                itemsIndexed(
+                    items = allNotes,
+                    key = { index, note -> note.id }
+                ) { index, note ->
+                    NoteUiCard(
+                        onClick = {
+                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                            onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
+                        },
+                        noteName = note.name,
+                        noteOrderNum = if (isDisplayOrderNumEnabledState) index + 1 else null,
+                        noteDatetimeCreation = onFormatTimeMillis(note.dateTime),
+                        noteLastEditDatetime = note.lastEditDateTime?.let { onFormatTimeMillis(it) },
+                        onEdit = {
+                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                            onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
+                        },
+                        onDelete = {
+                            selectedNoteIdToEdit = note.id
+                            deleteNoteAlertMessageDialogState = true
+                        },
+                        onShare = {
+                            // configure send intent
+                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
+                            // create chooser
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        },
+                        useBrightBg =
+                            if (isAlternatingNoteColorsEnabledState)
+                                // check is index even
+                                if ((index + 1) % 2 == 0) true // light bg
+                                else false // dark bg
+                            else false
+                    )
+                }
+            }
+        }
+
+        AlertUiMessageDialog(
+            onDismissRequestFunction = { deleteNoteAlertMessageDialogState = false },
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = Color.White,
+            state = deleteNoteAlertMessageDialogState,
+            titleIcon = painterResource(R.drawable.outline_warning_amber_24),
+            titleText = "Warning"
+        ) {
+            Text(text = "Are you sure you want to delete this note?")
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { deleteNoteAlertMessageDialogState = false },
+                    modifier = Modifier.weight(0.5f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                ) { Text(text = "Cancel") }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Button(
+                    onClick = {
+                        deleteNoteAlertMessageDialogState = false
+
+                        selectedNoteIdToEdit?.let { id ->
+                            onDeleteNoteById(id)
+                        }
+                    },
+                    modifier = Modifier.weight(0.5f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+                ) { Text(text = "Delete") }
+            }
+        }
+    } else {
+        NoDataUiDescriptionBlock(
+            description = "No notes :(",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
 /**
  * Creates a main app screen.
- * @param navigator navigation utility.
  * @param isGridEnabledState notes grid enabled state.
  */
 @Composable
 fun MainUiScreen(
-    navigator: Navigator,
+    onNavigateTo: (String) -> Unit,
     isGridEnabledState: Boolean,
-    noteViewModel: NoteViewModel = hiltViewModel()
+    isDisplayOrderNumEnabledState: Boolean,
+    isAlternatingNoteColorsEnabledState: Boolean,
+    notesList: NotesListResult,
+    onDeleteAllNotes: () -> Unit,
+    onDeleteNoteById: (Long) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -79,35 +254,14 @@ fun MainUiScreen(
     val appManager = remember { AppManager(activity) }
 
     var deleteAllNotesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
-    var deleteNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
-    var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
-    var selectedNoteIdToEdit: Long? by rememberSaveable { mutableStateOf(null) }
-
-    val notesList by noteViewModel.noteList.collectAsState()
-    val isNotesLoadingState by noteViewModel.isNotesLoadingState.collectAsState()
-
-    /**
-     * Configures intent for send note text.
-     * @return intent object.
-     */
-    val sendNoteIntent: (String) -> Intent = remember {
-        { textToSend ->
-            Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(
-                    Intent.EXTRA_TEXT,
-                    textToSend
-                )
-                type = "text/plain"
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
             TopUiBar(
                 titleContent = { Text(text = "Notepad") },
                 barActionElements = {
+                    var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
+
                     // dropdown menu
                     Box {
                         IconButton(onClick = { dropdownMenuState = true }) {
@@ -124,7 +278,7 @@ fun MainUiScreen(
                             DropdownMenuItem(
                                 onClick = {
                                     dropdownMenuState = false // hide menu
-                                    navigator.navigateTo(NavigationRoutes.NoteSettingsScreen.route)
+                                    onNavigateTo(NavigationRoutes.NoteSettingsScreen.route)
                                 },
                                 text = {
                                     Row(
@@ -189,7 +343,7 @@ fun MainUiScreen(
             SimpleFloatingUiIconButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    navigator.navigateTo(NavigationRoutes.NoteCreationScreen.route)
+                    onNavigateTo(NavigationRoutes.NoteCreationScreen.route)
                 },
                 icon = painterResource(R.drawable.outline_add_24),
                 buttonShape = FloatingActionButtonDefaults.shape,
@@ -204,122 +358,31 @@ fun MainUiScreen(
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
-                if (isNotesLoadingState) {
-                    Row {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterVertically))
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            text = "Loading...",
-                            modifier = Modifier.align(Alignment.CenterVertically)
-                        )
-                    }
-                } else {
-                    // check notes list is not empty
-                    if (notesList.isNotEmpty())
-                        ScrollableUiItemsList(
+                // match notes list state
+                when (val notesListState = notesList) {
+                    is NotesListResult.SuccessfullyLoaded ->
+                        ScrollableNoteItemsList(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(horizontal = 5.dp),
+                            context = context,
                             isGridEnabled = isGridEnabledState,
-                            scrollableContent = {
-                                item {
-                                    Text(
-                                        text = "notes count: ${notesList.size}", //test
-                                        fontSize = 20.sp,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-
-                                    HorizontalDivider(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-
-                                items(
-                                    items = notesList,
-                                    key = { note -> note.id }
-                                ) { note ->
-                                    NoteUiCard(
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
-                                            navigator.navigateTo("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
-                                        },
-                                        noteName = note.name,
-                                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
-                                        noteLastEditDatetime = note.lastEditDateTime?.let { dateTimeFormatter.formatDatetimeNow(it) },
-                                        onEdit = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
-                                            navigator.navigateTo("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
-                                        },
-                                        onDelete = {
-                                            selectedNoteIdToEdit = note.id
-                                            deleteNoteAlertMessageDialogState = true
-                                        },
-                                        onShare = {
-                                            // configure send intent
-                                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
-                                            // create chooser
-                                            val shareIntent = Intent.createChooser(sendIntent, null)
-                                            context.startActivity(shareIntent)
-                                        }
-                                    )
-                                }
-                            },
-                            scrollableGridContent = {
-                                item(span = { GridItemSpan(2) }) {
-                                    Column(modifier = Modifier.fillMaxSize()) {
-                                        Text(
-                                            text = "notes count: ${notesList.size}", //test
-                                            fontSize = 20.sp,
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-
-                                        HorizontalDivider(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-
-                                items(
-                                    items = notesList,
-                                    key = { note -> note.id }
-                                ) { note ->
-                                    NoteUiCard(
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            navigator.navigateTo("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
-                                        },
-                                        noteName = note.name,
-                                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
-                                        noteLastEditDatetime = note.lastEditDateTime?.let { dateTimeFormatter.formatDatetimeNow(it) },
-                                        onEdit = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
-                                            navigator.navigateTo("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
-                                        },
-                                        onDelete = {
-                                            selectedNoteIdToEdit = note.id
-                                            deleteNoteAlertMessageDialogState = true
-                                        },
-                                        onShare = {
-                                            // configure send intent
-                                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
-                                            // create chooser
-                                            val shareIntent = Intent.createChooser(sendIntent, null)
-                                            context.startActivity(shareIntent)
-                                        }
-                                    )
-                                }
-                            }
+                            allNotes = notesListState.noteList,
+                            onPerformHaptic = haptic::performHapticFeedback,
+                            onNavigate = onNavigateTo,
+                            onFormatTimeMillis = dateTimeFormatter::formatDatetimeNow,
+                            isDisplayOrderNumEnabledState = isDisplayOrderNumEnabledState,
+                            isAlternatingNoteColorsEnabledState = isAlternatingNoteColorsEnabledState,
+                            onDeleteNoteById = onDeleteNoteById
                         )
-                    else
-                        // show no-data description
+                    is NotesListResult.LoadedWithException ->
                         NoDataUiDescriptionBlock(
-                            description = "No notes :(",
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            description = notesListState.message
                         )
+                    NotesListResult.Loading -> LoadingUiBlock() // show loading block
                 }
             }
 
@@ -346,42 +409,7 @@ fun MainUiScreen(
                     Button(
                         onClick = {
                             deleteAllNotesAlertMessageDialogState = false
-                            noteViewModel.deleteAllNotes()
-                        },
-                        modifier = Modifier.weight(0.5f),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                    ) { Text(text = "Delete") }
-                }
-            }
-
-            AlertUiMessageDialog(
-                onDismissRequestFunction = { deleteNoteAlertMessageDialogState = false },
-                containerColor = MaterialTheme.colorScheme.error,
-                contentColor = Color.White,
-                state = deleteNoteAlertMessageDialogState,
-                titleIcon = painterResource(R.drawable.outline_warning_amber_24),
-                titleText = "Warning"
-            ) {
-                Text(text = "Are you sure you want to delete this note?")
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Button(
-                        onClick = { deleteNoteAlertMessageDialogState = false },
-                        modifier = Modifier.weight(0.5f),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                    ) { Text(text = "Cancel") }
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Button(
-                        onClick = {
-                            deleteNoteAlertMessageDialogState = false
-
-                            selectedNoteIdToEdit?.let { id ->
-                                noteViewModel.deleteNote(id)
-                            }
+                            onDeleteAllNotes() // delete all notes
                         },
                         modifier = Modifier.weight(0.5f),
                         shape = RoundedCornerShape(10.dp),

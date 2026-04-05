@@ -9,4 +9,8 @@ interface AppDataStoreRepository {
     fun getNoteTextSize(): Flow<Int>
     suspend fun saveTextWrapState(state: Boolean)
     fun getTextWrapState(): Flow<Boolean>
+    suspend fun saveOrderNumState(state: Boolean)
+    fun getOrderNumState(): Flow<Boolean>
+    suspend fun saveAlternatingNoteColorsState(state: Boolean)
+    fun getAlternatingNoteColorsState(): Flow<Boolean>
 }

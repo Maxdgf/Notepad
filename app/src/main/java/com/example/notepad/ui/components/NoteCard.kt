@@ -3,6 +3,7 @@ package com.example.notepad.ui.components
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,11 +14,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -25,6 +29,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import com.example.notepad.R
 
 /**
@@ -43,97 +48,119 @@ fun NoteUiCard(
     onDelete: () -> Unit,
     onShare: () -> Unit,
     noteName: String,
+    noteOrderNum: Int?,
+    useBrightBg: Boolean,
     noteDatetimeCreation: String,
-    noteLastEditDatetime: String? = null
+    noteLastEditDatetime: String?
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
-            .clickable(
-                onClick = { onClick() }
-            )
+            .height(150.dp),
+        colors = CardDefaults.cardColors(
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            containerColor =
+                if (useBrightBg) MaterialTheme.colorScheme.surfaceContainerHighest
+                else MaterialTheme.colorScheme.surfaceContainer
+        )
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(5.dp)
+                .clickable(onClick = { onClick() })
         ) {
-            Column(
+            Row(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
+                    .fillMaxSize()
+                    .padding(5.dp)
             ) {
-                Text(
-                    text = noteName,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.basicMarquee(Int.MAX_VALUE)
-                )
 
-                Text(
-                    text = noteDatetimeCreation,
-                    fontWeight = FontWeight.Light,
-                    fontSize = 10.sp,
-                    modifier = Modifier.basicMarquee(Int.MAX_VALUE)
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                ) {
+                    Text(
+                        text = noteName,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                    )
 
-                noteLastEditDatetime?.let { dateTime ->
-                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = noteDatetimeCreation,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 10.sp,
+                        modifier = Modifier.basicMarquee(Int.MAX_VALUE)
+                    )
 
-                    Column {
-                        Row {
-                            Icon(
-                                painter = painterResource(R.drawable.outline_edit_24),
-                                contentDescription = null
+                    noteLastEditDatetime?.let { dateTime ->
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Column {
+                            Row {
+                                Icon(
+                                    painter = painterResource(R.drawable.outline_edit_24),
+                                    contentDescription = null
+                                )
+
+                                Text(
+                                    text = "last edit",
+                                    fontStyle = FontStyle.Italic,
+                                    fontSize = 10.sp,
+                                    modifier = Modifier
+                                        .padding(start = 3.dp)
+                                        .basicMarquee(Int.MAX_VALUE)
+                                )
+                            }
+
+                            HorizontalDivider(
+                                modifier = Modifier.width(130.dp),
+                                color = if (isSystemInDarkTheme()) Color.White else Color.Black
                             )
 
                             Text(
-                                text = "last edit",
-                                fontStyle = FontStyle.Italic,
+                                text = dateTime,
+                                fontWeight = FontWeight.Light,
                                 fontSize = 10.sp,
                                 modifier = Modifier
-                                    .padding(start = 3.dp)
+                                    .padding(start = 5.dp)
                                     .basicMarquee(Int.MAX_VALUE)
                             )
                         }
+                    }
 
-                        HorizontalDivider(
-                            modifier = Modifier.width(130.dp),
-                            color = if (isSystemInDarkTheme()) Color.White else Color.Black
-                        )
+                    Spacer(modifier = Modifier.weight(1f))
 
+                    noteOrderNum?.let {
                         Text(
-                            text = dateTime,
+                            text = it.toString(),
                             fontWeight = FontWeight.Light,
-                            fontSize = 10.sp,
-                            modifier = Modifier
-                                .padding(start = 5.dp)
-                                .basicMarquee(Int.MAX_VALUE)
+                            fontSize = 10.sp
                         )
                     }
                 }
-            }
 
-            Column {
-                IconButton(onClick = { onEdit() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_edit_24),
-                        contentDescription = null
-                    )
-                }
+                Column {
+                    IconButton(onClick = { onEdit() }) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_edit_24),
+                            contentDescription = null
+                        )
+                    }
 
-                IconButton(onClick = { onDelete() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.baseline_delete_24),
-                        contentDescription = null
-                    )
-                }
+                    IconButton(onClick = { onDelete() }) {
+                        Icon(
+                            painter = painterResource(R.drawable.baseline_delete_24),
+                            contentDescription = null
+                        )
+                    }
 
-                IconButton(onClick = { onShare() }) {
-                    Icon(
-                        painter = painterResource(R.drawable.outline_share_24),
-                        contentDescription = null
-                    )
+                    IconButton(onClick = { onShare() }) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_share_24),
+                            contentDescription = null
+                        )
+                    }
                 }
             }
         }

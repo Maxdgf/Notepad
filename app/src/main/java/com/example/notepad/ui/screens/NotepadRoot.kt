@@ -14,17 +14,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
-import com.example.notepad.ui.navigation.NavigationRoutes
-import com.example.notepad.ui.navigation.Navigator
+import com.example.notepad.ui.screens.navigation.NavigationRoutes
+import com.example.notepad.ui.screens.navigation.Navigator
 import com.example.notepad.ui.view_models.AppDataStoreViewModel
+import com.example.notepad.ui.view_models.NoteViewModel
 
 /**Main screen root.*/
 @Composable
-fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()) {
+fun MainUiNotePad(
+    noteViewModel: NoteViewModel = hiltViewModel(),
+    appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel(),
+) {
     val navController = rememberNavController()
     val navigator = remember { Navigator(navController) }
 
+    val allNotesList by noteViewModel.noteList.collectAsState()
+
     val isGridEnabledState by appDataStoreViewModel.notesGridEnabledMode.collectAsState()
+    val isOrderNumEnabledState by appDataStoreViewModel.orderNumEnabledState.collectAsState()
+    val isAlternatingNoteColorsEnabledState by appDataStoreViewModel.alternatingNoteColorsEnabledState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -34,14 +42,22 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
             // main screen
             composable(route = NavigationRoutes.MainScreen.route) {
                 MainUiScreen(
-                    navigator = navigator,
-                    isGridEnabledState = isGridEnabledState
+                    onNavigateTo = navigator::navigateTo,
+                    isGridEnabledState = isGridEnabledState,
+                    notesList = allNotesList,
+                    onDeleteAllNotes = noteViewModel::deleteAllNotes,
+                    isDisplayOrderNumEnabledState = isOrderNumEnabledState,
+                    isAlternatingNoteColorsEnabledState = isAlternatingNoteColorsEnabledState,
+                    onDeleteNoteById = noteViewModel::deleteNote
                 )
             }
 
             // note creation screen
             composable(route = NavigationRoutes.NoteCreationScreen.route) {
-                NoteUiCreationScreen(navigator = navigator,)
+                NoteUiCreationScreen(
+                    onNavigateTo = navigator::navigateTo,
+                    onAddNote = noteViewModel::addNote
+                )
             }
 
             // note view screen
@@ -57,7 +73,7 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
                 val textWrapState by appDataStoreViewModel.textWrapMode.collectAsState()
 
                 NoteUiViewScreen(
-                    navigator = navigator,
+                    onNavigateTo = navigator::navigateTo,
                     currentFontSize = noteTextSize,
                     updateCurrentFontSize = appDataStoreViewModel::saveNoteTextSize,
                     textWrapState = textWrapState,
@@ -76,8 +92,8 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
                 val noteId = navBackStackEntry.arguments?.getLong("noteId")
 
                 NoteUiEditScreen(
-                    navigator = navigator,
-                    noteId = noteId
+                    noteId = noteId,
+                    onNavigateTo = navigator::navigateTo
                 )
             }
 
@@ -86,7 +102,11 @@ fun MainUiNotePad(appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
                 SettingsUiScreen(
                     isGridEnabledState = isGridEnabledState,
                     updateIsGridEnabledStateMethod = appDataStoreViewModel::saveNotesGridEnabledState,
-                    navigator = navigator,
+                    onNavigateTo = navigator::navigateTo,
+                    isDisplayOrderNumEnabledState = isOrderNumEnabledState,
+                    updateIsDisplayOrderNumEnabledStateMethod = appDataStoreViewModel::saveOrderNumEnabledState,
+                    isAlternatingNoteColorsEnabledState = isAlternatingNoteColorsEnabledState,
+                    updateIsAlternatingNoteColorsEnabledState = appDataStoreViewModel::saveAlternatingNoteColorsState
                 )
             }
         }

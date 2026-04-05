@@ -1,4 +1,4 @@
-package com.example.notepad.ui.navigation
+package com.example.notepad.ui.screens.navigation
 
 // navigation routes
 sealed class NavigationRoutes(val route: String) {

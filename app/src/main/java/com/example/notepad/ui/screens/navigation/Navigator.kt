@@ -1,4 +1,4 @@
-package com.example.notepad.ui.navigation
+package com.example.notepad.ui.screens.navigation
 
 import androidx.navigation.NavController
 

@@ -2,6 +2,7 @@ package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,24 +38,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 import com.example.notepad.R
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
-import com.example.notepad.ui.navigation.NavigationRoutes
-import com.example.notepad.ui.navigation.Navigator
-import com.example.notepad.ui.view_models.NoteViewModel
+import com.example.notepad.ui.screens.navigation.NavigationRoutes
 
 /**
  * Creates a note creation app screen.
- * @param navigator navigation utility.
  */
 @Composable
 fun NoteUiCreationScreen(
-    navigator: Navigator,
-    noteViewModel: NoteViewModel = hiltViewModel()
+    onNavigateTo: (String) -> Unit,
+    onAddNote: (String, String) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
     val noteContentInputFieldVerticalScrollState = rememberScrollState()
@@ -72,39 +69,10 @@ fun NoteUiCreationScreen(
         topBar = {
             TopUiBar(
                 titleContent = {
-                    Row {
-                        OutlinedTextField(
-                            maxLines = 1,
-                            modifier = Modifier.fillMaxWidth(),
-                            value = noteNameState,
-                            onValueChange = { newValue -> noteNameState = newValue },
-                            trailingIcon = {
-                                IconButton(onClick = { noteNameState = "" }) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.baseline_clear_24),
-                                        contentDescription = null
-                                    )
-                                }
-                            },
-                            textStyle = TextStyle(fontSize = 15.sp),
-                            placeholder = {
-                                Text(
-                                    text = "Enter your note name here...",
-                                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                    fontSize = 15.sp
-                                )
-                            },
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                                cursorColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        )
-                    }
+                    Text(text = "Create new note")
                 },
                 barIcon = {
-                    IconButton(onClick = { navigator.navigateTo(NavigationRoutes.MainScreen.route) }) {
+                    IconButton(onClick = { onNavigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_arrow_back_24),
                             contentDescription = null
@@ -119,7 +87,44 @@ fun NoteUiCreationScreen(
                     .padding(innerPadding)
                     .imePadding()
                     .fillMaxSize()
+                    .padding(
+                        top = 5.dp,
+                        start = 5.dp,
+                        end = 5.dp
+                    ),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
+                OutlinedTextField(
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth(),
+                    value = noteNameState,
+                    onValueChange = { newValue -> noteNameState = newValue },
+                    trailingIcon = {
+                        IconButton(onClick = { noteNameState = "" }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_clear_24),
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    textStyle = TextStyle(fontSize = 15.sp),
+                    placeholder = {
+                        Text(
+                            text = "Enter your note name here...",
+                            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                            fontSize = 15.sp
+                        )
+                    },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                        cursorColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+
+                HorizontalDivider()
+
                 BasicTextField(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -149,13 +154,9 @@ fun NoteUiCreationScreen(
                             errorOfEmptyNoteAlertMessageDialogState = true
                         } else {
                             // add note to database
-                            noteViewModel.addNote(
-                                name = noteNameState,
-                                content = noteContentState,
-                            )
-
+                            onAddNote(noteNameState, noteContentState)
                             // navigate to main screen
-                            navigator.navigateTo(NavigationRoutes.MainScreen.route)
+                            onNavigateTo(NavigationRoutes.MainScreen.route)
                         }
                     },
                     modifier = Modifier

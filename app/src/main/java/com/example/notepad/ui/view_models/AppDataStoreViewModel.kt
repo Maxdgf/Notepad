@@ -1,5 +1,6 @@
 package com.example.notepad.ui.view_models
 
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,21 +32,40 @@ class AppDataStoreViewModel @Inject constructor(private val appDataStoreReposito
         false
     )
 
-    fun saveNotesGridEnabledState(state: Boolean) {
+    val orderNumEnabledState = appDataStoreRepository.getOrderNumState().stateIn(
+        viewModelScope,
+        SharingStarted.Lazily,
+        false
+    )
+
+    val alternatingNoteColorsEnabledState = appDataStoreRepository.getAlternatingNoteColorsState().stateIn(
+        viewModelScope,
+        SharingStarted.Lazily,
+        false
+    )
+
+    fun saveNotesGridEnabledState(state: Boolean) =
         viewModelScope.launch(Dispatchers.IO) {
             appDataStoreRepository.saveGridEnabledState(state)
         }
-    }
 
-    fun saveNoteTextSize(size: Int) {
+    fun saveNoteTextSize(size: Int) =
         viewModelScope.launch(Dispatchers.IO) {
             appDataStoreRepository.saveNoteTextSize(size)
         }
-    }
 
-    fun saveTextWrapState(state: Boolean) {
+    fun saveTextWrapState(state: Boolean) =
         viewModelScope.launch(Dispatchers.IO) {
             appDataStoreRepository.saveTextWrapState(state)
         }
-    }
+
+    fun saveOrderNumEnabledState(state: Boolean) =
+        viewModelScope.launch(Dispatchers.IO) {
+            appDataStoreRepository.saveOrderNumState(state)
+        }
+
+    fun saveAlternatingNoteColorsState(state: Boolean) =
+        viewModelScope.launch(Dispatchers.IO) {
+            appDataStoreRepository.saveAlternatingNoteColorsState(state)
+        }
 }

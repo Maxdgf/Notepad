@@ -22,7 +22,17 @@ interface NoteDao {
     @Query("DELETE FROM notes_storage WHERE id = :id")
     suspend fun deleteNote(id: Long)
 
-    @Query("UPDATE notes_storage SET note_name = :name, note_content = :content, note_last_edit_datetime = :lastEditDateTime WHERE id = :id")
+    @Query(
+        """
+        UPDATE notes_storage 
+        SET 
+            note_name = :name, 
+            note_content = :content, 
+            note_last_edit_datetime = :lastEditDateTime 
+        WHERE 
+            id = :id
+        """
+    )
     suspend fun updateNote(
         name: String,
         content: String,

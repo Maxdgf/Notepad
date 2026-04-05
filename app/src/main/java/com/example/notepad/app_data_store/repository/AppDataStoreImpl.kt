@@ -13,9 +13,14 @@ val Context.dataStore by preferencesDataStore(name = "Notepad_preferences")
 
 class AppDataStoreImpl @Inject constructor(private val context: Context) : AppDataStoreRepository {
     companion object {
-        val gridEnabledState = booleanPreferencesKey(name = "is_grid_enabled")
+        // note view screen
         val noteTextSize = intPreferencesKey(name = "note_text_size")
         val isTextWrapEnabled = booleanPreferencesKey(name = "note_text_wrap_mode")
+
+        // main screen
+        val gridEnabledState = booleanPreferencesKey(name = "is_grid_enabled")
+        val orderNumEnabledState = booleanPreferencesKey(name = "is_order_num_enabled")
+        val alternatingNoteColorsEnabledState = booleanPreferencesKey(name = "is_alternating_note_colors_enabled")
     }
 
     override suspend fun saveGridEnabledState(state: Boolean) {
@@ -24,9 +29,10 @@ class AppDataStoreImpl @Inject constructor(private val context: Context) : AppDa
         }
     }
 
-    override fun getGridEnabledState(): Flow<Boolean> = context.dataStore.data.map {
-        it[gridEnabledState] == true
-    }
+    override fun getGridEnabledState(): Flow<Boolean> =
+        context.dataStore.data.map {
+            it[gridEnabledState] == true
+        }
 
     override suspend fun saveNoteTextSize(size: Int) {
         context.dataStore.edit {
@@ -34,9 +40,10 @@ class AppDataStoreImpl @Inject constructor(private val context: Context) : AppDa
         }
     }
 
-    override fun getNoteTextSize(): Flow<Int> = context.dataStore.data.map {
-        it[noteTextSize] ?: 10
-    }
+    override fun getNoteTextSize(): Flow<Int> =
+        context.dataStore.data.map {
+            it[noteTextSize] ?: 10
+        }
 
     override suspend fun saveTextWrapState(state: Boolean) {
         context.dataStore.edit {
@@ -44,7 +51,30 @@ class AppDataStoreImpl @Inject constructor(private val context: Context) : AppDa
         }
     }
 
-    override fun getTextWrapState(): Flow<Boolean> = context.dataStore.data.map {
-        it[isTextWrapEnabled] == true
+    override fun getTextWrapState(): Flow<Boolean> =
+        context.dataStore.data.map {
+            it[isTextWrapEnabled] == true
+        }
+
+    override suspend fun saveOrderNumState(state: Boolean) {
+        context.dataStore.edit {
+            it[orderNumEnabledState] = state
+        }
     }
+
+    override fun getOrderNumState(): Flow<Boolean> =
+        context.dataStore.data.map {
+            it[orderNumEnabledState] == true
+        }
+
+    override suspend fun saveAlternatingNoteColorsState(state: Boolean) {
+        context.dataStore.edit {
+            it[alternatingNoteColorsEnabledState] = state
+        }
+    }
+
+    override fun getAlternatingNoteColorsState(): Flow<Boolean> =
+        context.dataStore.data.map {
+            it[alternatingNoteColorsEnabledState] == true
+        }
 }
