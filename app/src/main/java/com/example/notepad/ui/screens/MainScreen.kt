@@ -3,7 +3,6 @@ package com.example.notepad.ui.screens
 import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -15,14 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -46,7 +43,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
@@ -58,23 +54,39 @@ import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.components.NoteUiCard
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.states.NotesListResult
-import com.example.notepad.ui.view_models.NoteViewModel
 import com.example.notepad.utils.AppManager
 import com.example.notepad.utils.DateTimeFormatter
 
+// lazy vertical grid cells count
+private const val CELLS_COUNT = 2
+
+/**
+ * Creates a scrollable note items list.
+ *
+ * @param modifier component modifier.
+ * @param context local context.
+ * @param isGridViewEnabled notes grid display mode flag.
+ * @param isDisplayOrderNumEnabled note order num display mode flag.
+ * @param isAlternatingNoteColorsEnabled display alternating note colors flag.
+ * @param allNotes notes list.
+ * @param onPerformHaptic haptic feedback call function.
+ * @param onNavigate call navigation to a specific screen function.
+ * @param onDeleteNoteById delete note by id function.
+ */
 @Composable
 private fun ScrollableNoteItemsList(
     modifier: Modifier = Modifier,
     context: Context,
-    isGridEnabled: Boolean,
-    isDisplayOrderNumEnabledState: Boolean,
-    isAlternatingNoteColorsEnabledState: Boolean,
+    isGridViewEnabled: Boolean,
+    isDisplayOrderNumEnabled: Boolean,
+    isAlternatingNoteColorsEnabled: Boolean,
     allNotes: List<NoteEntity>,
     onPerformHaptic: (HapticFeedbackType) -> Unit,
     onNavigate: (String) -> Unit,
-    onFormatTimeMillis: (Long) -> String,
     onDeleteNoteById: (Long) -> Unit
 ) {
+    val dateTimeFormatter = remember { DateTimeFormatter() }
+
     // check notes list(is empty or not)
     if (allNotes.isNotEmpty()) {
         var deleteNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
@@ -97,10 +109,10 @@ private fun ScrollableNoteItemsList(
             }
         }
 
-        if (isGridEnabled) {
+        if (isGridViewEnabled) {
             // grid list
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2), // 2 cells
+                columns = GridCells.Fixed(CELLS_COUNT), // 2 cells
                 modifier = modifier,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -109,8 +121,8 @@ private fun ScrollableNoteItemsList(
                     items = allNotes,
                     key = { index, note -> note.id }
                 ) { index, note ->
-                    val column = index % 2 // find column num by formula: k % C
-                    val row = index / 2 // find row num by formula: k / C
+                    val column = index % CELLS_COUNT // find column num by formula: k % C
+                    val row = index / CELLS_COUNT // find row num by formula: k / C
                     val isNoteCardDark = (column + row) % 2 == 0 // is sum even state
 
                     NoteUiCard(
@@ -119,9 +131,11 @@ private fun ScrollableNoteItemsList(
                             onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
                         },
                         noteName = note.name,
-                        noteOrderNum = if (isDisplayOrderNumEnabledState) index + 1 else null,
-                        noteDatetimeCreation = onFormatTimeMillis(note.dateTime),
-                        noteLastEditDatetime = note.lastEditDateTime?.let { onFormatTimeMillis(it) },
+                        noteOrderNum = if (isDisplayOrderNumEnabled) index + 1 else null,
+                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
+                        noteLastEditDatetime = note.lastEditDateTime?.let {
+                            dateTimeFormatter.formatDatetimeNow(it)
+                        },
                         onEdit = {
                             onPerformHaptic(HapticFeedbackType.LongPress) // haptic
                             onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
@@ -138,7 +152,7 @@ private fun ScrollableNoteItemsList(
                             context.startActivity(shareIntent)
                         },
                         useBrightBg =
-                            if (isAlternatingNoteColorsEnabledState)
+                            if (isAlternatingNoteColorsEnabled)
                                 if (isNoteCardDark) false // dark bg
                                 else true // light bg
                             else false
@@ -161,9 +175,11 @@ private fun ScrollableNoteItemsList(
                             onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
                         },
                         noteName = note.name,
-                        noteOrderNum = if (isDisplayOrderNumEnabledState) index + 1 else null,
-                        noteDatetimeCreation = onFormatTimeMillis(note.dateTime),
-                        noteLastEditDatetime = note.lastEditDateTime?.let { onFormatTimeMillis(it) },
+                        noteOrderNum = if (isDisplayOrderNumEnabled) index + 1 else null,
+                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
+                        noteLastEditDatetime = note.lastEditDateTime?.let {
+                            dateTimeFormatter.formatDatetimeNow(it)
+                        },
                         onEdit = {
                             onPerformHaptic(HapticFeedbackType.LongPress) // haptic
                             onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
@@ -180,7 +196,7 @@ private fun ScrollableNoteItemsList(
                             context.startActivity(shareIntent)
                         },
                         useBrightBg =
-                            if (isAlternatingNoteColorsEnabledState)
+                            if (isAlternatingNoteColorsEnabled)
                                 // check is index even
                                 if ((index + 1) % 2 == 0) true // light bg
                                 else false // dark bg
@@ -190,6 +206,7 @@ private fun ScrollableNoteItemsList(
             }
         }
 
+        // delete note warn dialog
         AlertUiMessageDialog(
             onDismissRequestFunction = { deleteNoteAlertMessageDialogState = false },
             containerColor = MaterialTheme.colorScheme.error,
@@ -234,14 +251,20 @@ private fun ScrollableNoteItemsList(
 
 /**
  * Creates a main app screen.
- * @param isGridEnabledState notes grid enabled state.
+ *
+ * @param isGridViewEnabled notes grid display mode flag.
+ * @param isDisplayOrderNumEnabled note order num display mode flag.
+ * @param isAlternatingNoteColorsEnabled display alternating note colors flag.
+ * @param notesList notes list.
+ * @param onDeleteAllNotes delete all notes function.
+ * @param onDeleteNoteById delete note by id function.
  */
 @Composable
 fun MainUiScreen(
     onNavigateTo: (String) -> Unit,
-    isGridEnabledState: Boolean,
-    isDisplayOrderNumEnabledState: Boolean,
-    isAlternatingNoteColorsEnabledState: Boolean,
+    isGridViewEnabled: Boolean,
+    isDisplayOrderNumEnabled: Boolean,
+    isAlternatingNoteColorsEnabled: Boolean,
     notesList: NotesListResult,
     onDeleteAllNotes: () -> Unit,
     onDeleteNoteById: (Long) -> Unit
@@ -250,9 +273,7 @@ fun MainUiScreen(
     val context = LocalContext.current
     val activity = LocalActivity.current
 
-    val dateTimeFormatter = remember { DateTimeFormatter() }
     val appManager = remember { AppManager(activity) }
-
     var deleteAllNotesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -366,13 +387,12 @@ fun MainUiScreen(
                                 .fillMaxSize()
                                 .padding(horizontal = 5.dp),
                             context = context,
-                            isGridEnabled = isGridEnabledState,
+                            isGridViewEnabled = isGridViewEnabled,
                             allNotes = notesListState.noteList,
                             onPerformHaptic = haptic::performHapticFeedback,
                             onNavigate = onNavigateTo,
-                            onFormatTimeMillis = dateTimeFormatter::formatDatetimeNow,
-                            isDisplayOrderNumEnabledState = isDisplayOrderNumEnabledState,
-                            isAlternatingNoteColorsEnabledState = isAlternatingNoteColorsEnabledState,
+                            isDisplayOrderNumEnabled = isDisplayOrderNumEnabled,
+                            isAlternatingNoteColorsEnabled = isAlternatingNoteColorsEnabled,
                             onDeleteNoteById = onDeleteNoteById
                         )
                     is NotesListResult.LoadedWithException ->
@@ -386,6 +406,7 @@ fun MainUiScreen(
                 }
             }
 
+            // delete all notes warning dialog
             AlertUiMessageDialog(
                 onDismissRequestFunction = { deleteAllNotesAlertMessageDialogState = false },
                 containerColor = MaterialTheme.colorScheme.error,

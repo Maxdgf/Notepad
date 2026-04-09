@@ -1,12 +1,13 @@
 package com.example.notepad.core.data_management.databases.notes_local_storage.repository
 
-import com.example.notepad.core.data_management.databases.notes_local_storage.NoteDao
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+import com.example.notepad.core.data_management.databases.notes_local_storage.NoteDao
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+
 class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : NoteRepository {
-    override fun getAllNotes() = noteDao.getNotesFromDeviceLocalStorage()
+    override fun getAllNotes() = noteDao.getAllNotes()
 
     override fun getNoteById(id: Long): Flow<NoteEntity?> = noteDao.getNoteById(id)
 

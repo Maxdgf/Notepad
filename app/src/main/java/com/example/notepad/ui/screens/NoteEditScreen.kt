@@ -39,7 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
@@ -50,7 +50,8 @@ import com.example.notepad.ui.components.LoadingUiBlock
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.states.NoteResult
-import com.example.notepad.ui.view_models.NoteViewModel
+import com.example.notepad.ui.viewmodels.screens.NoteEditScreenViewModel
+import com.example.notepad.ui.viewmodels.NoteViewModel
 
 @Composable
 private fun NoteEditView(
@@ -60,10 +61,18 @@ private fun NoteEditView(
     onNavigateTo: (String) -> Unit,
     onPerformHaptic: (HapticFeedbackType) -> Unit
 ) {
+    val noteEditScreenViewModel: NoteEditScreenViewModel = viewModel()
+
     var errorOfEmptyNotAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
     var errorOfNoteChangesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
-    var noteNameState by rememberSaveable { mutableStateOf(currentNote.name) }
-    var noteContentState by rememberSaveable { mutableStateOf(currentNote.content) }
+
+    LaunchedEffect(currentNote.name) {
+        noteEditScreenViewModel.updateNoteName(currentNote.name)
+    }
+
+    LaunchedEffect(currentNote.content) {
+        noteEditScreenViewModel.updateNoteContent(currentNote.content)
+    }
 
     Column(
         modifier = Modifier
@@ -80,10 +89,10 @@ private fun NoteEditView(
         OutlinedTextField(
             maxLines = 1,
             modifier = Modifier.fillMaxWidth(),
-            value = noteNameState,
-            onValueChange = { newValue -> noteNameState = newValue },
+            value = noteEditScreenViewModel.noteName,
+            onValueChange = { newValue -> noteEditScreenViewModel.updateNoteName(newValue) },
             trailingIcon = {
-                IconButton(onClick = { noteNameState = "" }) {
+                IconButton(onClick = { noteEditScreenViewModel.updateNoteName("") }) {
                     Icon(
                         painter = painterResource(R.drawable.baseline_clear_24),
                         contentDescription = null
@@ -120,13 +129,13 @@ private fun NoteEditView(
                 .fillMaxWidth()
                 .weight(1f)
                 .verticalScroll(noteContentInputFieldVerticalScrollState),
-            value = noteContentState,
-            onValueChange = { newValue -> noteContentState = newValue },
+            value = noteEditScreenViewModel.noteContent,
+            onValueChange = { newValue -> noteEditScreenViewModel.updateNoteContent(newValue) },
             textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
             cursorBrush = SolidColor(if (isSystemInDarkTheme()) Color.White else Color.Black),
             decorationBox = @Composable { innerTextField ->
                 BasicTextFieldUiPlaceholder(
-                    value = noteContentState,
+                    value = noteEditScreenViewModel.noteContent,
                     placeholderText = "Write here anything...",
                     startPadding = 5.dp,
                     innerTextField = innerTextField
@@ -140,14 +149,14 @@ private fun NoteEditView(
             onClick = {
                 onPerformHaptic(HapticFeedbackType.LongPress) // haptic
 
-                if (noteNameState.isEmpty() || noteContentState.isEmpty()) {
+                if (noteEditScreenViewModel.isNoteNameOrContentEmpty()) {
                     errorOfEmptyNotAlertMessageDialogState = true
                 } else {
                     // check changes in note
-                    if (noteContentState != currentNote.content || noteNameState != currentNote.name) {
+                    if (noteEditScreenViewModel.noteName != currentNote.name || noteEditScreenViewModel.noteContent != currentNote.content) {
                         onEditNote(
-                            noteNameState,
-                            noteContentState,
+                            noteEditScreenViewModel.noteName,
+                            noteEditScreenViewModel.noteContent,
                             currentNote.id
                         )
                         onNavigateTo(NavigationRoutes.MainScreen.route)
@@ -204,30 +213,29 @@ private fun NoteEditView(
 
 /**
  * Creates a note edit app screen.
- * @param noteId id of the note to be edited.
+ *
+ * @param noteId current note id.
+ * @param onNavigateTo function for navigate to specific screen.
+ * @param noteViewModel notes viewmodel.
  */
 @Composable
 fun NoteUiEditScreen(
-    onNavigateTo: (String) -> Unit,
     noteId: Long?,
-    noteViewModel: NoteViewModel = hiltViewModel()
+    onNavigateTo: (String) -> Unit,
+    noteViewModel: NoteViewModel
 ) {
     val haptic = LocalHapticFeedback.current
-    val currentNote by noteViewModel.currentNote.collectAsState()
 
     LaunchedEffect(Unit) {
-        // select note by id
-        noteId?.let {
-            noteViewModel.selectNote(it)
+        noteId?.let { id ->
+            noteViewModel.selectNote(id)
         }
     }
 
     Scaffold(
         topBar = {
             TopUiBar(
-                titleContent = {
-                    Text(text = "Edit note")
-                },
+                titleContent = { Text(text = "Edit note") },
                 barIcon = {
                     IconButton(onClick = { onNavigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
@@ -239,6 +247,8 @@ fun NoteUiEditScreen(
             )
         },
         content = { innerPadding ->
+            val currentNote by noteViewModel.currentNote.collectAsState()
+
             when (val noteState = currentNote) {
                 is NoteResult.SuccessfullyLoaded ->
                     NoteEditView(
@@ -262,7 +272,13 @@ fun NoteUiEditScreen(
                             .padding(innerPadding),
                         description = noteState.description
                     )
-                NoteResult.NoteLoading -> LoadingUiBlock()
+                NoteResult.NoteLoading ->
+                    LoadingUiBlock(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        description = "Loading note, please wait."
+                    )
             }
         }
     )

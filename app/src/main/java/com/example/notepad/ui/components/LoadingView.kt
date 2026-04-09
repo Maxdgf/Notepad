@@ -1,5 +1,6 @@
 package com.example.notepad.ui.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -12,13 +13,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LoadingUiBlock(description: String = "Loading...") {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        CircularProgressIndicator()
-        Spacer(modifier = Modifier.width(5.dp))
-        Text(
-            text = description,
-            fontWeight = FontWeight.Bold
-        )
+fun LoadingUiBlock(
+    modifier: Modifier = Modifier,
+    showLoadingBar: Boolean = true,
+    description: String = "Loading..."
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (showLoadingBar) CircularProgressIndicator()
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = description,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }

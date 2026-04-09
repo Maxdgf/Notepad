@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -43,12 +42,12 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 import com.example.notepad.R
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.components.CheckBoxWithUiText
@@ -56,15 +55,25 @@ import com.example.notepad.ui.components.LoadingUiBlock
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.states.NoteResult
-import com.example.notepad.ui.view_models.NoteViewModel
+import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
+import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.ClipBoardManager
 import com.example.notepad.utils.DateTimeFormatter
 
+/**
+ * Creates a dropdown menu.
+ *
+ * @param textWrap text wrap mode flag.
+ * @param currentFontSize current text size.
+ * @param onUpdateCurrentFontSize function of update text size.
+ * @param onCopyNoteContent copy note content function.
+ * @param onUpdateTextWrapState function of update text wrap mode state.
+ */
 @Composable
 private fun ScreenDropdownMenu(
-    textWrapState: Boolean,
+    textWrap: Boolean,
     currentFontSize: Int,
-    updateCurrentFontSize: (Int) -> Unit,
+    onUpdateCurrentFontSize: (Int) -> Unit,
     onCopyNoteContent: () -> Unit,
     onUpdateTextWrapState: (Boolean) -> Unit
 ) {
@@ -125,7 +134,7 @@ private fun ScreenDropdownMenu(
 
             val hideMenuScope = rememberCoroutineScope()
             CheckBoxWithUiText(
-                checked = textWrapState,
+                checked = textWrap,
                 text = "text wrap",
                 onCheckedChange = { state ->
                     onUpdateTextWrapState(state)
@@ -151,7 +160,7 @@ private fun ScreenDropdownMenu(
                 steps = 8,
                 valueRange = 0.1f..0.3f,
                 onValueChange = { value ->
-                    updateCurrentFontSize((value * 100).roundToInt())
+                    onUpdateCurrentFontSize((value * 100).roundToInt())
                 }
             )
 
@@ -171,16 +180,68 @@ private fun ScreenDropdownMenu(
     }
 }
 
+/**
+ * Creates a note data title(note name, creation datetime, symbols count).
+ * @param note current note entity.
+ */
+@Composable
+private fun NoteTitle(note: NoteEntity) {
+    val dateTimeFormatter = remember { DateTimeFormatter() }
+
+    // note title
+    Column {
+        // note name
+        Text(
+            text = note.name,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+            fontSize = 16.sp
+        )
+
+        Row {
+            // note datetime of creation
+            Text(
+                text = dateTimeFormatter.formatDatetimeNow(note.dateTime),
+                fontWeight = FontWeight.Light,
+                modifier = Modifier.basicMarquee(Int.MAX_VALUE),
+                fontSize = 10.sp
+            )
+
+            // note symbols count(note content length)
+            Text(
+                text = "${note.content.length} symbols",
+                fontStyle = FontStyle.Italic,
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .basicMarquee(Int.MAX_VALUE),
+                fontSize = 10.sp
+            )
+        }
+    }
+}
+
+/**
+ * Creates a note content view.
+ *
+ * @param content note text content.
+ * @param currentFontSize current note text content font size.
+ * @param isTextWrapEnabled text wrap mode flag.
+ * @param paddingValues ui padding values.
+ */
 @Composable
 private fun NoteContentView(
     content: String,
     currentFontSize: Int,
-    textWrapState: Boolean,
+    isTextWrapEnabled: Boolean,
     paddingValues: PaddingValues
 ) {
+    println("note view!")
     SelectionContainer {
         val verticalScrollState = rememberScrollState()
-        if (textWrapState) {
+
+        // note text content view
+        if (isTextWrapEnabled) {
+            // with only vertical scroll
             Text(
                 text = content,
                 modifier = Modifier
@@ -190,6 +251,7 @@ private fun NoteContentView(
                 fontSize = currentFontSize.sp
             )
         } else {
+            // with both vertical and horizontal scroll
             val horizontalScrollState = rememberScrollState()
             Text(
                 text = content,
@@ -207,24 +269,20 @@ private fun NoteContentView(
 /**Creates a note view app screen.*/
 @Composable
 fun NoteUiViewScreen(
-    onNavigateTo: (String) -> Unit,
     noteId: Long?,
-    currentFontSize: Int,
-    updateCurrentFontSize: (Int) -> Unit,
-    textWrapState: Boolean,
-    updateTextWrapStateMethod: (Boolean) -> Unit,
-    noteViewModel: NoteViewModel = hiltViewModel()
+    onNavigateTo: (String) -> Unit,
+    noteViewModel: NoteViewModel,
+    appDataStoreViewModel: AppDataStoreViewModel
 ) {
     val context = LocalContext.current
 
-    val clipBoardManager = remember { ClipBoardManager(context) }
-    val dateTimeFormatter = remember { DateTimeFormatter() }
-
     val currentNote by noteViewModel.currentNote.collectAsState()
+    val textWrapState by appDataStoreViewModel.textWrapMode.collectAsState()
+    val currentFontSize by appDataStoreViewModel.noteTextSize.collectAsState()
 
     LaunchedEffect(Unit) {
-        noteId?.let {
-            noteViewModel.selectNote(it)
+        noteId?.let { id ->
+            noteViewModel.selectNote(id)
         }
     }
 
@@ -234,32 +292,7 @@ fun NoteUiViewScreen(
                 titleContent = {
                     when (val noteState = currentNote) {
                         is NoteResult.SuccessfullyLoaded ->
-                            Column {
-                                Text(
-                                    text = noteState.note.name,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                    fontSize = 16.sp
-                                )
-
-                                Row {
-                                    Text(
-                                        text = dateTimeFormatter.formatDatetimeNow(noteState.note.dateTime),
-                                        fontWeight = FontWeight.Light,
-                                        modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                                        fontSize = 10.sp
-                                    )
-
-                                    Text(
-                                        text = "${noteState.note.content.length} symbols",
-                                        fontStyle = FontStyle.Italic,
-                                        modifier = Modifier
-                                            .padding(start = 10.dp)
-                                            .basicMarquee(Int.MAX_VALUE),
-                                        fontSize = 10.sp
-                                    )
-                                }
-                            }
+                            NoteTitle(note = noteState.note)
                         is NoteResult.LoadedWithException ->
                             Text(
                                 text = "Error",
@@ -271,7 +304,10 @@ fun NoteUiViewScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         NoteResult.NoteLoading ->
-                            LoadingUiBlock(description = "Note loading...")
+                            LoadingUiBlock(
+                                showLoadingBar = false,
+                                description = "Loading note..."
+                            )
                     }
                 },
                 barIcon = {
@@ -283,18 +319,20 @@ fun NoteUiViewScreen(
                     }
                 },
                 barActionElements = {
+                    val clipBoardManager = remember { ClipBoardManager(context) }
+
                     when (val noteState = currentNote) {
                         is NoteResult.SuccessfullyLoaded ->
                             ScreenDropdownMenu(
-                                textWrapState = textWrapState,
+                                textWrap = textWrapState,
                                 currentFontSize = currentFontSize,
-                                updateCurrentFontSize = updateCurrentFontSize,
+                                onUpdateCurrentFontSize = appDataStoreViewModel::saveNoteTextSize,
                                 onCopyNoteContent = {
                                     clipBoardManager.setTextToClipboard(noteState.note.content)
                                 },
-                                onUpdateTextWrapState = updateTextWrapStateMethod
+                                onUpdateTextWrapState = appDataStoreViewModel::saveTextWrapState
                             )
-                        else -> {}
+                        else -> {} // nothing show
                     }
                 }
             )
@@ -305,7 +343,7 @@ fun NoteUiViewScreen(
                     NoteContentView(
                         content = noteState.note.content,
                         currentFontSize = currentFontSize,
-                        textWrapState = textWrapState,
+                        isTextWrapEnabled = textWrapState,
                         paddingValues = innerPadding
                     )
                 is NoteResult.LoadedWithException ->
@@ -322,7 +360,13 @@ fun NoteUiViewScreen(
                             .padding(innerPadding),
                         description = noteState.description
                     )
-                NoteResult.NoteLoading -> LoadingUiBlock()
+                NoteResult.NoteLoading ->
+                    LoadingUiBlock(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        description = "Loading note, please wait."
+                    )
             }
         }
     )

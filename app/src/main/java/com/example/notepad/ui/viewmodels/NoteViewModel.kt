@@ -1,4 +1,4 @@
-package com.example.notepad.ui.view_models
+package com.example.notepad.ui.viewmodels
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.SharingStarted
@@ -8,23 +8,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import javax.inject.Inject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
-
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
-import com.example.notepad.ui.states.NoteResult
-import com.example.notepad.ui.states.NotesListResult
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+
+import com.example.notepad.ui.states.NoteResult
+import com.example.notepad.ui.states.NotesListResult
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
@@ -45,15 +41,13 @@ class NoteViewModel @Inject constructor(
         .flatMapLatest { id ->
             flow<NoteResult> {
                 // get note by id
-                noteRepository.getNoteById(id).collect { note ->
-                    // null check
-                    if (note != null)
-                        // emit note
-                        emit(NoteResult.SuccessfullyLoaded(note))
-                    else
-                        // emit note was not founded state
-                        emit(NoteResult.NotFounded("Sorry, this note was not founded!"))
-                }
+                noteRepository.getNoteById(id)
+                    .onStart { emit(NoteResult.NoteLoading) } // emit loading state on start
+                    .collect { note ->
+                        // null check
+                        if (note != null) emit(NoteResult.SuccessfullyLoaded(note)) // emit note
+                        else emit(NoteResult.NotFounded("Sorry, this note was not founded!")) // emit note was not founded state
+                    }
             }
         }
         .catch { exception ->

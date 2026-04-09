@@ -1,6 +1,5 @@
-package com.example.notepad.ui.view_models
+package com.example.notepad.ui.viewmodels
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel

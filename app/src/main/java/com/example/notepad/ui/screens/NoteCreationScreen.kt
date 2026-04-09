@@ -4,7 +4,6 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -38,15 +37,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.notepad.R
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
+import com.example.notepad.ui.viewmodels.screens.NoteCreationScreenViewModel
 
 /**
  * Creates a note creation app screen.
+ *
+ * @param onNavigateTo navigate to specific screen function.
+ * @param onAddNote add note to database function.
  */
 @Composable
 fun NoteUiCreationScreen(
@@ -54,10 +58,9 @@ fun NoteUiCreationScreen(
     onAddNote: (String, String) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-    val noteContentInputFieldVerticalScrollState = rememberScrollState()
+    val noteCreationScreenViewModel: NoteCreationScreenViewModel = viewModel()
 
-    var noteNameState by rememberSaveable { mutableStateOf("") }
-    var noteContentState by rememberSaveable { mutableStateOf("") }
+    val noteContentInputFieldVerticalScrollState = rememberScrollState()
     var errorOfEmptyNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
 
     // text field auto scroll
@@ -68,9 +71,7 @@ fun NoteUiCreationScreen(
     Scaffold(
         topBar = {
             TopUiBar(
-                titleContent = {
-                    Text(text = "Create new note")
-                },
+                titleContent = { Text(text = "Create new note") },
                 barIcon = {
                     IconButton(onClick = { onNavigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
@@ -97,10 +98,12 @@ fun NoteUiCreationScreen(
                 OutlinedTextField(
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth(),
-                    value = noteNameState,
-                    onValueChange = { newValue -> noteNameState = newValue },
+                    value = noteCreationScreenViewModel.noteName,
+                    onValueChange = { newValue ->
+                        noteCreationScreenViewModel.updateNoteName(newValue)
+                    },
                     trailingIcon = {
-                        IconButton(onClick = { noteNameState = "" }) {
+                        IconButton(onClick = { noteCreationScreenViewModel.updateNoteName("") }) {
                             Icon(
                                 painter = painterResource(R.drawable.baseline_clear_24),
                                 contentDescription = null
@@ -130,13 +133,13 @@ fun NoteUiCreationScreen(
                         .fillMaxWidth()
                         .weight(1f)
                         .verticalScroll(noteContentInputFieldVerticalScrollState),
-                    value = noteContentState,
-                    onValueChange = { newValue -> noteContentState = newValue },
+                    value = noteCreationScreenViewModel.noteContent,
+                    onValueChange = { newValue -> noteCreationScreenViewModel.updateNoteContent(newValue) },
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
                     cursorBrush = SolidColor(if (isSystemInDarkTheme()) Color.White else Color.Black),
                     decorationBox = @Composable { innerTextField ->
                         BasicTextFieldUiPlaceholder(
-                            value = noteContentState,
+                            value = noteCreationScreenViewModel.noteContent,
                             placeholderText = "Write here anything...",
                             startPadding = 5.dp,
                             innerTextField = innerTextField
@@ -150,11 +153,15 @@ fun NoteUiCreationScreen(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress) // haptic
 
-                        if (noteNameState.isEmpty() || noteContentState.isEmpty()) {
+                        if (noteCreationScreenViewModel.isNoteNameOrContentEmpty()) {
                             errorOfEmptyNoteAlertMessageDialogState = true
                         } else {
                             // add note to database
-                            onAddNote(noteNameState, noteContentState)
+                            onAddNote(
+                                noteCreationScreenViewModel.noteName,
+                                noteCreationScreenViewModel.noteContent
+                            )
+
                             // navigate to main screen
                             onNavigateTo(NavigationRoutes.MainScreen.route)
                         }
