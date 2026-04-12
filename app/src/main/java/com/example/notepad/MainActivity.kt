@@ -17,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 // | by Maxdgf github: https://github.com/Maxdgf/Notepad |
 // =======================================================
 // |--> created at: 27.09.2025
-// |--> last update: 09.04.2026
+// |--> last update: 11.04.2026
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.Dp
 
 /**
  * Creates text placeholder for basic text field.
+ *
  * @param value basic text field text content.
  * @param placeholderText placeholder text.
  * @param startPadding placeholder start side padding.

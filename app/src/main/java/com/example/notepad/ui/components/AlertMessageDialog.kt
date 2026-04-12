@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Creates and setups compose alert dialog with custom content.
+ *
  * @param state dialog state.
  * @param containerColor dialog color (optional).
  * @param contentColor dialog's content color (optional).

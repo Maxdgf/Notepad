@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Creates checkbox with a text description.
+ *
  * @param checked checkbox checked state.
  * @param text description text.
  * @param onCheckedChange on checkbox checked state change function.

@@ -25,12 +25,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,13 +49,18 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.en
 import com.example.notepad.ui.components.SimpleFloatingUiIconButton
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
+import com.example.notepad.ui.components.DropdownMenuUiIconItem
 import com.example.notepad.ui.components.LoadingUiBlock
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.components.NoteUiCard
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.states.NotesListResult
+import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
+import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.AppManager
 import com.example.notepad.utils.DateTimeFormatter
+import androidx.core.net.toUri
+import com.example.notepad.utils.Toaster
 
 // lazy vertical grid cells count
 private const val CELLS_COUNT = 2
@@ -85,7 +90,11 @@ private fun ScrollableNoteItemsList(
     onNavigate: (String) -> Unit,
     onDeleteNoteById: (Long) -> Unit
 ) {
+    val context = LocalContext.current
+    val packageManager = context.packageManager
+
     val dateTimeFormatter = remember { DateTimeFormatter() }
+    val toaster = remember { Toaster(context) }
 
     // check notes list(is empty or not)
     if (allNotes.isNotEmpty()) {
@@ -100,10 +109,7 @@ private fun ScrollableNoteItemsList(
             { textToSend ->
                 Intent().apply {
                     action = Intent.ACTION_SEND
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        textToSend
-                    )
+                    putExtra(Intent.EXTRA_TEXT, textToSend)
                     type = "text/plain"
                 }
             }
@@ -147,9 +153,11 @@ private fun ScrollableNoteItemsList(
                         onShare = {
                             // configure send intent
                             val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
-                            // create chooser
-                            val shareIntent = Intent.createChooser(sendIntent, null)
-                            context.startActivity(shareIntent)
+                            val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
+
+                            if (sendIntent.resolveActivity(packageManager) != null)
+                                context.startActivity(shareIntent)
+                            else toaster.showToast("Unable to share note!")
                         },
                         useBrightBg =
                             if (isAlternatingNoteColorsEnabled)
@@ -191,9 +199,11 @@ private fun ScrollableNoteItemsList(
                         onShare = {
                             // configure send intent
                             val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
-                            // create chooser
-                            val shareIntent = Intent.createChooser(sendIntent, null)
-                            context.startActivity(shareIntent)
+                            val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
+
+                            if (sendIntent.resolveActivity(packageManager) != null)
+                                context.startActivity(shareIntent)
+                            else toaster.showToast("Unable to share note!")
                         },
                         useBrightBg =
                             if (isAlternatingNoteColorsEnabled)
@@ -249,32 +259,49 @@ private fun ScrollableNoteItemsList(
     }
 }
 
+// developer email address
+private const val DEVELOPER_EMAIL_ADDRESS = "maxma4090@gmail.com"
+
 /**
  * Creates a main app screen.
  *
- * @param isGridViewEnabled notes grid display mode flag.
- * @param isDisplayOrderNumEnabled note order num display mode flag.
- * @param isAlternatingNoteColorsEnabled display alternating note colors flag.
- * @param notesList notes list.
- * @param onDeleteAllNotes delete all notes function.
- * @param onDeleteNoteById delete note by id function.
+ * @param onNavigateTo function for navigate to specific screen.
+ * @param noteViewModel notes viewmodel.
+ * @param appDataStoreViewModel app data store preferences viewmodel.
  */
 @Composable
 fun MainUiScreen(
     onNavigateTo: (String) -> Unit,
-    isGridViewEnabled: Boolean,
-    isDisplayOrderNumEnabled: Boolean,
-    isAlternatingNoteColorsEnabled: Boolean,
-    notesList: NotesListResult,
-    onDeleteAllNotes: () -> Unit,
-    onDeleteNoteById: (Long) -> Unit
+    noteViewModel: NoteViewModel,
+    appDataStoreViewModel: AppDataStoreViewModel
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val activity = LocalActivity.current
+    val packageManager = context.packageManager
 
     val appManager = remember { AppManager(activity) }
+    val toaster = remember { Toaster(context) }
+
+    /**
+     * Configures intent for send feedback about app by email.
+     * @return intent object.
+     */
+    val sendFeedbackViaEmailIntent: (String) -> Intent = remember {
+        { subject ->
+            // only email apps
+            Intent(Intent.ACTION_SENDTO).apply {
+                data = "mailto:$DEVELOPER_EMAIL_ADDRESS?subject=$subject".toUri()
+            }
+        }
+    }
+
     var deleteAllNotesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+
+    val allNotesList by noteViewModel.noteList.collectAsState()
+    val isGridViewEnabled by appDataStoreViewModel.notesGridEnabledMode.collectAsState()
+    val isDisplayOrderNumEnabled by appDataStoreViewModel.orderNumEnabledState.collectAsState()
+    val isAlternatingNoteColorsEnabled by appDataStoreViewModel.alternatingNoteColorsEnabledState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -296,63 +323,55 @@ fun MainUiScreen(
                             expanded = dropdownMenuState,
                             onDismissRequest = { dropdownMenuState = false }
                         ) {
-                            DropdownMenuItem(
+                            DropdownMenuUiIconItem(
                                 onClick = {
                                     dropdownMenuState = false // hide menu
                                     onNavigateTo(NavigationRoutes.NoteSettingsScreen.route)
                                 },
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.baseline_settings_24),
-                                            contentDescription = null
-                                        )
-                                        Text(text = "settings")
-                                    }
-                                }
+                                iconPainter = painterResource(R.drawable.baseline_settings_24),
+                                text = "settings",
+                                contentDescription = null,
                             )
 
-                            DropdownMenuItem(
-                                onClick = {
-                                    dropdownMenuState = false // hide menu
-                                    deleteAllNotesAlertMessageDialogState = true
-                                },
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.baseline_delete_24),
-                                            contentDescription = null
-                                        )
-                                        Text(text = "delete all")
-                                    }
-                                }
-                            )
+                            // delete all notes button
+                            when (val notesListState = allNotesList) {
+                                is NotesListResult.SuccessfullyLoaded ->
+                                    DropdownMenuUiIconItem(
+                                        onClick = {
+                                            dropdownMenuState = false // hide menu
+                                            if (notesListState.noteList.isNotEmpty())
+                                                deleteAllNotesAlertMessageDialogState = true
+                                        },
+                                        iconPainter = painterResource(R.drawable.baseline_delete_24),
+                                        text = "delete all",
+                                        contentDescription = null
+                                    )
+                                else -> {} // nothing show
+                            }
 
                             HorizontalDivider()
 
-                            DropdownMenuItem(
+                            DropdownMenuUiIconItem(
+                                onClick = {
+                                    val sendFeedbackIntent = sendFeedbackViaEmailIntent("Notepad app feedback")
+
+                                    if (sendFeedbackIntent.resolveActivity(packageManager) != null)
+                                        context.startActivity(sendFeedbackIntent)
+                                    else toaster.showToast("No email apps!")
+                                },
+                                iconPainter = painterResource(R.drawable.baseline_email_24),
+                                text = "send feedback",
+                                contentDescription = null
+                            )
+
+                            DropdownMenuUiIconItem(
                                 onClick = {
                                     dropdownMenuState = false // hide menu
                                     appManager.breakApp() // exit app
                                 },
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.baseline_exit_to_app_24),
-                                            contentDescription = null
-                                        )
-                                        Text(text = "exit")
-                                    }
-                                }
+                                text = "exit",
+                                iconPainter = painterResource(R.drawable.baseline_exit_to_app_24),
+                                contentDescription = null
                             )
                         }
                     }
@@ -380,7 +399,7 @@ fun MainUiScreen(
                 contentAlignment = Alignment.Center
             ) {
                 // match notes list state
-                when (val notesListState = notesList) {
+                when (val notesListState = allNotesList) {
                     is NotesListResult.SuccessfullyLoaded ->
                         ScrollableNoteItemsList(
                             modifier = Modifier
@@ -393,7 +412,7 @@ fun MainUiScreen(
                             onNavigate = onNavigateTo,
                             isDisplayOrderNumEnabled = isDisplayOrderNumEnabled,
                             isAlternatingNoteColorsEnabled = isAlternatingNoteColorsEnabled,
-                            onDeleteNoteById = onDeleteNoteById
+                            onDeleteNoteById = noteViewModel::deleteNote
                         )
                     is NotesListResult.LoadedWithException ->
                         NoDataUiDescriptionBlock(
@@ -402,7 +421,13 @@ fun MainUiScreen(
                                 .padding(innerPadding),
                             description = notesListState.message
                         )
-                    NotesListResult.Loading -> LoadingUiBlock() // show loading block
+                    NotesListResult.Loading ->
+                        LoadingUiBlock(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            description = "Loading notes..."
+                        ) // show loading block
                 }
             }
 
@@ -430,7 +455,7 @@ fun MainUiScreen(
                     Button(
                         onClick = {
                             deleteAllNotesAlertMessageDialogState = false
-                            onDeleteAllNotes() // delete all notes
+                            noteViewModel.deleteAllNotes() // delete all notes
                         },
                         modifier = Modifier.weight(0.5f),
                         shape = RoundedCornerShape(10.dp),

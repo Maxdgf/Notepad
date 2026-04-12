@@ -8,6 +8,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -18,18 +20,18 @@ import com.example.notepad.R
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.CheckBoxWithUiText
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
+import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
 
 /*** Creates a settings app screen.*/
 @Composable
 fun SettingsUiScreen(
     onNavigateTo: (String) -> Unit,
-    isGridViewEnabled: Boolean,
-    onUpdateIsGridEnabledState: (Boolean) -> Unit,
-    isDisplayOrderNumEnabled: Boolean,
-    onUpdateIsDisplayOrderNumEnabledState: (Boolean) -> Unit,
-    isAlternatingNoteColorsEnabled: Boolean,
-    onUpdateIsAlternatingNoteColorsEnabled: (Boolean) -> Unit
+    appDataStoreViewModel: AppDataStoreViewModel
 ) {
+    val isGridViewEnabled by appDataStoreViewModel.notesGridEnabledMode.collectAsState()
+    val isDisplayOrderNumEnabled by appDataStoreViewModel.orderNumEnabledState.collectAsState()
+    val isAlternatingNoteColorsEnabled by appDataStoreViewModel.alternatingNoteColorsEnabledState.collectAsState()
+
     Scaffold(
         topBar = {
             TopUiBar(
@@ -60,19 +62,25 @@ fun SettingsUiScreen(
             CheckBoxWithUiText(
                 checked = isGridViewEnabled,
                 text = "notes list grid view",
-                onCheckedChange = { state -> onUpdateIsGridEnabledState(state) }
+                onCheckedChange = { state ->
+                    appDataStoreViewModel.saveNotesGridEnabledState(state)
+                }
             )
 
             CheckBoxWithUiText(
                 checked = isDisplayOrderNumEnabled,
                 text = "display order num",
-                onCheckedChange = { state -> onUpdateIsDisplayOrderNumEnabledState(state) }
+                onCheckedChange = { state ->
+                    appDataStoreViewModel.saveOrderNumEnabledState(state)
+                }
             )
 
             CheckBoxWithUiText(
                 checked = isAlternatingNoteColorsEnabled,
                 text = "alternating note colors",
-                onCheckedChange = { state -> onUpdateIsAlternatingNoteColorsEnabled(state) }
+                onCheckedChange = { state ->
+                    appDataStoreViewModel.saveAlternatingNoteColorsState(state)
+                }
             )
         }
     }

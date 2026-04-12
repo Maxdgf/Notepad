@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Creates floating button with icon.
+ *
  * @param onClick on click function.
  * @param icon button icon painter.
  * @param buttonShape button shape.

@@ -2,7 +2,6 @@ package com.example.notepad.ui.screens
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,10 +16,11 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -51,6 +50,7 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.en
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.components.CheckBoxWithUiText
+import com.example.notepad.ui.components.DropdownMenuUiIconItem
 import com.example.notepad.ui.components.LoadingUiBlock
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
@@ -59,6 +59,8 @@ import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
 import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.ClipBoardManager
 import com.example.notepad.utils.DateTimeFormatter
+
+private const val TEXT_SIZE_SLIDER_STEPS = 8
 
 /**
  * Creates a dropdown menu.
@@ -92,42 +94,24 @@ private fun ScreenDropdownMenu(
             expanded = dropdownMenuState,
             onDismissRequest = { dropdownMenuState = false }
         ) {
-            DropdownMenuItem(
+            DropdownMenuUiIconItem(
                 onClick = {
                     dropdownMenuState = false // hide menu
                     fontSizeDialogState = true
                 },
-                text = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_text_format_24),
-                            contentDescription = null
-                        )
-                        Text(text = "text size")
-                    }
-                }
+                iconPainter = painterResource(R.drawable.baseline_text_format_24),
+                text = "text size",
+                contentDescription = null
             )
 
-            DropdownMenuItem(
+            DropdownMenuUiIconItem(
                 onClick = {
                     dropdownMenuState = false // hide menu
                     onCopyNoteContent()
                 },
-                text = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_content_copy_24),
-                            contentDescription = null
-                        )
-                        Text(text = "copy")
-                    }
-                }
+                iconPainter = painterResource(R.drawable.baseline_content_copy_24),
+                text = "copy note",
+                contentDescription = null
             )
 
             HorizontalDivider()
@@ -137,9 +121,9 @@ private fun ScreenDropdownMenu(
                 checked = textWrap,
                 text = "text wrap",
                 onCheckedChange = { state ->
-                    onUpdateTextWrapState(state)
+                   onUpdateTextWrapState(state)
                    hideMenuScope.launch {
-                       delay(250)
+                       delay(250) // delay 250 ms
                        dropdownMenuState = false // hide menu
                    }
                 }
@@ -157,7 +141,7 @@ private fun ScreenDropdownMenu(
             Slider(
                 modifier = Modifier.fillMaxWidth(),
                 value = currentFontSize / 100f,
-                steps = 8,
+                steps = TEXT_SIZE_SLIDER_STEPS,
                 valueRange = 0.1f..0.3f,
                 onValueChange = { value ->
                     onUpdateCurrentFontSize((value * 100).roundToInt())
@@ -235,33 +219,44 @@ private fun NoteContentView(
     isTextWrapEnabled: Boolean,
     paddingValues: PaddingValues
 ) {
-    println("note view!")
-    SelectionContainer {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
         val verticalScrollState = rememberScrollState()
 
-        // note text content view
-        if (isTextWrapEnabled) {
-            // with only vertical scroll
-            Text(
-                text = content,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(verticalScrollState),
-                fontSize = currentFontSize.sp
-            )
-        } else {
-            // with both vertical and horizontal scroll
-            val horizontalScrollState = rememberScrollState()
-            Text(
-                text = content,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .horizontalScroll(horizontalScrollState)
-                    .verticalScroll(verticalScrollState),
-                fontSize = currentFontSize.sp
-            )
+        // note content scroll value indicator
+        LinearProgressIndicator(
+            progress = { verticalScrollState.value / verticalScrollState.maxValue.toFloat() },
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.onPrimary,
+            drawStopIndicator = {} // without stop indicator
+        )
+
+        SelectionContainer {
+            // note text content view
+            if (isTextWrapEnabled) {
+                // with only vertical scroll
+                Text(
+                    text = content,
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(verticalScrollState),
+                    fontSize = currentFontSize.sp
+                )
+            } else {
+                // with both vertical and horizontal scroll
+                val horizontalScrollState = rememberScrollState()
+                Text(
+                    text = content,
+                    modifier = Modifier
+                        .weight(1f)
+                        .horizontalScroll(horizontalScrollState)
+                        .verticalScroll(verticalScrollState),
+                    fontSize = currentFontSize.sp
+                )
+            }
         }
     }
 }
