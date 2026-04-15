@@ -5,7 +5,7 @@
 ![Min Sdk](https://img.shields.io/badge/Min%20Sdk-26-green)
 
 **Notepad** a simple and minimalistic android app📱 for notes📃
-Based on *Room* and *Jetpack Compose*.
+Based on *Room* and *Jetpack Compose* with **MVVM** architecture.
 
 ## 🖼️Gallery
 #### Screenshots in ☀️light/🌙dark themes
@@ -24,36 +24,8 @@ Based on *Room* and *Jetpack Compose*.
             <p align="center">3</p>
         </td>
         <td>
-            <img src="previews/preview (5).jpg">
+            <img src="previews/preview (3).jpg">
             <p align="center">4</p>
-        </td>
-    </tr>
-</table>
-
-#### 📃Descriptions for screenshots
-<table>
-    <tr>
-        <td>1</td>
-        <td>
-            Main screen, list of all notes in grid view, light theme
-        </td>
-    </tr>
-    <tr>
-        <td>2</td>
-        <td>
-            Main screen, list of all notes, dark theme
-        </td>
-    </tr>
-    <tr>
-        <td>3</td>
-        <td>
-            Note viewing screen, light theme
-        </td>
-    </tr>
-    <tr>
-        <td>4</td>
-        <td>
-            Note viewing screen with enabled resize note text size dialog, light theme
         </td>
     </tr>
 </table>
