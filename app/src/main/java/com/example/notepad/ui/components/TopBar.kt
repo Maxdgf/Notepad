@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 
 /**
  * Creates top app bar.
+ *
  * @param titleContent top bar title content.
  * @param barIcon top bar icon.
  * @param barActionElements top bar action elements, for example: `buttons, icon buttons...`

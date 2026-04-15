@@ -33,9 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -224,7 +227,16 @@ private fun NoteContentView(
             .fillMaxSize()
             .padding(paddingValues)
     ) {
+        val haptic = LocalHapticFeedback.current
         val verticalScrollState = rememberScrollState()
+
+        LaunchedEffect(Unit) {
+            snapshotFlow { verticalScrollState.value }
+                .collect { value ->
+                    if (value == verticalScrollState.maxValue)
+                        haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                }
+        }
 
         // note content scroll value indicator
         LinearProgressIndicator(

@@ -12,6 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * Creates ui block with loading bar and description text.
+ *
+ * @param showLoadingBar show loading bar flag.
+ * @param description description text.
+ */
 @Composable
 fun LoadingUiBlock(
     modifier: Modifier = Modifier,

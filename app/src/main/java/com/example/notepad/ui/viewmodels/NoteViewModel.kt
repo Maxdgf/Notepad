@@ -21,6 +21,13 @@ import com.example.notepad.ui.states.NoteResult
 import com.example.notepad.ui.states.NotesListResult
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
@@ -65,7 +72,7 @@ class NoteViewModel @Inject constructor(
             NoteResult.NoteLoading // initial value(loading state)
         )
 
-    // All notes list state
+    // All notes list
     val noteList = noteRepository.getAllNotes()
         .map<List<NoteEntity>, NotesListResult> { list ->
             NotesListResult.SuccessfullyLoaded(list)
@@ -84,6 +91,44 @@ class NoteViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(5000),
             NotesListResult.Loading // initial value(loading state)
         )
+
+    val searchQuery = MutableStateFlow<String>("")
+
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    val noteListBySearchQuery = searchQuery
+        .debounce(250) // debounce 250 ms
+        .distinctUntilChanged()
+        .mapLatest { query ->
+            when (val list = noteList.value) {
+                is NotesListResult.SuccessfullyLoaded -> {
+                    if (query.isNotBlank()) {
+                        // trim search query
+                        val preparedQuery = query.trim()
+
+                        // search note
+                        withContext(Dispatchers.Default) {
+                            list.noteList.filter { note ->
+                                note.name.contains(preparedQuery, ignoreCase = true)
+                            } // filter list by query
+                        }
+                    } else emptyList() // map empty list
+                }
+                else -> emptyList() // map empty list
+            }
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+
+    /**
+     * Updates search query state.
+     * @param query input search query.
+     */
+    fun updateSearchQuery(query: String) {
+        searchQuery.value = query
+    }
 
     /**
      * Stores the note id in the saved state descriptor to loading the note using it.

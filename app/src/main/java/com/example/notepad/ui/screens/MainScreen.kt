@@ -60,6 +60,7 @@ import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.AppManager
 import com.example.notepad.utils.DateTimeFormatter
 import androidx.core.net.toUri
+import com.example.notepad.ui.components.SearchUiView
 import com.example.notepad.utils.Toaster
 
 // lazy vertical grid cells count
@@ -85,7 +86,9 @@ private fun ScrollableNoteItemsList(
     isGridViewEnabled: Boolean,
     isDisplayOrderNumEnabled: Boolean,
     isAlternatingNoteColorsEnabled: Boolean,
+    isSearchingNow: Boolean,
     allNotes: List<NoteEntity>,
+    foundedNotesBySearchQuery: List<NoteEntity>,
     onPerformHaptic: (HapticFeedbackType) -> Unit,
     onNavigate: (String) -> Unit,
     onDeleteNoteById: (Long) -> Unit
@@ -124,7 +127,7 @@ private fun ScrollableNoteItemsList(
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 itemsIndexed(
-                    items = allNotes,
+                    items = if (!isSearchingNow) allNotes else foundedNotesBySearchQuery,
                     key = { index, note -> note.id }
                 ) { index, note ->
                     val column = index % CELLS_COUNT // find column num by formula: k % C
@@ -174,7 +177,7 @@ private fun ScrollableNoteItemsList(
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 itemsIndexed(
-                    items = allNotes,
+                    items = if (!isSearchingNow) allNotes else foundedNotesBySearchQuery,
                     key = { index, note -> note.id }
                 ) { index, note ->
                     NoteUiCard(
@@ -297,8 +300,10 @@ fun MainUiScreen(
     }
 
     var deleteAllNotesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+    var searchViewState by rememberSaveable { mutableStateOf(false) }
 
     val allNotesList by noteViewModel.noteList.collectAsState()
+    val foundedNotesBySearchQuery by noteViewModel.noteListBySearchQuery.collectAsState()
     val isGridViewEnabled by appDataStoreViewModel.notesGridEnabledMode.collectAsState()
     val isDisplayOrderNumEnabled by appDataStoreViewModel.orderNumEnabledState.collectAsState()
     val isAlternatingNoteColorsEnabled by appDataStoreViewModel.alternatingNoteColorsEnabledState.collectAsState()
@@ -306,9 +311,35 @@ fun MainUiScreen(
     Scaffold(
         topBar = {
             TopUiBar(
-                titleContent = { Text(text = "Notepad") },
+                titleContent = { if (!searchViewState) Text(text = "Notepad") },
                 barActionElements = {
                     var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
+                    val searchQuery by noteViewModel.searchQuery.collectAsState()
+
+                    // search view
+                    SearchUiView(
+                        state = searchViewState,
+                        onDismissRequest = {
+                            searchViewState = false
+                            noteViewModel.updateSearchQuery("") // clear query
+                        },
+                        query = searchQuery,
+                        onUpdateQuery = { query ->
+                            noteViewModel.updateSearchQuery(query)
+                        },
+                        onClearQuery = {
+                            noteViewModel.updateSearchQuery("")
+                        }
+                    )
+
+
+                    if (!searchViewState)
+                        IconButton(onClick = { searchViewState = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.outline_search_24),
+                                contentDescription = null
+                            )
+                        }
 
                     // dropdown menu
                     Box {
@@ -412,7 +443,9 @@ fun MainUiScreen(
                             onNavigate = onNavigateTo,
                             isDisplayOrderNumEnabled = isDisplayOrderNumEnabled,
                             isAlternatingNoteColorsEnabled = isAlternatingNoteColorsEnabled,
-                            onDeleteNoteById = noteViewModel::deleteNote
+                            onDeleteNoteById = noteViewModel::deleteNote,
+                            isSearchingNow = searchViewState,
+                            foundedNotesBySearchQuery = foundedNotesBySearchQuery
                         )
                     is NotesListResult.LoadedWithException ->
                         NoDataUiDescriptionBlock(

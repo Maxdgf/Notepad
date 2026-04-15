@@ -7,13 +7,17 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.No
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 
 class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : NoteRepository {
-    override fun getAllNotes() = noteDao.getAllNotes()
+    override fun getAllNotes() =
+        noteDao.getAllNotes()
 
-    override fun getNoteById(id: Long): Flow<NoteEntity?> = noteDao.getNoteById(id)
+    override fun getNoteById(id: Long): Flow<NoteEntity?> =
+        noteDao.getNoteById(id)
 
-    override suspend fun addNote(note: NoteEntity) = noteDao.addNote(note)
+    override suspend fun addNote(note: NoteEntity) =
+        noteDao.addNote(note)
 
-    override suspend fun deleteNote(id: Long) = noteDao.deleteNote(id)
+    override suspend fun deleteNote(id: Long) =
+        noteDao.deleteNote(id)
 
     override suspend fun editNote(
         name: String,
@@ -22,5 +26,6 @@ class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : Not
         id: Long
     ) = noteDao.updateNote(name, content, lastEditDateTime, id)
 
-    override suspend fun deleteAllNotes() = noteDao.deleteAllNotes()
+    override suspend fun deleteAllNotes() =
+        noteDao.deleteAllNotes()
 }

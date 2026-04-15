@@ -29,13 +29,17 @@ object AppModule {
         ).fallbackToDestructiveMigration(false).build()
 
     @Provides
-    fun provideNoteDao(noteDatabase: NoteDatabase): NoteDao = noteDatabase.getNoteDao()
+    fun provideNoteDao(noteDatabase: NoteDatabase): NoteDao =
+        noteDatabase.getNoteDao()
 
     @Singleton
     @Provides
-    fun provideNoteRepository(noteDao: NoteDao): NoteRepository = NoteRepositoryImpl(noteDao)
+    fun provideNoteRepository(noteDao: NoteDao): NoteRepository =
+        NoteRepositoryImpl(noteDao)
 
     @Singleton
     @Provides
-    fun provideAppDataStoreManager(@ApplicationContext context: Context): AppDataStoreRepository = AppDataStoreImpl(context)
+    fun provideAppDataStoreManager(
+        @ApplicationContext context: Context
+    ): AppDataStoreRepository = AppDataStoreImpl(context)
 }
