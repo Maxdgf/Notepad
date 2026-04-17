@@ -10,61 +10,32 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.example.notepad.app_data_store.repository.AppDataStoreRepository
+import com.example.notepad.proto.NoteDisplaySettings
+import com.example.notepad.proto.NoteViewSettings
 
 @HiltViewModel
-class AppDataStoreViewModel @Inject constructor(private val appDataStoreRepository: AppDataStoreRepository) : ViewModel() {
-    val notesGridEnabledMode = appDataStoreRepository.getGridEnabledState().stateIn(
+class AppDataStoreViewModel @Inject constructor(
+    private val appDataStoreRepository: AppDataStoreRepository
+) : ViewModel() {
+    val noteViewSettings = appDataStoreRepository.getNoteViewSettings().stateIn(
         viewModelScope,
         SharingStarted.Lazily,
-        false
+        NoteViewSettings.getDefaultInstance()
     )
 
-    val noteTextSize = appDataStoreRepository.getNoteTextSize().stateIn(
+    val notesDisplaySettings = appDataStoreRepository.getNotesDisplaySettings().stateIn(
         viewModelScope,
         SharingStarted.Lazily,
-        10
+        NoteDisplaySettings.getDefaultInstance()
     )
 
-    val textWrapMode = appDataStoreRepository.getTextWrapState().stateIn(
-        viewModelScope,
-        SharingStarted.Lazily,
-        false
-    )
-
-    val orderNumEnabledState = appDataStoreRepository.getOrderNumState().stateIn(
-        viewModelScope,
-        SharingStarted.Lazily,
-        false
-    )
-
-    val alternatingNoteColorsEnabledState = appDataStoreRepository.getAlternatingNoteColorsState().stateIn(
-        viewModelScope,
-        SharingStarted.Lazily,
-        false
-    )
-
-    fun saveNotesGridEnabledState(state: Boolean) =
+    fun saveNoteViewSettings(noteSettings: NoteViewSettings) =
         viewModelScope.launch(Dispatchers.IO) {
-            appDataStoreRepository.saveGridEnabledState(state)
+            appDataStoreRepository.saveNoteViewSettings(noteSettings)
         }
 
-    fun saveNoteTextSize(size: Int) =
+    fun saveNotesDisplaySettings(noteSettings: NoteDisplaySettings) =
         viewModelScope.launch(Dispatchers.IO) {
-            appDataStoreRepository.saveNoteTextSize(size)
-        }
-
-    fun saveTextWrapState(state: Boolean) =
-        viewModelScope.launch(Dispatchers.IO) {
-            appDataStoreRepository.saveTextWrapState(state)
-        }
-
-    fun saveOrderNumEnabledState(state: Boolean) =
-        viewModelScope.launch(Dispatchers.IO) {
-            appDataStoreRepository.saveOrderNumState(state)
-        }
-
-    fun saveAlternatingNoteColorsState(state: Boolean) =
-        viewModelScope.launch(Dispatchers.IO) {
-            appDataStoreRepository.saveAlternatingNoteColorsState(state)
+            appDataStoreRepository.saveNotesDisplaySettings(noteSettings)
         }
 }

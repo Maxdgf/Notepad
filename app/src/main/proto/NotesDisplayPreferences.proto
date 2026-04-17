@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "com.example.notepad.proto";
+option java_multiple_files = true;
+
+message NoteDisplaySettings {
+  bool is_grid_enabled = 1;
+  bool is_order_num_enabled = 2;
+  bool is_alternating_note_colors_enabled = 3;
+}

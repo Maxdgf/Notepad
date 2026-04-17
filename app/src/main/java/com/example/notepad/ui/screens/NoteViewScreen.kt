@@ -107,15 +107,17 @@ private fun ScreenDropdownMenu(
                 contentDescription = null
             )
 
-            DropdownMenuUiIconItem(
-                onClick = {
-                    dropdownMenuState = false // hide menu
-                    onCopyNoteContent()
-                },
-                iconPainter = painterResource(R.drawable.baseline_content_copy_24),
-                text = "copy note",
-                contentDescription = null
-            )
+            Box(modifier = Modifier.padding(horizontal = 10.dp)) {
+                DropdownMenuUiIconItem(
+                    onClick = {
+                        dropdownMenuState = false // hide menu
+                        onCopyNoteContent()
+                    },
+                    iconPainter = painterResource(R.drawable.baseline_content_copy_24),
+                    text = "copy note",
+                    contentDescription = null
+                )
+            }
 
             HorizontalDivider()
 
@@ -284,8 +286,7 @@ fun NoteUiViewScreen(
     val context = LocalContext.current
 
     val currentNote by noteViewModel.currentNote.collectAsState()
-    val textWrapState by appDataStoreViewModel.textWrapMode.collectAsState()
-    val currentFontSize by appDataStoreViewModel.noteTextSize.collectAsState()
+    val noteViewSettings by appDataStoreViewModel.noteViewSettings.collectAsState()
 
     LaunchedEffect(Unit) {
         noteId?.let { id ->
@@ -298,19 +299,19 @@ fun NoteUiViewScreen(
             TopUiBar(
                 titleContent = {
                     when (val noteState = currentNote) {
-                        is NoteResult.SuccessfullyLoaded ->
+                        is NoteResult.Found ->
                             NoteTitle(note = noteState.note)
-                        is NoteResult.LoadedWithException ->
+                        is NoteResult.Exception ->
                             Text(
                                 text = "Error",
                                 fontWeight = FontWeight.Bold
                             )
-                        is NoteResult.NotFounded ->
+                        is NoteResult.NotFound ->
                             Text(
                                 text = "Not founded",
                                 fontWeight = FontWeight.Bold
                             )
-                        NoteResult.NoteLoading ->
+                        NoteResult.Loading ->
                             LoadingUiBlock(
                                 showLoadingBar = false,
                                 description = "Loading note..."
@@ -329,15 +330,27 @@ fun NoteUiViewScreen(
                     val clipBoardManager = remember { ClipBoardManager(context) }
 
                     when (val noteState = currentNote) {
-                        is NoteResult.SuccessfullyLoaded ->
+                        is NoteResult.Found ->
                             ScreenDropdownMenu(
-                                textWrap = textWrapState,
-                                currentFontSize = currentFontSize,
-                                onUpdateCurrentFontSize = appDataStoreViewModel::saveNoteTextSize,
+                                textWrap = noteViewSettings.isTextWrapEnabled,
+                                currentFontSize = noteViewSettings.noteTextSize,
+                                onUpdateCurrentFontSize = { size ->
+                                    val noteSettings = noteViewSettings.toBuilder()
+                                        .setNoteTextSize(size)
+                                        .build()
+
+                                    appDataStoreViewModel.saveNoteViewSettings(noteSettings)
+                                },
                                 onCopyNoteContent = {
                                     clipBoardManager.setTextToClipboard(noteState.note.content)
                                 },
-                                onUpdateTextWrapState = appDataStoreViewModel::saveTextWrapState
+                                onUpdateTextWrapState = { state ->
+                                    val noteSettings = noteViewSettings.toBuilder()
+                                        .setIsTextWrapEnabled(state)
+                                        .build()
+
+                                    appDataStoreViewModel.saveNoteViewSettings(noteSettings)
+                                }
                             )
                         else -> {} // nothing show
                     }
@@ -346,28 +359,28 @@ fun NoteUiViewScreen(
         },
         content = { innerPadding ->
             when (val noteState = currentNote) {
-                is NoteResult.SuccessfullyLoaded ->
+                is NoteResult.Found ->
                     NoteContentView(
                         content = noteState.note.content,
-                        currentFontSize = currentFontSize,
-                        isTextWrapEnabled = textWrapState,
+                        currentFontSize = noteViewSettings.noteTextSize,
+                        isTextWrapEnabled = noteViewSettings.isTextWrapEnabled,
                         paddingValues = innerPadding
                     )
-                is NoteResult.LoadedWithException ->
+                is NoteResult.Exception ->
                     NoDataUiDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = noteState.message
                     )
-                is NoteResult.NotFounded ->
+                is NoteResult.NotFound ->
                     NoDataUiDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = noteState.description
                     )
-                NoteResult.NoteLoading ->
+                NoteResult.Loading ->
                     LoadingUiBlock(
                         modifier = Modifier
                             .fillMaxSize()

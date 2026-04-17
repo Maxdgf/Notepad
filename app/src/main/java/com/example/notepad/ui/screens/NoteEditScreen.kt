@@ -250,7 +250,7 @@ fun NoteUiEditScreen(
             val currentNote by noteViewModel.currentNote.collectAsState()
 
             when (val noteState = currentNote) {
-                is NoteResult.SuccessfullyLoaded ->
+                is NoteResult.Found ->
                     NoteEditView(
                         paddingValues = innerPadding,
                         currentNote = noteState.note,
@@ -258,21 +258,21 @@ fun NoteUiEditScreen(
                         onNavigateTo = onNavigateTo,
                         onPerformHaptic = haptic::performHapticFeedback
                     )
-                is NoteResult.LoadedWithException ->
+                is NoteResult.Exception ->
                     NoDataUiDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = noteState.message
                     )
-                is NoteResult.NotFounded ->
+                is NoteResult.NotFound ->
                     NoDataUiDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = noteState.description
                     )
-                NoteResult.NoteLoading ->
+                NoteResult.Loading ->
                     LoadingUiBlock(
                         modifier = Modifier
                             .fillMaxSize()

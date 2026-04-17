@@ -28,9 +28,7 @@ fun SettingsUiScreen(
     onNavigateTo: (String) -> Unit,
     appDataStoreViewModel: AppDataStoreViewModel
 ) {
-    val isGridViewEnabled by appDataStoreViewModel.notesGridEnabledMode.collectAsState()
-    val isDisplayOrderNumEnabled by appDataStoreViewModel.orderNumEnabledState.collectAsState()
-    val isAlternatingNoteColorsEnabled by appDataStoreViewModel.alternatingNoteColorsEnabledState.collectAsState()
+    val notesDisplaySettings by appDataStoreViewModel.notesDisplaySettings.collectAsState()
 
     Scaffold(
         topBar = {
@@ -60,26 +58,38 @@ fun SettingsUiScreen(
             )
 
             CheckBoxWithUiText(
-                checked = isGridViewEnabled,
+                checked = notesDisplaySettings.isGridEnabled,
                 text = "notes list grid view",
                 onCheckedChange = { state ->
-                    appDataStoreViewModel.saveNotesGridEnabledState(state)
+                    val noteSettings = notesDisplaySettings.toBuilder()
+                        .setIsGridEnabled(state)
+                        .build()
+
+                    appDataStoreViewModel.saveNotesDisplaySettings(noteSettings)
                 }
             )
 
             CheckBoxWithUiText(
-                checked = isDisplayOrderNumEnabled,
+                checked = notesDisplaySettings.isOrderNumEnabled,
                 text = "display order num",
                 onCheckedChange = { state ->
-                    appDataStoreViewModel.saveOrderNumEnabledState(state)
+                    val noteSettings = notesDisplaySettings.toBuilder()
+                        .setIsOrderNumEnabled(state)
+                        .build()
+
+                    appDataStoreViewModel.saveNotesDisplaySettings(noteSettings)
                 }
             )
 
             CheckBoxWithUiText(
-                checked = isAlternatingNoteColorsEnabled,
+                checked = notesDisplaySettings.isAlternatingNoteColorsEnabled,
                 text = "alternating note colors",
                 onCheckedChange = { state ->
-                    appDataStoreViewModel.saveAlternatingNoteColorsState(state)
+                    val noteSettings = notesDisplaySettings.toBuilder()
+                        .setIsAlternatingNoteColorsEnabled(state)
+                        .build()
+
+                    appDataStoreViewModel.saveNotesDisplaySettings(noteSettings)
                 }
             )
         }

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "com.example.notepad.proto";
+option java_multiple_files = true;
+
+message NoteViewSettings {
+    bool is_text_wrap_enabled = 1;
+    uint32 note_text_size = 2;
+}

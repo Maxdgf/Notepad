@@ -43,6 +43,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.core.net.toUri
 
 import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
@@ -59,8 +60,8 @@ import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
 import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.AppManager
 import com.example.notepad.utils.DateTimeFormatter
-import androidx.core.net.toUri
 import com.example.notepad.ui.components.SearchUiView
+import com.example.notepad.ui.states.NoteSearchResult
 import com.example.notepad.utils.Toaster
 
 // lazy vertical grid cells count
@@ -74,7 +75,6 @@ private const val CELLS_COUNT = 2
  * @param isGridViewEnabled notes grid display mode flag.
  * @param isDisplayOrderNumEnabled note order num display mode flag.
  * @param isAlternatingNoteColorsEnabled display alternating note colors flag.
- * @param allNotes notes list.
  * @param onPerformHaptic haptic feedback call function.
  * @param onNavigate call navigation to a specific screen function.
  * @param onDeleteNoteById delete note by id function.
@@ -86,9 +86,7 @@ private fun ScrollableNoteItemsList(
     isGridViewEnabled: Boolean,
     isDisplayOrderNumEnabled: Boolean,
     isAlternatingNoteColorsEnabled: Boolean,
-    isSearchingNow: Boolean,
-    allNotes: List<NoteEntity>,
-    foundedNotesBySearchQuery: List<NoteEntity>,
+    notes: List<NoteEntity>,
     onPerformHaptic: (HapticFeedbackType) -> Unit,
     onNavigate: (String) -> Unit,
     onDeleteNoteById: (Long) -> Unit
@@ -99,166 +97,158 @@ private fun ScrollableNoteItemsList(
     val dateTimeFormatter = remember { DateTimeFormatter() }
     val toaster = remember { Toaster(context) }
 
-    // check notes list(is empty or not)
-    if (allNotes.isNotEmpty()) {
-        var deleteNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
-        var selectedNoteIdToEdit: Long? by rememberSaveable { mutableStateOf(null) }
+    var deleteNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
+    var selectedNoteIdToEdit: Long? by rememberSaveable { mutableStateOf(null) }
 
-        /**
-         * Configures intent for send note text.
-         * @return intent object.
-         */
-        val sendNoteIntent: (String) -> Intent = remember {
-            { textToSend ->
-                Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, textToSend)
-                    type = "text/plain"
-                }
+    /**
+     * Configures intent for send note text.
+     * @return intent object.
+     */
+    val sendNoteIntent: (String) -> Intent = remember {
+        { textToSend ->
+            Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, textToSend)
+                type = "text/plain"
             }
         }
+    }
 
-        if (isGridViewEnabled) {
-            // grid list
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(CELLS_COUNT), // 2 cells
-                modifier = modifier,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                itemsIndexed(
-                    items = if (!isSearchingNow) allNotes else foundedNotesBySearchQuery,
-                    key = { index, note -> note.id }
-                ) { index, note ->
-                    val column = index % CELLS_COUNT // find column num by formula: k % C
-                    val row = index / CELLS_COUNT // find row num by formula: k / C
-                    val isNoteCardDark = (column + row) % 2 == 0 // is sum even state
-
-                    NoteUiCard(
-                        onClick = {
-                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
-                            onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
-                        },
-                        noteName = note.name,
-                        noteOrderNum = if (isDisplayOrderNumEnabled) index + 1 else null,
-                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
-                        noteLastEditDatetime = note.lastEditDateTime?.let {
-                            dateTimeFormatter.formatDatetimeNow(it)
-                        },
-                        onEdit = {
-                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
-                            onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
-                        },
-                        onDelete = {
-                            selectedNoteIdToEdit = note.id
-                            deleteNoteAlertMessageDialogState = true
-                        },
-                        onShare = {
-                            // configure send intent
-                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
-                            val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
-
-                            if (sendIntent.resolveActivity(packageManager) != null)
-                                context.startActivity(shareIntent)
-                            else toaster.showToast("Unable to share note!")
-                        },
-                        useBrightBg =
-                            if (isAlternatingNoteColorsEnabled)
-                                if (isNoteCardDark) false // dark bg
-                                else true // light bg
-                            else false
-                    )
-                }
-            }
-        } else {
-            // normal list
-            LazyColumn(
-                modifier = modifier,
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-                itemsIndexed(
-                    items = if (!isSearchingNow) allNotes else foundedNotesBySearchQuery,
-                    key = { index, note -> note.id }
-                ) { index, note ->
-                    NoteUiCard(
-                        onClick = {
-                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
-                            onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
-                        },
-                        noteName = note.name,
-                        noteOrderNum = if (isDisplayOrderNumEnabled) index + 1 else null,
-                        noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
-                        noteLastEditDatetime = note.lastEditDateTime?.let {
-                            dateTimeFormatter.formatDatetimeNow(it)
-                        },
-                        onEdit = {
-                            onPerformHaptic(HapticFeedbackType.LongPress) // haptic
-                            onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
-                        },
-                        onDelete = {
-                            selectedNoteIdToEdit = note.id
-                            deleteNoteAlertMessageDialogState = true
-                        },
-                        onShare = {
-                            // configure send intent
-                            val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
-                            val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
-
-                            if (sendIntent.resolveActivity(packageManager) != null)
-                                context.startActivity(shareIntent)
-                            else toaster.showToast("Unable to share note!")
-                        },
-                        useBrightBg =
-                            if (isAlternatingNoteColorsEnabled)
-                                // check is index even
-                                if ((index + 1) % 2 == 0) true // light bg
-                                else false // dark bg
-                            else false
-                    )
-                }
-            }
-        }
-
-        // delete note warn dialog
-        AlertUiMessageDialog(
-            onDismissRequestFunction = { deleteNoteAlertMessageDialogState = false },
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = Color.White,
-            state = deleteNoteAlertMessageDialogState,
-            titleIcon = painterResource(R.drawable.outline_warning_amber_24),
-            titleText = "Warning"
+    if (isGridViewEnabled) {
+        // grid list
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(CELLS_COUNT), // 2 cells
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            Text(text = "Are you sure you want to delete this note?")
+            itemsIndexed(
+                items = notes,
+                key = { index, note -> note.id }
+            ) { index, note ->
+                val column = index % CELLS_COUNT // find column num by formula: k % C
+                val row = index / CELLS_COUNT // find row num by formula: k / C
+                val isNoteCardDark = (column + row) % 2 == 0 // is sum even state
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Button(
-                    onClick = { deleteNoteAlertMessageDialogState = false },
-                    modifier = Modifier.weight(0.5f),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                ) { Text(text = "Cancel") }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Button(
+                NoteUiCard(
                     onClick = {
-                        deleteNoteAlertMessageDialogState = false
-
-                        selectedNoteIdToEdit?.let { id ->
-                            onDeleteNoteById(id)
-                        }
+                        onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                        onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
                     },
-                    modifier = Modifier.weight(0.5f),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
-                ) { Text(text = "Delete") }
+                    noteName = note.name,
+                    noteOrderNum = if (isDisplayOrderNumEnabled) index + 1 else null,
+                    noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
+                    noteLastEditDatetime = note.lastEditDateTime?.let {
+                        dateTimeFormatter.formatDatetimeNow(it)
+                    },
+                    onEdit = {
+                        onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                        onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
+                    },
+                    onDelete = {
+                        selectedNoteIdToEdit = note.id
+                        deleteNoteAlertMessageDialogState = true
+                    },
+                    onShare = {
+                        // configure send intent
+                        val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
+                        val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
+
+                        if (sendIntent.resolveActivity(packageManager) != null)
+                            context.startActivity(shareIntent)
+                        else toaster.showToast("Unable to share note!")
+                    },
+                    useBrightBg =
+                        if (isAlternatingNoteColorsEnabled)
+                            if (isNoteCardDark) false // dark bg
+                            else true // light bg
+                        else false
+                )
             }
         }
     } else {
-        NoDataUiDescriptionBlock(
-            description = "No notes :(",
-            modifier = Modifier.fillMaxSize()
-        )
+        // normal list
+        LazyColumn(
+            modifier = modifier,
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            itemsIndexed(
+                items = notes,
+                key = { index, note -> note.id }
+            ) { index, note ->
+                NoteUiCard(
+                    onClick = {
+                        onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                        onNavigate("${NavigationRoutes.NoteViewScreen.route}/${note.id}")
+                    },
+                    noteName = note.name,
+                    noteOrderNum = if (isDisplayOrderNumEnabled) index + 1 else null,
+                    noteDatetimeCreation = dateTimeFormatter.formatDatetimeNow(note.dateTime),
+                    noteLastEditDatetime = note.lastEditDateTime?.let {
+                        dateTimeFormatter.formatDatetimeNow(it)
+                    },
+                    onEdit = {
+                        onPerformHaptic(HapticFeedbackType.LongPress) // haptic
+                        onNavigate("${NavigationRoutes.NoteEditScreen.route}/${note.id}")
+                    },
+                    onDelete = {
+                        selectedNoteIdToEdit = note.id
+                        deleteNoteAlertMessageDialogState = true
+                    },
+                    onShare = {
+                        // configure send intent
+                        val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
+                        val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
+
+                        if (sendIntent.resolveActivity(packageManager) != null)
+                            context.startActivity(shareIntent)
+                        else toaster.showToast("Unable to share note!")
+                    },
+                    useBrightBg =
+                        if (isAlternatingNoteColorsEnabled)
+                        // check is index even
+                            if ((index + 1) % 2 == 0) true // light bg
+                            else false // dark bg
+                        else false
+                )
+            }
+        }
+    }
+
+    // delete note warn dialog
+    AlertUiMessageDialog(
+        onDismissRequestFunction = { deleteNoteAlertMessageDialogState = false },
+        containerColor = MaterialTheme.colorScheme.error,
+        contentColor = Color.White,
+        state = deleteNoteAlertMessageDialogState,
+        titleIcon = painterResource(R.drawable.outline_warning_amber_24),
+        titleText = "Warning"
+    ) {
+        Text(text = "Are you sure you want to delete this note?")
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = { deleteNoteAlertMessageDialogState = false },
+                modifier = Modifier.weight(0.5f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+            ) { Text(text = "Cancel") }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Button(
+                onClick = {
+                    deleteNoteAlertMessageDialogState = false
+
+                    selectedNoteIdToEdit?.let { id ->
+                        onDeleteNoteById(id)
+                    }
+                },
+                modifier = Modifier.weight(0.5f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
+            ) { Text(text = "Delete") }
+        }
     }
 }
 
@@ -304,9 +294,7 @@ fun MainUiScreen(
 
     val allNotesList by noteViewModel.noteList.collectAsState()
     val foundedNotesBySearchQuery by noteViewModel.noteListBySearchQuery.collectAsState()
-    val isGridViewEnabled by appDataStoreViewModel.notesGridEnabledMode.collectAsState()
-    val isDisplayOrderNumEnabled by appDataStoreViewModel.orderNumEnabledState.collectAsState()
-    val isAlternatingNoteColorsEnabled by appDataStoreViewModel.alternatingNoteColorsEnabledState.collectAsState()
+    val notesDisplaySettings by appDataStoreViewModel.notesDisplaySettings.collectAsState()
 
     Scaffold(
         topBar = {
@@ -318,6 +306,7 @@ fun MainUiScreen(
 
                     // search view
                     SearchUiView(
+                        modifier = Modifier.fillMaxWidth(),
                         state = searchViewState,
                         onDismissRequest = {
                             searchViewState = false
@@ -333,7 +322,7 @@ fun MainUiScreen(
                     )
 
 
-                    if (!searchViewState)
+                    if (!searchViewState) {
                         IconButton(onClick = { searchViewState = true }) {
                             Icon(
                                 painter = painterResource(R.drawable.outline_search_24),
@@ -341,69 +330,72 @@ fun MainUiScreen(
                             )
                         }
 
-                    // dropdown menu
-                    Box {
-                        IconButton(onClick = { dropdownMenuState = true }) {
-                            Icon(
-                                painter = painterResource(R.drawable.baseline_more_vert_24),
-                                contentDescription = null
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = dropdownMenuState,
-                            onDismissRequest = { dropdownMenuState = false }
-                        ) {
-                            DropdownMenuUiIconItem(
-                                onClick = {
-                                    dropdownMenuState = false // hide menu
-                                    onNavigateTo(NavigationRoutes.NoteSettingsScreen.route)
-                                },
-                                iconPainter = painterResource(R.drawable.baseline_settings_24),
-                                text = "settings",
-                                contentDescription = null,
-                            )
-
-                            // delete all notes button
-                            when (val notesListState = allNotesList) {
-                                is NotesListResult.SuccessfullyLoaded ->
-                                    DropdownMenuUiIconItem(
-                                        onClick = {
-                                            dropdownMenuState = false // hide menu
-                                            if (notesListState.noteList.isNotEmpty())
-                                                deleteAllNotesAlertMessageDialogState = true
-                                        },
-                                        iconPainter = painterResource(R.drawable.baseline_delete_24),
-                                        text = "delete all",
-                                        contentDescription = null
-                                    )
-                                else -> {} // nothing show
+                        // dropdown menu
+                        Box {
+                            IconButton(onClick = { dropdownMenuState = true }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.baseline_more_vert_24),
+                                    contentDescription = null
+                                )
                             }
 
-                            HorizontalDivider()
+                            DropdownMenu(
+                                expanded = dropdownMenuState,
+                                onDismissRequest = { dropdownMenuState = false }
+                            ) {
+                                DropdownMenuUiIconItem(
+                                    onClick = {
+                                        dropdownMenuState = false // hide menu
+                                        onNavigateTo(NavigationRoutes.NoteSettingsScreen.route)
+                                    },
+                                    iconPainter = painterResource(R.drawable.baseline_settings_24),
+                                    text = "settings",
+                                    contentDescription = null,
+                                )
 
-                            DropdownMenuUiIconItem(
-                                onClick = {
-                                    val sendFeedbackIntent = sendFeedbackViaEmailIntent("Notepad app feedback")
+                                // delete all notes button
+                                when (val notesListState = allNotesList) {
+                                    is NotesListResult.ContentList ->
+                                        DropdownMenuUiIconItem(
+                                            onClick = {
+                                                dropdownMenuState = false // hide menu
+                                                if (notesListState.noteList.isNotEmpty())
+                                                    deleteAllNotesAlertMessageDialogState = true
+                                            },
+                                            iconPainter = painterResource(R.drawable.baseline_delete_24),
+                                            text = "delete all",
+                                            contentDescription = null
+                                        )
 
-                                    if (sendFeedbackIntent.resolveActivity(packageManager) != null)
-                                        context.startActivity(sendFeedbackIntent)
-                                    else toaster.showToast("No email apps!")
-                                },
-                                iconPainter = painterResource(R.drawable.baseline_email_24),
-                                text = "send feedback",
-                                contentDescription = null
-                            )
+                                    else -> {} // nothing show
+                                }
 
-                            DropdownMenuUiIconItem(
-                                onClick = {
-                                    dropdownMenuState = false // hide menu
-                                    appManager.breakApp() // exit app
-                                },
-                                text = "exit",
-                                iconPainter = painterResource(R.drawable.baseline_exit_to_app_24),
-                                contentDescription = null
-                            )
+                                HorizontalDivider()
+
+                                DropdownMenuUiIconItem(
+                                    onClick = {
+                                        val sendFeedbackIntent =
+                                            sendFeedbackViaEmailIntent("Notepad app feedback")
+
+                                        if (sendFeedbackIntent.resolveActivity(packageManager) != null)
+                                            context.startActivity(sendFeedbackIntent)
+                                        else toaster.showToast("No email apps!")
+                                    },
+                                    iconPainter = painterResource(R.drawable.baseline_email_24),
+                                    text = "send feedback",
+                                    contentDescription = null
+                                )
+
+                                DropdownMenuUiIconItem(
+                                    onClick = {
+                                        dropdownMenuState = false // hide menu
+                                        appManager.breakApp() // exit app
+                                    },
+                                    text = "exit",
+                                    iconPainter = painterResource(R.drawable.baseline_exit_to_app_24),
+                                    contentDescription = null
+                                )
+                            }
                         }
                     }
                 }
@@ -431,23 +423,53 @@ fun MainUiScreen(
             ) {
                 // match notes list state
                 when (val notesListState = allNotesList) {
-                    is NotesListResult.SuccessfullyLoaded ->
-                        ScrollableNoteItemsList(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 5.dp),
-                            context = context,
-                            isGridViewEnabled = isGridViewEnabled,
-                            allNotes = notesListState.noteList,
-                            onPerformHaptic = haptic::performHapticFeedback,
-                            onNavigate = onNavigateTo,
-                            isDisplayOrderNumEnabled = isDisplayOrderNumEnabled,
-                            isAlternatingNoteColorsEnabled = isAlternatingNoteColorsEnabled,
-                            onDeleteNoteById = noteViewModel::deleteNote,
-                            isSearchingNow = searchViewState,
-                            foundedNotesBySearchQuery = foundedNotesBySearchQuery
-                        )
-                    is NotesListResult.LoadedWithException ->
+                    is NotesListResult.ContentList ->
+                        if (!searchViewState)
+                            ScrollableNoteItemsList(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 5.dp),
+                                context = context,
+                                isGridViewEnabled = notesDisplaySettings.isGridEnabled,
+                                notes = notesListState.noteList,
+                                onPerformHaptic = haptic::performHapticFeedback,
+                                onNavigate = onNavigateTo,
+                                isDisplayOrderNumEnabled = notesDisplaySettings.isOrderNumEnabled,
+                                isAlternatingNoteColorsEnabled = notesDisplaySettings.isAlternatingNoteColorsEnabled,
+                                onDeleteNoteById = noteViewModel::deleteNote
+                            )
+                        else
+                            when (val foundNotes = foundedNotesBySearchQuery) {
+                                is NoteSearchResult.Found ->
+                                    ScrollableNoteItemsList(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 5.dp),
+                                        context = context,
+                                        isGridViewEnabled = notesDisplaySettings.isGridEnabled,
+                                        notes = foundNotes.notes,
+                                        onPerformHaptic = haptic::performHapticFeedback,
+                                        onNavigate = onNavigateTo,
+                                        isDisplayOrderNumEnabled = notesDisplaySettings.isOrderNumEnabled,
+                                        isAlternatingNoteColorsEnabled = notesDisplaySettings.isAlternatingNoteColorsEnabled,
+                                        onDeleteNoteById = noteViewModel::deleteNote
+                                    )
+                                is NoteSearchResult.NotFound ->
+                                    NoDataUiDescriptionBlock(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(innerPadding),
+                                        description = "No notes found."
+                                    )
+                                is NoteSearchResult.Searching ->
+                                    LoadingUiBlock(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(innerPadding),
+                                        description = "Searching notes..."
+                                    ) // show loading block
+                            }
+                    is NotesListResult.Exception ->
                         NoDataUiDescriptionBlock(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -461,6 +483,11 @@ fun MainUiScreen(
                                 .padding(innerPadding),
                             description = "Loading notes..."
                         ) // show loading block
+                    NotesListResult.EmptyList ->
+                        NoDataUiDescriptionBlock(
+                            description = "No notes :(",
+                            modifier = Modifier.fillMaxSize()
+                        )
                 }
             }
 

@@ -1,5 +1,6 @@
 package com.example.notepad.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -19,6 +20,7 @@ import com.example.notepad.R
 
 @Composable
 fun SearchUiView(
+    modifier: Modifier = Modifier,
     state: Boolean,
     onDismissRequest: () -> Unit,
     query: String,
@@ -26,7 +28,11 @@ fun SearchUiView(
     onClearQuery: () -> Unit
 ) {
     if (state)
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = modifier,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             IconButton(onClick = { onDismissRequest() }) {
                 Icon(
                     painter = painterResource(R.drawable.outline_arrow_back_24),

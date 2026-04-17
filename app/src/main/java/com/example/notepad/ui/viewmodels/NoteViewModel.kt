@@ -21,12 +21,13 @@ import com.example.notepad.ui.states.NoteResult
 import com.example.notepad.ui.states.NotesListResult
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
+import com.example.notepad.ui.states.NoteSearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 
 @HiltViewModel
@@ -49,18 +50,18 @@ class NoteViewModel @Inject constructor(
             flow<NoteResult> {
                 // get note by id
                 noteRepository.getNoteById(id)
-                    .onStart { emit(NoteResult.NoteLoading) } // emit loading state on start
+                    .onStart { emit(NoteResult.Loading) } // emit loading state on start
                     .collect { note ->
                         // null check
-                        if (note != null) emit(NoteResult.SuccessfullyLoaded(note)) // emit note
-                        else emit(NoteResult.NotFounded("Sorry, this note was not founded!")) // emit note was not founded state
+                        if (note != null) emit(NoteResult.Found(note)) // emit note
+                        else emit(NoteResult.NotFound("Sorry, this note was not founded!")) // emit note was not founded state
                     }
             }
         }
         .catch { exception ->
             // emit exception state
             emit(
-                NoteResult.LoadedWithException(
+                NoteResult.Exception(
                     exception.message ?:
                     "An unexpected error occurred, the note was not loaded."
                 )
@@ -69,18 +70,21 @@ class NoteViewModel @Inject constructor(
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            NoteResult.NoteLoading // initial value(loading state)
+            NoteResult.Loading // initial value(loading state)
         )
 
     // All notes list
     val noteList = noteRepository.getAllNotes()
         .map<List<NoteEntity>, NotesListResult> { list ->
-            NotesListResult.SuccessfullyLoaded(list)
+            if (list.isNotEmpty())
+                NotesListResult.ContentList(list)
+            else
+                NotesListResult.EmptyList
         }
         .catch { exception ->
             // emit exception state
             emit(
-                NotesListResult.LoadedWithException(
+                NotesListResult.Exception(
                     exception.message ?:
                     "An unexpected error occurred, the notes was not loaded."
                 )
@@ -98,28 +102,37 @@ class NoteViewModel @Inject constructor(
     val noteListBySearchQuery = searchQuery
         .debounce(250) // debounce 250 ms
         .distinctUntilChanged()
-        .mapLatest { query ->
+        .transformLatest { query ->
             when (val list = noteList.value) {
-                is NotesListResult.SuccessfullyLoaded -> {
+                is NotesListResult.ContentList -> {
                     if (query.isNotBlank()) {
+                        emit(NoteSearchResult.Searching)
+
                         // trim search query
                         val preparedQuery = query.trim()
 
                         // search note
-                        withContext(Dispatchers.Default) {
+                        val foundedNotes = withContext(Dispatchers.Default) {
                             list.noteList.filter { note ->
                                 note.name.contains(preparedQuery, ignoreCase = true)
                             } // filter list by query
                         }
-                    } else emptyList() // map empty list
+
+                        // emit state
+                        if (foundedNotes.isNotEmpty())
+                            emit(NoteSearchResult.Found(foundedNotes)) // emit found notes list
+                        else
+                            emit(NoteSearchResult.NotFound) // emit not found state
+
+                    } else emit(NoteSearchResult.NotFound) // emit not found state
                 }
-                else -> emptyList() // map empty list
+                else -> emit(NoteSearchResult.NotFound) // emit not found state
             }
         }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            emptyList()
+            NoteSearchResult.NotFound
         )
 
     /**
