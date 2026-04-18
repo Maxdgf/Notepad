@@ -13,46 +13,43 @@ Based on *Room* and *Jetpack Compose* with **MVVM** architecture.
     <tr>
         <td>
             <img src="previews/preview (1).jpg">
-            <p align="center">1</p>
         </td>
         <td>
             <img src="previews/preview (2).jpg">
-            <p align="center">2</p>
         </td>
         <td>
             <img src="previews/preview (4).jpg">
-            <p align="center">3</p>
         </td>
         <td>
             <img src="previews/preview (3).jpg">
-            <p align="center">4</p>
         </td>
     </tr>
 </table>
 
-## 🔃Android Versions
-Android **8.0** and later
+## 🦾Functionality
 
-## 🦾Possibilities
-#### 👉Here you can:
+#### Base:
 * creating a note
 * deleting a note
 * editing a note
 * deleting all notes
-* sharing a note
 
-## 🌟Features
-* grid notes list mode
-* note last edit time view
-* edit note text size
-* enable/disable note text wrap mode
+#### Additional:
+* sharing a note
+* searching specific note-s via search string
+* editing all notes display settings
+* editing note display settings
+
+## 📖How to use?
+The app's functionality is simple and convenient. The plus button at the bottom creates a new note. Tapping a note once opens it. Editing and action buttons are located on the right side of the note card, and you can also delete all notes. A search bar is available to help you find the note you need. Settings are also available, allowing you to customize options (such as how notes are displayed) to your liking.
 
 ## 📚Tech stack
 * **Dagger-Hilt** - dependency injection
-* **Room** - store all notes in database (*repository pattern* with dependency injection)
+* **Room** - store all notes in database
 * **Ksp** - Room and Dagger-Hilt implementation
 * **Viewmodel** - store and update states
-* **Data store** - store app settings parameters (*repository pattern* with dependency injection)
+* **Data store** - store app settings parameters
+* **Google Protobuf** - structuring application settings flags and parameters for store in a datastore
 
-## 📖How to use?
-App functionality is simple and easy. The plus button at the bottom creates a new note. A single tap on a note will view it, and a long press will bring up a menu with options for editing or deleting it. You can also delete all notes, and there are also mini settings where you can change the notes list display mode to grid.
+## 🔃Android Versions
+Android **8.0** and later
