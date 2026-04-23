@@ -2,7 +2,7 @@
 
 ![Compose BOM](https://img.shields.io/badge/Compose%20Bom-2026.03.00-blue)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-purple)
-![Min Sdk](https://img.shields.io/badge/Min%20Sdk-26-green)
+![Api](https://img.shields.io/badge/API-26+-green)
 
 **Notepad** a simple and minimalistic android app📱 for notes📃
 Based on *Room* and *Jetpack Compose* with **MVVM** architecture.
@@ -42,6 +42,10 @@ Based on *Room* and *Jetpack Compose* with **MVVM** architecture.
 
 ## 📖How to use?
 The app's functionality is simple and convenient. The plus button at the bottom creates a new note. Tapping a note once opens it. Editing and action buttons are located on the right side of the note card, and you can also delete all notes. A search bar is available to help you find the note you need. Settings are also available, allowing you to customize options (such as how notes are displayed) to your liking.
+
+## 🏗️Architecture patterns
+* **MVVM**
+* **Repository pattern**
 
 ## 📚Tech stack
 * **Dagger-Hilt** - dependency injection
