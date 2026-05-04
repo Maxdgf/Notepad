@@ -16,12 +16,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-
-import com.example.notepad.ui.states.NoteResult
-import com.example.notepad.ui.states.NotesListResult
-import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
-import com.example.notepad.ui.states.NoteSearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,13 +24,19 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
 
+import com.example.notepad.ui.states.NoteSearchResult
+import com.example.notepad.ui.states.NoteResult
+import com.example.notepad.ui.states.NotesListResult
+import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
+import com.example.notepad.core.data_management.databases.notes_local_storage.repository.NoteRepository
+
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    companion object {
-        private const val CURRENT_NOTE_KEY = "current_note"
+    private companion object {
+        const val CURRENT_NOTE_KEY = "current_note"
     }
 
     // current note id saved state
@@ -53,8 +53,10 @@ class NoteViewModel @Inject constructor(
                     .onStart { emit(NoteResult.Loading) } // emit loading state on start
                     .collect { note ->
                         // null check
-                        if (note != null) emit(NoteResult.Found(note)) // emit note
-                        else emit(NoteResult.NotFound("Sorry, this note was not founded!")) // emit note was not founded state
+                        if (note != null)
+                            emit(NoteResult.Found(note)) // emit note
+                        else
+                            emit(NoteResult.NotFound) // emit note was not founded state
                     }
             }
         }
@@ -93,9 +95,10 @@ class NoteViewModel @Inject constructor(
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            NotesListResult.Loading // initial value(loading state)
+            NotesListResult.Loading // initial value (loading state)
         )
 
+    // search note query state
     val searchQuery = MutableStateFlow<String>("")
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -132,7 +135,7 @@ class NoteViewModel @Inject constructor(
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            NoteSearchResult.NotFound
+            NoteSearchResult.NotFound // initial state (not found state)
         )
 
     /**

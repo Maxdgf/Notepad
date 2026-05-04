@@ -321,7 +321,7 @@ fun MainUiScreen(
                         }
                     )
 
-
+                    // check search note state
                     if (!searchViewState) {
                         IconButton(onClick = { searchViewState = true }) {
                             Icon(
@@ -486,7 +486,9 @@ fun MainUiScreen(
                     NotesListResult.EmptyList ->
                         NoDataUiDescriptionBlock(
                             description = "No notes :(",
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding)
                         )
                 }
             }

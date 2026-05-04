@@ -47,7 +47,7 @@ protobuf {
         artifact = "com.google.protobuf:protoc:3.21.7"
     }
 
-    // Generates the java Protobuf-lite code for the Protobufs in this project
+    // Generates the java Protobuf-lite code for the Protobuf's in this project
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {

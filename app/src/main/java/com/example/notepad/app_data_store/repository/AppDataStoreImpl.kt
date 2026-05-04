@@ -1,14 +1,15 @@
 package com.example.notepad.app_data_store.repository
 
 import android.content.Context
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+
 import androidx.datastore.preferences.core.byteArrayPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.notepad.proto.NoteDisplaySettings
 import com.example.notepad.proto.NoteViewSettings
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 val Context.dataStore by preferencesDataStore(name = "Notepad_preferences")
 

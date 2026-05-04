@@ -378,7 +378,7 @@ fun NoteUiViewScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
-                        description = noteState.description
+                        description = "This note, not found."
                     )
                 NoteResult.Loading ->
                     LoadingUiBlock(
