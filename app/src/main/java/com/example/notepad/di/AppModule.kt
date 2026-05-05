@@ -39,7 +39,6 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAppDataStoreManager(
-        @ApplicationContext context: Context
-    ): AppDataStoreRepository = AppDataStoreImpl(context)
+    fun provideAppDataStoreManager(@ApplicationContext context: Context): AppDataStoreRepository =
+        AppDataStoreImpl(context)
 }
