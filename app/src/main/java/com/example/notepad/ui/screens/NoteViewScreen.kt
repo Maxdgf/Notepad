@@ -52,7 +52,7 @@ import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
-import com.example.notepad.ui.components.CheckBoxWithUiText
+import com.example.notepad.ui.components.SwitchWithUiText
 import com.example.notepad.ui.components.DropdownMenuUiIconItem
 import com.example.notepad.ui.components.LoadingUiBlock
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
@@ -122,7 +122,7 @@ private fun ScreenDropdownMenu(
             HorizontalDivider()
 
             val hideMenuScope = rememberCoroutineScope()
-            CheckBoxWithUiText(
+            SwitchWithUiText(
                 checked = textWrap,
                 text = "text wrap",
                 onCheckedChange = { state ->

@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 
 import com.example.notepad.R
 import com.example.notepad.ui.components.TopUiBar
-import com.example.notepad.ui.components.CheckBoxWithUiText
+import com.example.notepad.ui.components.SwitchWithUiText
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
 
@@ -57,7 +57,7 @@ fun SettingsUiScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            CheckBoxWithUiText(
+            SwitchWithUiText(
                 checked = notesDisplaySettings.isGridEnabled,
                 text = "notes list grid view",
                 onCheckedChange = { state ->
@@ -69,7 +69,7 @@ fun SettingsUiScreen(
                 }
             )
 
-            CheckBoxWithUiText(
+            SwitchWithUiText(
                 checked = notesDisplaySettings.isOrderNumEnabled,
                 text = "display order num",
                 onCheckedChange = { state ->
@@ -81,7 +81,7 @@ fun SettingsUiScreen(
                 }
             )
 
-            CheckBoxWithUiText(
+            SwitchWithUiText(
                 checked = notesDisplaySettings.isAlternatingNoteColorsEnabled,
                 text = "alternating note colors",
                 onCheckedChange = { state ->
