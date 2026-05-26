@@ -10,7 +10,7 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.en
 
 @Dao
 interface NoteDao {
-    @Query("SELECT * FROM notes_storage")
+    @Query("SELECT * FROM notes_storage ORDER BY note_creation_datetime DESC")
     fun getAllNotes(): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM notes_storage WHERE id = :id")
