@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.protobuf.javalite)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.room.runtime)
+    testImplementation(libs.junit.junit)
+    testImplementation(libs.junit.junit)
     ksp(libs.room.compiler)
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
