@@ -123,6 +123,7 @@ private fun ScreenDropdownMenu(
 
             val hideMenuScope = rememberCoroutineScope()
             SwitchWithUiText(
+                modifier = Modifier.padding(horizontal = 5.dp),
                 checked = textWrap,
                 text = "text wrap",
                 onCheckedChange = { state ->
@@ -235,6 +236,7 @@ private fun NoteContentView(
         LaunchedEffect(Unit) {
             snapshotFlow { verticalScrollState.value }
                 .collect { value ->
+                    // when scroll value reached max value, perform haptic feedback
                     if (value == verticalScrollState.maxValue)
                         haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
                 }

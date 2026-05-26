@@ -126,8 +126,8 @@ private fun ScrollableNoteItemsList(
                 items = notes,
                 key = { index, note -> note.id }
             ) { index, note ->
-                val column = index % CELLS_COUNT // find column num by formula: k % C
-                val row = index / CELLS_COUNT // find row num by formula: k / C
+                val column = index % CELLS_COUNT             // find column num by formula: k % C
+                val row = index / CELLS_COUNT                // find row num by formula: k / C
                 val isNoteCardDark = (column + row) % 2 == 0 // is sum even state
 
                 NoteUiCard(
@@ -252,7 +252,7 @@ private fun ScrollableNoteItemsList(
     }
 }
 
-// developer email address
+// developer public email address
 private const val DEVELOPER_EMAIL_ADDRESS = "maxma4090@gmail.com"
 
 /**
@@ -317,7 +317,7 @@ fun MainUiScreen(
                             noteViewModel.updateSearchQuery(query)
                         },
                         onClearQuery = {
-                            noteViewModel.updateSearchQuery("")
+                            noteViewModel.updateSearchQuery("") // clear query
                         }
                     )
 
@@ -389,7 +389,7 @@ fun MainUiScreen(
                                 DropdownMenuUiIconItem(
                                     onClick = {
                                         dropdownMenuState = false // hide menu
-                                        appManager.breakApp() // exit app
+                                        appManager.breakApp()     // exit app
                                     },
                                     text = "exit",
                                     iconPainter = painterResource(R.drawable.baseline_exit_to_app_24),

@@ -19,11 +19,15 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun SwitchWithUiText(
+    modifier: Modifier = Modifier,
     checked: Boolean,
     text: String,
     onCheckedChange: (state: Boolean) -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Switch(
             checked = checked,
             onCheckedChange = { state -> onCheckedChange(state) }
