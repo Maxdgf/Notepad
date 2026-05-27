@@ -65,8 +65,9 @@ private fun NoteEditView(
     var errorOfNoteChangesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
 
     // update note content state
-    LaunchedEffect(currentNote.content) {
-        noteEditScreenViewModel.updateNoteContent(currentNote.content)
+    LaunchedEffect(Unit) {
+        if (noteEditScreenViewModel.isNoteContentEmpty())
+            noteEditScreenViewModel.updateNoteContent(currentNote.content)
     }
 
     Column(
@@ -85,7 +86,9 @@ private fun NoteEditView(
 
         // text field auto scroll
         LaunchedEffect(noteContentInputFieldVerticalScrollState.maxValue) {
-            noteContentInputFieldVerticalScrollState.animateScrollTo(noteContentInputFieldVerticalScrollState.maxValue)
+            noteContentInputFieldVerticalScrollState.animateScrollTo(
+                noteContentInputFieldVerticalScrollState.maxValue
+            )
         }
         
         BasicTextField(
@@ -205,8 +208,9 @@ fun NoteUiEditScreen(
                     when (val noteState = currentNote) {
                         is NoteResult.Found -> {
                             // update note name state
-                            LaunchedEffect(noteState.note.name) {
-                                noteEditScreenViewModel.updateNoteName(noteState.note.name)
+                            LaunchedEffect(Unit) {
+                                if (noteEditScreenViewModel.isNoteNameEmpty())
+                                    noteEditScreenViewModel.updateNoteName(noteState.note.name)
                             }
 
                             LineInputUiField(

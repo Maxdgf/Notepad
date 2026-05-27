@@ -22,9 +22,23 @@ class NoteEditScreenViewModel : ViewModel() {
     fun updateNoteContent(text: String) { noteContent = text }
 
     /**
-     * Checks is note name and content empty
+     * Checks is note name or content empty.
      * @return boolean flag.
      */
     fun isNoteNameOrContentEmpty(): Boolean =
         noteName.isEmpty() || noteContent.isEmpty()
+
+    /**
+     * Checks is note name empty.
+     * @return boolean flag.
+     */
+    fun isNoteNameEmpty(): Boolean =
+        noteName.isEmpty()
+
+    /**
+     * Checks is note content empty.
+     * @return boolean flag.
+     */
+    fun isNoteContentEmpty(): Boolean =
+        noteContent.isEmpty()
 }
