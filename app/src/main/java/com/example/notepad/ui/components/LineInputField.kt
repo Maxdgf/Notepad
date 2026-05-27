@@ -59,6 +59,7 @@ fun LineInputUiField(
                 .weight(1f)
                 .onFocusChanged(
                     onFocusChanged = { state ->
+                        @Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
                         isFieldFocused = state.isFocused
                     }
                 ),

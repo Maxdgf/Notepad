@@ -50,6 +50,7 @@ import com.example.notepad.ui.states.NoteResult
 import com.example.notepad.ui.viewmodels.screens.NoteEditScreenViewModel
 import com.example.notepad.ui.viewmodels.NoteViewModel
 
+@Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
 private fun NoteEditView(
     paddingValues: PaddingValues,
