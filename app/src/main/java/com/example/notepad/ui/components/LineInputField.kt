@@ -25,6 +25,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.example.notepad.R
 
+/**
+ * Creates a sing-line text input field with ability
+ * to clear text by clicking icon button.
+ *
+ * @param state text state.
+ * @param placeholder input field placeholder text.
+ * @param buttonContentDescription icon button content description.
+ * @param onUpdateState update text state function.
+ * @param onClearContent clear text content function.
+ */
 @Composable
 fun LineInputUiField(
     state: String,

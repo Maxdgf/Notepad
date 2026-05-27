@@ -64,6 +64,7 @@ private fun NoteEditView(
     var errorOfEmptyNotAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
     var errorOfNoteChangesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
 
+    // update note content state
     LaunchedEffect(currentNote.content) {
         noteEditScreenViewModel.updateNoteContent(currentNote.content)
     }

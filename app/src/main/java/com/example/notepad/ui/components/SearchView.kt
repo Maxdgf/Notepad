@@ -18,6 +18,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.notepad.R
 
+/**
+ * Creates a search view.
+ *
+ * @param state visibility state.
+ * @param onDismissRequest dismiss request function.
+ * @param query search query state.
+ * @param onUpdateQuery update search query state function.
+ * @param onClearQuery clear search query state function.
+ */
 @Composable
 fun SearchUiView(
     modifier: Modifier = Modifier,

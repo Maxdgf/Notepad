@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
  * @param state dialog state.
  * @param containerColor dialog color (optional).
  * @param contentColor dialog's content color (optional).
- * @param onDismissRequestFunction on dismiss request function.
+ * @param onDismissRequestFunction dismiss request function.
  * @param dialogContent composable dialog content.
  * @param titleIcon dialog title icon painter.
  * @param titleText dialog title text.
