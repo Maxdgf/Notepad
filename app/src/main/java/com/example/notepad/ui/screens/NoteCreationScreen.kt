@@ -43,6 +43,7 @@ import com.example.notepad.R
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
+import com.example.notepad.ui.components.LineInputUiField
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.viewmodels.screens.NoteCreationScreenViewModel
 
@@ -71,7 +72,19 @@ fun NoteUiCreationScreen(
     Scaffold(
         topBar = {
             TopUiBar(
-                titleContent = { Text(text = "Create new note") },
+                titleContent = {
+                    LineInputUiField(
+                        state = noteCreationScreenViewModel.noteName,
+                        placeholder = "Enter note name...",
+                        buttonContentDescription = null,
+                        onUpdateState = { newValue ->
+                            noteCreationScreenViewModel.updateNoteName(newValue)
+                        },
+                        onClearContent = {
+                            noteCreationScreenViewModel.updateNoteName("")
+                        }
+                    )
+                },
                 barIcon = {
                     IconButton(onClick = { onNavigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
@@ -95,39 +108,6 @@ fun NoteUiCreationScreen(
                     ),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                OutlinedTextField(
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth(),
-                    value = noteCreationScreenViewModel.noteName,
-                    onValueChange = { newValue ->
-                        noteCreationScreenViewModel.updateNoteName(newValue)
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { noteCreationScreenViewModel.updateNoteName("") }) {
-                            Icon(
-                                painter = painterResource(R.drawable.baseline_clear_24),
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    textStyle = TextStyle(fontSize = 15.sp),
-                    placeholder = {
-                        Text(
-                            text = "Enter your note name here...",
-                            modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                            fontSize = 15.sp
-                        )
-                    },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                        cursorColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-
-                HorizontalDivider()
-
                 BasicTextField(
                     modifier = Modifier
                         .fillMaxWidth()

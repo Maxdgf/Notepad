@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Creates text placeholder for basic text field.
@@ -31,7 +32,8 @@ fun BasicTextFieldUiPlaceholder(
                 color =
                     if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
                     else Color.Black.copy(alpha = 0.5f), // set placeholder text color
-                modifier = Modifier.padding(start = startPadding)
+                modifier = Modifier.padding(start = startPadding),
+                fontSize = 16.sp
             )
 
         innerTextField() // inner text field

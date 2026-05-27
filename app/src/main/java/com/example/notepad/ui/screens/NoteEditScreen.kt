@@ -46,6 +46,7 @@ import com.example.notepad.core.data_management.databases.notes_local_storage.en
 import com.example.notepad.ui.components.TopUiBar
 import com.example.notepad.ui.components.AlertUiMessageDialog
 import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
+import com.example.notepad.ui.components.LineInputUiField
 import com.example.notepad.ui.components.LoadingUiBlock
 import com.example.notepad.ui.components.NoDataUiDescriptionBlock
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
@@ -66,10 +67,6 @@ private fun NoteEditView(
     var errorOfEmptyNotAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
     var errorOfNoteChangesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(currentNote.name) {
-        noteEditScreenViewModel.updateNoteName(currentNote.name)
-    }
-
     LaunchedEffect(currentNote.content) {
         noteEditScreenViewModel.updateNoteContent(currentNote.content)
     }
@@ -86,37 +83,6 @@ private fun NoteEditView(
             ),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        OutlinedTextField(
-            maxLines = 1,
-            modifier = Modifier.fillMaxWidth(),
-            value = noteEditScreenViewModel.noteName,
-            onValueChange = { newValue -> noteEditScreenViewModel.updateNoteName(newValue) },
-            trailingIcon = {
-                IconButton(onClick = { noteEditScreenViewModel.updateNoteName("") }) {
-                    Icon(
-                        painter = painterResource(R.drawable.baseline_clear_24),
-                        contentDescription = null
-                    )
-                }
-            },
-            textStyle = TextStyle(fontSize = 15.sp),
-            placeholder = {
-                Text(
-                    text = "Enter your note name here...",
-                    modifier = Modifier.basicMarquee(Int.MAX_VALUE),
-                    fontSize = 15.sp
-                )
-            },
-            singleLine = true,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                cursorColor = MaterialTheme.colorScheme.onPrimary
-            )
-        )
-
-        HorizontalDivider()
-
         val noteContentInputFieldVerticalScrollState = rememberScrollState()
 
         // text field auto scroll
@@ -224,18 +190,42 @@ fun NoteUiEditScreen(
     onNavigateTo: (String) -> Unit,
     noteViewModel: NoteViewModel
 ) {
-    val haptic = LocalHapticFeedback.current
-
     LaunchedEffect(Unit) {
         noteId?.let { id ->
             noteViewModel.selectNote(id)
         }
     }
 
+    val currentNote by noteViewModel.currentNote.collectAsState()
+
     Scaffold(
         topBar = {
             TopUiBar(
-                titleContent = { Text(text = "Edit note") },
+                titleContent = {
+                    val noteEditScreenViewModel: NoteEditScreenViewModel = viewModel()
+
+                    when (val noteState = currentNote) {
+                        is NoteResult.Found -> {
+                            // update note name state
+                            LaunchedEffect(noteState.note.name) {
+                                noteEditScreenViewModel.updateNoteName(noteState.note.name)
+                            }
+
+                            LineInputUiField(
+                                state = noteEditScreenViewModel.noteName,
+                                placeholder = "Edit note name",
+                                buttonContentDescription = null,
+                                onUpdateState = { newValue ->
+                                    noteEditScreenViewModel.updateNoteName(newValue)
+                                },
+                                onClearContent = {
+                                    noteEditScreenViewModel.updateNoteName("")
+                                }
+                            )
+                        }
+                        else -> {}
+                    }
+                },
                 barIcon = {
                     IconButton(onClick = { onNavigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
@@ -247,7 +237,7 @@ fun NoteUiEditScreen(
             )
         },
         content = { innerPadding ->
-            val currentNote by noteViewModel.currentNote.collectAsState()
+            val haptic = LocalHapticFeedback.current
 
             when (val noteState = currentNote) {
                 is NoteResult.Found ->
