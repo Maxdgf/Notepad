@@ -47,7 +47,7 @@ class NoteViewModel @Inject constructor(
     val currentNote = currentNoteId
         .filterNotNull()
         .flatMapLatest { id ->
-            flow<NoteResult> {
+            flow {
                 // get note by id
                 noteRepository.getNoteById(id)
                     .onStart { emit(NoteResult.Loading) } // emit loading state on start
@@ -77,7 +77,7 @@ class NoteViewModel @Inject constructor(
 
     // All notes list
     val noteList = noteRepository.getAllNotes()
-        .map<List<NoteEntity>, NotesListResult> { list ->
+        .map { list ->
             if (list.isNotEmpty())
                 NotesListResult.ContentList(list)
             else
@@ -99,8 +99,9 @@ class NoteViewModel @Inject constructor(
         )
 
     // search note query state
-    val searchQuery = MutableStateFlow<String>("")
+    val searchQuery = MutableStateFlow("")
 
+    // found notes by search query state
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val noteListBySearchQuery = searchQuery
         .debounce(250) // debounce 250 ms
