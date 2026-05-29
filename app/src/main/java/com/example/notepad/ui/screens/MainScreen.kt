@@ -79,6 +79,7 @@ private const val CELLS_COUNT = 2
  * @param onNavigate call navigation to a specific screen function.
  * @param onDeleteNoteById delete note by id function.
  */
+@Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
 private fun ScrollableNoteItemsList(
     modifier: Modifier = Modifier,
@@ -124,7 +125,7 @@ private fun ScrollableNoteItemsList(
         ) {
             itemsIndexed(
                 items = notes,
-                key = { index, note -> note.id }
+                key = { _, note -> note.id }
             ) { index, note ->
                 val column = index % CELLS_COUNT             // find column num by formula: k % C
                 val row = index / CELLS_COUNT                // find row num by formula: k / C
@@ -174,7 +175,7 @@ private fun ScrollableNoteItemsList(
         ) {
             itemsIndexed(
                 items = notes,
-                key = { index, note -> note.id }
+                key = { _, note -> note.id }
             ) { index, note ->
                 NoteUiCard(
                     onClick = {
@@ -262,6 +263,7 @@ private const val DEVELOPER_EMAIL_ADDRESS = "maxma4090@gmail.com"
  * @param noteViewModel notes viewmodel.
  * @param appDataStoreViewModel app data store preferences viewmodel.
  */
+@Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
 fun MainUiScreen(
     onNavigateTo: (String) -> Unit,
@@ -366,7 +368,6 @@ fun MainUiScreen(
                                             text = "delete all",
                                             contentDescription = null
                                         )
-
                                     else -> {} // nothing show
                                 }
 
