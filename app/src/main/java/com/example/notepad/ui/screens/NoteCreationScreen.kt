@@ -62,7 +62,9 @@ fun NoteUiCreationScreen(
 
     // text field auto scroll
     LaunchedEffect(noteContentInputFieldVerticalScrollState.maxValue) {
-        noteContentInputFieldVerticalScrollState.animateScrollTo(noteContentInputFieldVerticalScrollState.maxValue)
+        noteContentInputFieldVerticalScrollState.animateScrollTo(
+            noteContentInputFieldVerticalScrollState.maxValue
+        )
     }
 
     Scaffold(

@@ -32,9 +32,7 @@ fun SwitchWithUiText(
             checked = checked,
             onCheckedChange = { state -> onCheckedChange(state) }
         )
-
         Spacer(modifier = Modifier.width(5.dp))
-
         Text(text = text)
     }
 }

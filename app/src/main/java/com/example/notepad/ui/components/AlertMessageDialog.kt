@@ -45,7 +45,8 @@ fun AlertUiMessageDialog(
     titleText: String,
     dialogContent: @Composable () -> Unit
 ) {
-    if (state)
+    // check visibility state
+    if (state) {
         BasicAlertDialog(onDismissRequest = { onDismissRequestFunction() }) {
             Surface(
                 modifier = Modifier
@@ -53,7 +54,8 @@ fun AlertUiMessageDialog(
                     .wrapContentHeight(),
                 shape = MaterialTheme.shapes.large,
                 color = containerColor ?: MaterialTheme.colorScheme.surface, // set surface color
-                contentColor = contentColor ?: MaterialTheme.colorScheme.onSurface, // set color to surface's elements
+                contentColor = contentColor
+                    ?: MaterialTheme.colorScheme.onSurface, // set color to surface's elements
                 tonalElevation = AlertDialogDefaults.TonalElevation
             ) {
                 Column(
@@ -82,4 +84,5 @@ fun AlertUiMessageDialog(
                 }
             }
         }
+    }
 }

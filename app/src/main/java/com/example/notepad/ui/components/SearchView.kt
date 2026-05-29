@@ -36,7 +36,8 @@ fun SearchUiView(
     onUpdateQuery: (String) -> Unit,
     onClearQuery: () -> Unit
 ) {
-    if (state)
+    // check visibility state
+    if (state) {
         Row(
             modifier = modifier,
             verticalAlignment = Alignment.CenterVertically,
@@ -83,4 +84,5 @@ fun SearchUiView(
                 )
             )
         }
+    }
 }

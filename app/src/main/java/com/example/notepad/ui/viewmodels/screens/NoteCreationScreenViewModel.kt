@@ -13,13 +13,17 @@ class NoteCreationScreenViewModel : ViewModel() {
      * Updates note name state value.
      * @param text input text.
      */
-    fun updateNoteName(text: String) { noteName = text }
+    fun updateNoteName(text: String) {
+        noteName = text
+    }
 
     /**
      * Updates note content state value.
      * @param text input text.
      */
-    fun updateNoteContent(text: String) { noteContent = text }
+    fun updateNoteContent(text: String) {
+        noteContent = text
+    }
 
     /**
      * Checks is note name and content empty

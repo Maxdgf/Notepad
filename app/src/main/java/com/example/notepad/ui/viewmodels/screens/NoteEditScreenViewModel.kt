@@ -37,7 +37,7 @@ class NoteEditScreenViewModel : ViewModel() {
 
     /**Sets `isNoteNameEdited` flag.*/
     fun setNoteNameEdited() {
-        isNoteContentEdited = true
+        isNoteNameEdited = true
     }
 
     /**Sets `isNoteContentEdited` flag.*/

@@ -31,7 +31,7 @@ fun BasicTextFieldUiPlaceholder(
                 text = placeholderText,
                 color =
                     if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
-                    else Color.Black.copy(alpha = 0.5f), // set placeholder text color
+                    else Color.Black.copy(alpha = 0.5f), // placeholder text color
                 modifier = Modifier.padding(start = startPadding),
                 fontSize = 16.sp
             )

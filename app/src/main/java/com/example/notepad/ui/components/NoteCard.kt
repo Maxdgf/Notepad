@@ -185,6 +185,7 @@ fun NoteUiCard(
 
                     Spacer(modifier = Modifier.weight(1f))
 
+                    // note order num
                     noteOrderNum?.let {
                         Text(
                             text = it.toString(),

@@ -29,8 +29,11 @@ fun LoadingUiBlock(
         contentAlignment = Alignment.Center
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (showLoadingBar) CircularProgressIndicator()
+            if (showLoadingBar)
+                CircularProgressIndicator() // circular progressbar
+
             Spacer(modifier = Modifier.width(5.dp))
+
             Text(
                 text = description,
                 fontWeight = FontWeight.Bold

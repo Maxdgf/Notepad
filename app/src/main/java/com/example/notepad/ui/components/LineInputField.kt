@@ -35,6 +35,7 @@ import com.example.notepad.R
  * @param onUpdateState update text state function.
  * @param onClearContent clear text content function.
  */
+@Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
 fun LineInputUiField(
     state: String,
@@ -69,7 +70,6 @@ fun LineInputUiField(
                 .weight(1f)
                 .onFocusChanged(
                     onFocusChanged = { state ->
-                        @Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
                         isFieldFocused = state.isFocused
                     }
                 ),

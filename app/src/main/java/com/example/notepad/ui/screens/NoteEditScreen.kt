@@ -125,7 +125,10 @@ private fun NoteEditView(
                     errorOfEmptyNotAlertMessageDialogState = true
                 } else {
                     // check changes in note
-                    if (noteEditScreenState.noteName != currentNote.name || noteEditScreenState.noteContent != currentNote.content) {
+                    if (
+                        noteEditScreenState.noteName != currentNote.name ||
+                        noteEditScreenState.noteContent != currentNote.content
+                    ) {
                         onEditNote(
                             noteEditScreenState.noteName,
                             noteEditScreenState.noteContent,
@@ -196,6 +199,7 @@ fun NoteUiEditScreen(
     onNavigateTo: (String) -> Unit,
     noteViewModel: NoteViewModel
 ) {
+    // select note by id
     LaunchedEffect(Unit) {
         noteId?.let { id ->
             noteViewModel.selectNote(id)

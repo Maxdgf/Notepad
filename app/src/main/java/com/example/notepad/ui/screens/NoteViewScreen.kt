@@ -63,6 +63,7 @@ import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.ClipBoardManager
 import com.example.notepad.utils.DateTimeFormatter
 
+// text size selector slider steps count
 private const val TEXT_SIZE_SLIDER_STEPS = 8
 
 /**
@@ -129,7 +130,7 @@ private fun ScreenDropdownMenu(
                 onCheckedChange = { state ->
                    onUpdateTextWrapState(state)
                    hideMenuScope.launch {
-                       delay(250) // delay 250 ms
+                       delay(250)     // delay 250 ms
                        dropdownMenuState = false // hide menu
                    }
                 }
@@ -290,6 +291,7 @@ fun NoteUiViewScreen(
     val currentNote by noteViewModel.currentNote.collectAsState()
     val noteViewSettings by appDataStoreViewModel.noteViewSettings.collectAsState()
 
+    // select note by id
     LaunchedEffect(Unit) {
         noteId?.let { id ->
             noteViewModel.selectNote(id)

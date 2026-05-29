@@ -157,13 +157,14 @@ private fun ScrollableNoteItemsList(
 
                         if (sendIntent.resolveActivity(packageManager) != null)
                             context.startActivity(shareIntent)
-                        else toaster.showToast("Unable to share note!")
+                        else
+                            toaster.showToast("Unable to share note!")
                     },
                     useBrightBg =
-                        if (isAlternatingNoteColorsEnabled)
+                        if (isAlternatingNoteColorsEnabled) {
                             if (isNoteCardDark) false // dark bg
-                            else true // light bg
-                        else false
+                            else true                 // light bg
+                        } else false
                 )
             }
         }
@@ -203,14 +204,15 @@ private fun ScrollableNoteItemsList(
 
                         if (sendIntent.resolveActivity(packageManager) != null)
                             context.startActivity(shareIntent)
-                        else toaster.showToast("Unable to share note!")
+                        else
+                            toaster.showToast("Unable to share note!")
                     },
                     useBrightBg =
-                        if (isAlternatingNoteColorsEnabled)
-                        // check is index even
+                        if (isAlternatingNoteColorsEnabled) {
+                            // check is index even
                             if ((index + 1) % 2 == 0) true // light bg
-                            else false // dark bg
-                        else false
+                            else false                     // dark bg
+                        } else false
                 )
             }
         }
@@ -375,12 +377,12 @@ fun MainUiScreen(
 
                                 DropdownMenuUiIconItem(
                                     onClick = {
-                                        val sendFeedbackIntent =
-                                            sendFeedbackViaEmailIntent("Notepad app feedback")
+                                        val sendFeedbackIntent = sendFeedbackViaEmailIntent("Notepad app feedback")
 
                                         if (sendFeedbackIntent.resolveActivity(packageManager) != null)
                                             context.startActivity(sendFeedbackIntent)
-                                        else toaster.showToast("No email apps!")
+                                        else
+                                            toaster.showToast("No email apps!")
                                     },
                                     iconPainter = painterResource(R.drawable.baseline_email_24),
                                     text = "send feedback",
@@ -425,7 +427,7 @@ fun MainUiScreen(
                 // match notes list state
                 when (val notesListState = allNotesList) {
                     is NotesListResult.ContentList ->
-                        if (!searchViewState)
+                        if (!searchViewState) {
                             ScrollableNoteItemsList(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -439,7 +441,7 @@ fun MainUiScreen(
                                 isAlternatingNoteColorsEnabled = notesDisplaySettings.isAlternatingNoteColorsEnabled,
                                 onDeleteNoteById = noteViewModel::deleteNote
                             )
-                        else
+                        } else {
                             when (val foundNotes = foundedNotesBySearchQuery) {
                                 is NoteSearchResult.Found ->
                                     ScrollableNoteItemsList(
@@ -470,6 +472,7 @@ fun MainUiScreen(
                                         description = "Searching notes..."
                                     ) // show loading block
                             }
+                        }
                     is NotesListResult.Exception ->
                         NoDataUiDescriptionBlock(
                             modifier = Modifier
