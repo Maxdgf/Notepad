@@ -9,17 +9,24 @@ class NoteEditScreenViewModel : ViewModel() {
     var noteName by mutableStateOf("")
     var noteContent by mutableStateOf("")
 
+    var isNoteNameEdited by mutableStateOf(false)
+    var isNoteContentEdited by mutableStateOf(false)
+
     /**
      * Updates note name state value.
      * @param text input text.
      */
-    fun updateNoteName(text: String) { noteName = text }
+    fun updateNoteName(text: String) {
+        noteName = text
+    }
 
     /**
      * Updates note content state value.
      * @param text input text.
      */
-    fun updateNoteContent(text: String) { noteContent = text }
+    fun updateNoteContent(text: String) {
+        noteContent = text
+    }
 
     /**
      * Checks is note name or content empty.
@@ -28,17 +35,13 @@ class NoteEditScreenViewModel : ViewModel() {
     fun isNoteNameOrContentEmpty(): Boolean =
         noteName.isEmpty() || noteContent.isEmpty()
 
-    /**
-     * Checks is note name empty.
-     * @return boolean flag.
-     */
-    fun isNoteNameEmpty(): Boolean =
-        noteName.isEmpty()
+    /**Sets `isNoteNameEdited` flag.*/
+    fun setNoteNameEdited() {
+        isNoteContentEdited = true
+    }
 
-    /**
-     * Checks is note content empty.
-     * @return boolean flag.
-     */
-    fun isNoteContentEmpty(): Boolean =
-        noteContent.isEmpty()
+    /**Sets `isNoteContentEdited` flag.*/
+    fun setNoteContentEdited() {
+        isNoteContentEdited = true
+    }
 }

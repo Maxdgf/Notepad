@@ -55,20 +55,20 @@ import com.example.notepad.ui.viewmodels.NoteViewModel
 private fun NoteEditView(
     paddingValues: PaddingValues,
     currentNote: NoteEntity,
+    noteEditScreenState: NoteEditScreenViewModel,
     onEditNote: (String, String, Long) -> Unit,
     onNavigateTo: (String) -> Unit,
     onPerformHaptic: (HapticFeedbackType) -> Unit
 ) {
-    val noteEditScreenViewModel: NoteEditScreenViewModel = viewModel()
+    // update note content state
+    LaunchedEffect(Unit) {
+        // check is note content edited
+        if (!noteEditScreenState.isNoteContentEdited)
+            noteEditScreenState.updateNoteContent(currentNote.content)
+    }
 
     var errorOfEmptyNotAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
     var errorOfNoteChangesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
-
-    // update note content state
-    LaunchedEffect(Unit) {
-        if (noteEditScreenViewModel.isNoteContentEmpty())
-            noteEditScreenViewModel.updateNoteContent(currentNote.content)
-    }
 
     Column(
         modifier = Modifier
@@ -96,13 +96,18 @@ private fun NoteEditView(
                 .fillMaxWidth()
                 .weight(1f)
                 .verticalScroll(noteContentInputFieldVerticalScrollState),
-            value = noteEditScreenViewModel.noteContent,
-            onValueChange = { newValue -> noteEditScreenViewModel.updateNoteContent(newValue) },
+            value = noteEditScreenState.noteContent,
+            onValueChange = { newValue ->
+                noteEditScreenState.apply {
+                    updateNoteContent(newValue) // update value
+                    setNoteContentEdited()            // set is note content edited flag
+                }
+            },
             textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
             cursorBrush = SolidColor(if (isSystemInDarkTheme()) Color.White else Color.Black),
             decorationBox = @Composable { innerTextField ->
                 BasicTextFieldUiPlaceholder(
-                    value = noteEditScreenViewModel.noteContent,
+                    value = noteEditScreenState.noteContent,
                     placeholderText = "Write here anything...",
                     startPadding = 5.dp,
                     innerTextField = innerTextField
@@ -116,14 +121,14 @@ private fun NoteEditView(
             onClick = {
                 onPerformHaptic(HapticFeedbackType.LongPress) // haptic
 
-                if (noteEditScreenViewModel.isNoteNameOrContentEmpty()) {
+                if (noteEditScreenState.isNoteNameOrContentEmpty()) {
                     errorOfEmptyNotAlertMessageDialogState = true
                 } else {
                     // check changes in note
-                    if (noteEditScreenViewModel.noteName != currentNote.name || noteEditScreenViewModel.noteContent != currentNote.content) {
+                    if (noteEditScreenState.noteName != currentNote.name || noteEditScreenState.noteContent != currentNote.content) {
                         onEditNote(
-                            noteEditScreenViewModel.noteName,
-                            noteEditScreenViewModel.noteContent,
+                            noteEditScreenState.noteName,
+                            noteEditScreenState.noteContent,
                             currentNote.id
                         )
                         onNavigateTo(NavigationRoutes.MainScreen.route)
@@ -198,30 +203,33 @@ fun NoteUiEditScreen(
     }
 
     val currentNote by noteViewModel.currentNote.collectAsState()
+    val noteEditScreenState: NoteEditScreenViewModel = viewModel()
 
     Scaffold(
         topBar = {
             TopUiBar(
                 titleContent = {
-                    val noteEditScreenViewModel: NoteEditScreenViewModel = viewModel()
-
                     when (val noteState = currentNote) {
                         is NoteResult.Found -> {
                             // update note name state
                             LaunchedEffect(Unit) {
-                                if (noteEditScreenViewModel.isNoteNameEmpty())
-                                    noteEditScreenViewModel.updateNoteName(noteState.note.name)
+                                // check is note name edited
+                                if (!noteEditScreenState.isNoteNameEdited)
+                                    noteEditScreenState.updateNoteName(noteState.note.name)
                             }
 
                             LineInputUiField(
-                                state = noteEditScreenViewModel.noteName,
+                                state = noteEditScreenState.noteName,
                                 placeholder = "Edit note name",
                                 buttonContentDescription = null,
                                 onUpdateState = { newValue ->
-                                    noteEditScreenViewModel.updateNoteName(newValue)
+                                    noteEditScreenState.apply {
+                                        updateNoteName(newValue)
+                                        setNoteNameEdited()
+                                    }
                                 },
                                 onClearContent = {
-                                    noteEditScreenViewModel.updateNoteName("")
+                                    noteEditScreenState.updateNoteName("")
                                 }
                             )
                         }
@@ -248,7 +256,8 @@ fun NoteUiEditScreen(
                         currentNote = noteState.note,
                         onEditNote = noteViewModel::editNote,
                         onNavigateTo = onNavigateTo,
-                        onPerformHaptic = haptic::performHapticFeedback
+                        onPerformHaptic = haptic::performHapticFeedback,
+                        noteEditScreenState = noteEditScreenState
                     )
                 is NoteResult.Exception ->
                     NoDataUiDescriptionBlock(
