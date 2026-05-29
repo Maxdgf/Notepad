@@ -35,6 +35,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notepad.R
 
+/**
+ * Creates dropdown menu with action buttons for note card.
+ *
+ * @param state visibility state.
+ * @param onDismissRequest dismiss request function.
+ * @param onEdit edit note function.
+ * @param onDelete delete note function.
+ * @param onShare share note function.
+ */
 @Composable
 private fun ActionsMenuList(
     state: Boolean,
@@ -62,6 +71,8 @@ private fun ActionsMenuList(
             contentDescription = null,
             text = "delete"
         )
+
+        HorizontalDivider() // divider
 
         // share note button
         DropdownMenuUiIconItem(
@@ -197,9 +208,18 @@ fun NoteUiCard(
                     ActionsMenuList(
                         state = dropdownMenuState,
                         onDismissRequest = { dropdownMenuState = false },
-                        onEdit = { onEdit() },
-                        onDelete = { onDelete() },
-                        onShare = { onShare() }
+                        onEdit = {
+                            dropdownMenuState = false // close dropdown menu
+                            onEdit()
+                        },
+                        onDelete = {
+                            dropdownMenuState = false // close dropdown menu
+                            onDelete()
+                        },
+                        onShare = {
+                            dropdownMenuState = false // close dropdown menu
+                            onShare()
+                        }
                     )
                 }
             }
