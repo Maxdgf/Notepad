@@ -12,16 +12,19 @@ Based on *Room* and *Jetpack Compose* with **MVVM** architecture.
 <table>
     <tr>
         <td>
-            <img src="previews/preview (1).jpg">
+            <img src="previews/preview (1).jpg" alt="app preview 1">
         </td>
         <td>
-            <img src="previews/preview (2).jpg">
+            <img src="previews/preview (2).jpg" alt="app preview 2">
         </td>
         <td>
-            <img src="previews/preview (4).jpg">
+            <img src="previews/preview (4).jpg" alt="app preview 4">
         </td>
         <td>
-            <img src="previews/preview (3).jpg">
+            <img src="previews/preview (3).jpg" alt="app preview 3">
+        </td>
+        <td>
+            <img src="previews/preview (5).jpg" alt="app preview 5">
         </td>
     </tr>
 </table>
