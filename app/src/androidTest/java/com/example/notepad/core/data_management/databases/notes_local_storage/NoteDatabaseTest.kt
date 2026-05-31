@@ -7,17 +7,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
+import junit.framework.TestCase
 
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
 
 @RunWith(AndroidJUnit4::class)
-class NoteDatabaseTest {
+class NoteDatabaseTest : TestCase() {
     private lateinit var noteDao: NoteDao
     private lateinit var db: NoteDatabase
 
