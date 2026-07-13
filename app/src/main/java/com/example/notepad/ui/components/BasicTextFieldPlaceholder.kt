@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
  * @param innerTextField inner text field parameter.
  */
 @Composable
-fun BasicTextFieldUiPlaceholder(
+fun BasicTextFieldPlaceholder(
     value: String,
     placeholderText: String,
     startPadding: Dp,

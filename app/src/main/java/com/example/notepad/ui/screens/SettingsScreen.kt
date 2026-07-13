@@ -17,14 +17,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import com.example.notepad.R
-import com.example.notepad.ui.components.TopUiBar
-import com.example.notepad.ui.components.SwitchWithUiText
+import com.example.notepad.ui.components.TopAppBar
+import com.example.notepad.ui.components.SwitchWithText
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
 
 /*** Creates a settings app screen.*/
 @Composable
-fun SettingsUiScreen(
+fun SettingsAppScreen(
     onNavigateTo: (String) -> Unit,
     appDataStoreViewModel: AppDataStoreViewModel
 ) {
@@ -32,7 +32,7 @@ fun SettingsUiScreen(
 
     Scaffold(
         topBar = {
-            TopUiBar(
+            TopAppBar(
                 titleContent = { Text(text = "Settings") },
                 barIcon = {
                     IconButton(onClick = { onNavigateTo(NavigationRoutes.MainScreen.route) }) {
@@ -57,7 +57,7 @@ fun SettingsUiScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            SwitchWithUiText(
+            SwitchWithText(
                 checked = notesDisplaySettings.isGridEnabled,
                 text = "notes list grid view",
                 onCheckedChange = { state ->
@@ -69,7 +69,7 @@ fun SettingsUiScreen(
                 }
             )
 
-            SwitchWithUiText(
+            SwitchWithText(
                 checked = notesDisplaySettings.isOrderNumEnabled,
                 text = "display order num",
                 onCheckedChange = { state ->
@@ -81,7 +81,7 @@ fun SettingsUiScreen(
                 }
             )
 
-            SwitchWithUiText(
+            SwitchWithText(
                 checked = notesDisplaySettings.isAlternatingNoteColorsEnabled,
                 text = "alternating note colors",
                 onCheckedChange = { state ->

@@ -47,12 +47,12 @@ import androidx.core.net.toUri
 
 import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.ui.components.SimpleFloatingUiIconButton
-import com.example.notepad.ui.components.TopUiBar
-import com.example.notepad.ui.components.AlertUiMessageDialog
-import com.example.notepad.ui.components.DropdownMenuUiIconItem
-import com.example.notepad.ui.components.LoadingUiBlock
-import com.example.notepad.ui.components.NoDataUiDescriptionBlock
+import com.example.notepad.ui.components.SimpleFloatingIconButton
+import com.example.notepad.ui.components.TopAppBar
+import com.example.notepad.ui.components.AlertMessageDialog
+import com.example.notepad.ui.components.DropdownMenuIconItem
+import com.example.notepad.ui.components.LoadingView
+import com.example.notepad.ui.components.NoDataDescriptionBlock
 import com.example.notepad.ui.components.NoteUiCard
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.states.NotesListResult
@@ -60,7 +60,7 @@ import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
 import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.AppManager
 import com.example.notepad.utils.DateTimeFormatter
-import com.example.notepad.ui.components.SearchUiView
+import com.example.notepad.ui.components.SearchPanelView
 import com.example.notepad.ui.states.NoteSearchResult
 import com.example.notepad.utils.Toaster
 
@@ -219,7 +219,7 @@ private fun ScrollableNoteItemsList(
     }
 
     // delete note warn dialog
-    AlertUiMessageDialog(
+    AlertMessageDialog(
         onDismissRequestFunction = { deleteNoteAlertMessageDialogState = false },
         containerColor = MaterialTheme.colorScheme.error,
         contentColor = Color.White,
@@ -267,7 +267,7 @@ private const val DEVELOPER_EMAIL_ADDRESS = "maxma4090@gmail.com"
  */
 @Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
-fun MainUiScreen(
+fun MainAppScreen(
     onNavigateTo: (String) -> Unit,
     noteViewModel: NoteViewModel,
     appDataStoreViewModel: AppDataStoreViewModel
@@ -302,14 +302,14 @@ fun MainUiScreen(
 
     Scaffold(
         topBar = {
-            TopUiBar(
+            TopAppBar(
                 titleContent = { if (!searchViewState) Text(text = "Notepad") },
                 barActionElements = {
                     var dropdownMenuState by rememberSaveable { mutableStateOf(false) }
                     val searchQuery by noteViewModel.searchQuery.collectAsState()
 
                     // search view
-                    SearchUiView(
+                    SearchPanelView(
                         modifier = Modifier.fillMaxWidth(),
                         state = searchViewState,
                         onDismissRequest = {
@@ -347,7 +347,7 @@ fun MainUiScreen(
                                 expanded = dropdownMenuState,
                                 onDismissRequest = { dropdownMenuState = false }
                             ) {
-                                DropdownMenuUiIconItem(
+                                DropdownMenuIconItem(
                                     onClick = {
                                         dropdownMenuState = false // hide menu
                                         onNavigateTo(NavigationRoutes.NoteSettingsScreen.route)
@@ -360,7 +360,7 @@ fun MainUiScreen(
                                 // delete all notes button
                                 when (val notesListState = allNotesList) {
                                     is NotesListResult.ContentList ->
-                                        DropdownMenuUiIconItem(
+                                        DropdownMenuIconItem(
                                             onClick = {
                                                 dropdownMenuState = false // hide menu
                                                 if (notesListState.noteList.isNotEmpty())
@@ -375,7 +375,7 @@ fun MainUiScreen(
 
                                 HorizontalDivider()
 
-                                DropdownMenuUiIconItem(
+                                DropdownMenuIconItem(
                                     onClick = {
                                         val sendFeedbackIntent = sendFeedbackViaEmailIntent("Notepad app feedback")
 
@@ -389,7 +389,7 @@ fun MainUiScreen(
                                     contentDescription = null
                                 )
 
-                                DropdownMenuUiIconItem(
+                                DropdownMenuIconItem(
                                     onClick = {
                                         dropdownMenuState = false // hide menu
                                         appManager.breakApp()     // exit app
@@ -406,7 +406,7 @@ fun MainUiScreen(
         },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            SimpleFloatingUiIconButton(
+            SimpleFloatingIconButton(
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onNavigateTo(NavigationRoutes.NoteCreationScreen.route)
@@ -458,14 +458,14 @@ fun MainUiScreen(
                                         onDeleteNoteById = noteViewModel::deleteNote
                                     )
                                 is NoteSearchResult.NotFound ->
-                                    NoDataUiDescriptionBlock(
+                                    NoDataDescriptionBlock(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .padding(innerPadding),
                                         description = "No notes found."
                                     )
                                 is NoteSearchResult.Searching ->
-                                    LoadingUiBlock(
+                                    LoadingView(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .padding(innerPadding),
@@ -474,21 +474,21 @@ fun MainUiScreen(
                             }
                         }
                     is NotesListResult.Exception ->
-                        NoDataUiDescriptionBlock(
+                        NoDataDescriptionBlock(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(innerPadding),
                             description = notesListState.message
                         )
                     NotesListResult.Loading ->
-                        LoadingUiBlock(
+                        LoadingView(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(innerPadding),
                             description = "Loading notes..."
                         ) // show loading block
                     NotesListResult.EmptyList ->
-                        NoDataUiDescriptionBlock(
+                        NoDataDescriptionBlock(
                             description = "No notes :(",
                             modifier = Modifier
                                 .fillMaxSize()
@@ -498,7 +498,7 @@ fun MainUiScreen(
             }
 
             // delete all notes warning dialog
-            AlertUiMessageDialog(
+            AlertMessageDialog(
                 onDismissRequestFunction = { deleteAllNotesAlertMessageDialogState = false },
                 containerColor = MaterialTheme.colorScheme.error,
                 contentColor = Color.White,

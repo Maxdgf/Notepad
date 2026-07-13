@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
  * @param contentDescription icon content description.
  */
 @Composable
-fun DropdownMenuUiIconItem(
+fun DropdownMenuIconItem(
     onClick: () -> Unit,
     iconPainter: Painter,
     text: String,

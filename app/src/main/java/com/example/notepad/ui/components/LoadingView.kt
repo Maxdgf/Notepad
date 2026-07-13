@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
  * @param description description text.
  */
 @Composable
-fun LoadingUiBlock(
+fun LoadingView(
     modifier: Modifier = Modifier,
     showLoadingBar: Boolean = true,
     description: String = "Loading..."

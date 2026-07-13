@@ -50,12 +50,12 @@ import kotlinx.coroutines.launch
 
 import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.ui.components.TopUiBar
-import com.example.notepad.ui.components.AlertUiMessageDialog
-import com.example.notepad.ui.components.SwitchWithUiText
-import com.example.notepad.ui.components.DropdownMenuUiIconItem
-import com.example.notepad.ui.components.LoadingUiBlock
-import com.example.notepad.ui.components.NoDataUiDescriptionBlock
+import com.example.notepad.ui.components.TopAppBar
+import com.example.notepad.ui.components.AlertMessageDialog
+import com.example.notepad.ui.components.SwitchWithText
+import com.example.notepad.ui.components.DropdownMenuIconItem
+import com.example.notepad.ui.components.LoadingView
+import com.example.notepad.ui.components.NoDataDescriptionBlock
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.states.NoteResult
 import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
@@ -99,7 +99,7 @@ private fun ScreenDropdownMenu(
             expanded = dropdownMenuState,
             onDismissRequest = { dropdownMenuState = false }
         ) {
-            DropdownMenuUiIconItem(
+            DropdownMenuIconItem(
                 onClick = {
                     dropdownMenuState = false // hide menu
                     fontSizeDialogState = true
@@ -110,7 +110,7 @@ private fun ScreenDropdownMenu(
             )
 
             Box(modifier = Modifier.padding(horizontal = 10.dp)) {
-                DropdownMenuUiIconItem(
+                DropdownMenuIconItem(
                     onClick = {
                         dropdownMenuState = false // hide menu
                         onCopyNoteContent()
@@ -124,7 +124,7 @@ private fun ScreenDropdownMenu(
             HorizontalDivider()
 
             val hideMenuScope = rememberCoroutineScope()
-            SwitchWithUiText(
+            SwitchWithText(
                 modifier = Modifier.padding(horizontal = 5.dp),
                 checked = textWrap,
                 text = "text wrap",
@@ -138,7 +138,7 @@ private fun ScreenDropdownMenu(
             )
         }
 
-        AlertUiMessageDialog(
+        AlertMessageDialog(
             state = fontSizeDialogState,
             onDismissRequestFunction = { fontSizeDialogState = false },
             titleIcon = painterResource(R.drawable.baseline_text_format_24),
@@ -283,7 +283,7 @@ private fun NoteContentView(
 
 /**Creates a note view app screen.*/
 @Composable
-fun NoteUiViewScreen(
+fun NoteAppViewScreen(
     noteId: Long?,
     onNavigateTo: (String) -> Unit,
     noteViewModel: NoteViewModel,
@@ -303,7 +303,7 @@ fun NoteUiViewScreen(
 
     Scaffold(
         topBar = {
-            TopUiBar(
+            TopAppBar(
                 titleContent = {
                     when (val noteState = currentNote) {
                         is NoteResult.Found ->
@@ -319,7 +319,7 @@ fun NoteUiViewScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         NoteResult.Loading ->
-                            LoadingUiBlock(
+                            LoadingView(
                                 showLoadingBar = false,
                                 description = "Loading note..."
                             )
@@ -374,21 +374,21 @@ fun NoteUiViewScreen(
                         paddingValues = innerPadding
                     )
                 is NoteResult.Exception ->
-                    NoDataUiDescriptionBlock(
+                    NoDataDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = noteState.message
                     )
                 is NoteResult.NotFound ->
-                    NoDataUiDescriptionBlock(
+                    NoDataDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = "This note, not found."
                     )
                 NoteResult.Loading ->
-                    LoadingUiBlock(
+                    LoadingView(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),

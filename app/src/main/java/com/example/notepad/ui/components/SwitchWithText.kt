@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
  * @param onCheckedChange on switch checked state change function.
  */
 @Composable
-fun SwitchWithUiText(
+fun SwitchWithText(
     modifier: Modifier = Modifier,
     checked: Boolean,
     text: String,

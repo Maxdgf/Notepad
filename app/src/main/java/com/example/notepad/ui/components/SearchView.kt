@@ -28,7 +28,7 @@ import com.example.notepad.R
  * @param onClearQuery clear search query state function.
  */
 @Composable
-fun SearchUiView(
+fun SearchPanelView(
     modifier: Modifier = Modifier,
     state: Boolean,
     onDismissRequest: () -> Unit,

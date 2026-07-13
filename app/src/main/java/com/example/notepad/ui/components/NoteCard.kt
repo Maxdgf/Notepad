@@ -58,7 +58,7 @@ private fun ActionsMenuList(
         onDismissRequest = { onDismissRequest() }
     ) {
         // edit note button
-        DropdownMenuUiIconItem(
+        DropdownMenuIconItem(
             onClick = { onEdit() },
             iconPainter = painterResource(R.drawable.outline_edit_24),
             contentDescription = null,
@@ -66,7 +66,7 @@ private fun ActionsMenuList(
         )
 
         // delete note button
-        DropdownMenuUiIconItem(
+        DropdownMenuIconItem(
             onClick = { onDelete() },
             iconPainter = painterResource(R.drawable.baseline_delete_24),
             contentDescription = null,
@@ -76,7 +76,7 @@ private fun ActionsMenuList(
         HorizontalDivider() // divider
 
         // share note button
-        DropdownMenuUiIconItem(
+        DropdownMenuIconItem(
             onClick = { onShare() },
             iconPainter = painterResource(R.drawable.outline_share_24),
             contentDescription = null,

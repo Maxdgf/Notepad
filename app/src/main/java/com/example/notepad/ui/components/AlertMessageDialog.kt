@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlertUiMessageDialog(
+fun AlertMessageDialog(
     onDismissRequestFunction: () -> Unit,
     containerColor: Color? = null,
     contentColor: Color? = null,

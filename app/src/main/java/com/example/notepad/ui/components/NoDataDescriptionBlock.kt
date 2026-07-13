@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
  * @param description text for description.
  */
 @Composable
-fun NoDataUiDescriptionBlock(
+fun NoDataDescriptionBlock(
     modifier: Modifier = Modifier,
     description: String
 ) {

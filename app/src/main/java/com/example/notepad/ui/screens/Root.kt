@@ -19,7 +19,7 @@ import com.example.notepad.ui.viewmodels.NoteViewModel
 
 /**Main screen root.*/
 @Composable
-fun MainUiNotePad() {
+fun MainNotepadAppRoot() {
     val noteViewModel: NoteViewModel = hiltViewModel()
     val appDataStoreViewModel: AppDataStoreViewModel = hiltViewModel()
 
@@ -33,7 +33,7 @@ fun MainUiNotePad() {
         ) {
             // main screen
             composable(route = NavigationRoutes.MainScreen.route) {
-                MainUiScreen(
+                MainAppScreen(
                     onNavigateTo = navigator::navigateTo,
                     noteViewModel = noteViewModel,
                     appDataStoreViewModel = appDataStoreViewModel
@@ -42,7 +42,7 @@ fun MainUiNotePad() {
 
             // note creation screen
             composable(route = NavigationRoutes.NoteCreationScreen.route) {
-                NoteUiCreationScreen(
+                NoteAppCreationScreen(
                     onNavigateTo = navigator::navigateTo,
                     onAddNote = noteViewModel::addNote
                 )
@@ -57,7 +57,7 @@ fun MainUiNotePad() {
             ) { navBackStackEntry ->
                 val noteId = navBackStackEntry.arguments?.getLong("noteId")
 
-                NoteUiViewScreen(
+                NoteAppViewScreen(
                     onNavigateTo = navigator::navigateTo,
                     noteId = noteId,
                     noteViewModel = noteViewModel,
@@ -74,7 +74,7 @@ fun MainUiNotePad() {
             ) { navBackStackEntry ->
                 val noteId = navBackStackEntry.arguments?.getLong("noteId")
 
-                NoteUiEditScreen(
+                NoteAppEditScreen(
                     onNavigateTo = navigator::navigateTo,
                     noteId = noteId,
                     noteViewModel = noteViewModel
@@ -83,7 +83,7 @@ fun MainUiNotePad() {
 
             // settings screen
             composable(route = NavigationRoutes.NoteSettingsScreen.route) {
-                SettingsUiScreen(
+                SettingsAppScreen(
                     onNavigateTo = navigator::navigateTo,
                     appDataStoreViewModel = appDataStoreViewModel,
                 )

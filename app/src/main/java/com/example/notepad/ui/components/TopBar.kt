@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopUiBar(
+fun TopAppBar(
     titleContent: @Composable () -> Unit,
     barIcon: @Composable () -> Unit = {},
     barActionElements: @Composable () -> Unit = {}

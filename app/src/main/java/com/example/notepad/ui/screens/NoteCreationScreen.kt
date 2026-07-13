@@ -36,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.notepad.R
-import com.example.notepad.ui.components.TopUiBar
-import com.example.notepad.ui.components.AlertUiMessageDialog
-import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
-import com.example.notepad.ui.components.LineInputUiField
+import com.example.notepad.ui.components.TopAppBar
+import com.example.notepad.ui.components.AlertMessageDialog
+import com.example.notepad.ui.components.BasicTextFieldPlaceholder
+import com.example.notepad.ui.components.BorderedLineInputField
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.viewmodels.screens.NoteCreationScreenViewModel
 
@@ -50,7 +50,7 @@ import com.example.notepad.ui.viewmodels.screens.NoteCreationScreenViewModel
  * @param onAddNote add note to database function.
  */
 @Composable
-fun NoteUiCreationScreen(
+fun NoteAppCreationScreen(
     onNavigateTo: (String) -> Unit,
     onAddNote: (String, String) -> Unit
 ) {
@@ -69,9 +69,9 @@ fun NoteUiCreationScreen(
 
     Scaffold(
         topBar = {
-            TopUiBar(
+            TopAppBar(
                 titleContent = {
-                    LineInputUiField(
+                    BorderedLineInputField(
                         state = noteCreationScreenViewModel.noteName,
                         placeholder = "Enter note name...",
                         buttonContentDescription = null,
@@ -116,7 +116,7 @@ fun NoteUiCreationScreen(
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
                     cursorBrush = SolidColor(if (isSystemInDarkTheme()) Color.White else Color.Black),
                     decorationBox = @Composable { innerTextField ->
-                        BasicTextFieldUiPlaceholder(
+                        BasicTextFieldPlaceholder(
                             value = noteCreationScreenViewModel.noteContent,
                             placeholderText = "Write here anything...",
                             startPadding = 5.dp,
@@ -155,7 +155,7 @@ fun NoteUiCreationScreen(
                 ) { Text(text = "create note") }
             }
 
-            AlertUiMessageDialog(
+            AlertMessageDialog(
                 onDismissRequestFunction = { errorOfEmptyNoteAlertMessageDialogState = false },
                 containerColor = MaterialTheme.colorScheme.error,
                 contentColor = Color.White,

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
  * @param contentColor button content color.
  */
 @Composable
-fun SimpleFloatingUiIconButton(
+fun SimpleFloatingIconButton(
     onClick: () -> Unit,
     icon: Painter,
     buttonShape: Shape,

@@ -39,12 +39,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.notepad.R
 import com.example.notepad.core.data_management.databases.notes_local_storage.entities.NoteEntity
-import com.example.notepad.ui.components.TopUiBar
-import com.example.notepad.ui.components.AlertUiMessageDialog
-import com.example.notepad.ui.components.BasicTextFieldUiPlaceholder
-import com.example.notepad.ui.components.LineInputUiField
-import com.example.notepad.ui.components.LoadingUiBlock
-import com.example.notepad.ui.components.NoDataUiDescriptionBlock
+import com.example.notepad.ui.components.TopAppBar
+import com.example.notepad.ui.components.AlertMessageDialog
+import com.example.notepad.ui.components.BasicTextFieldPlaceholder
+import com.example.notepad.ui.components.BorderedLineInputField
+import com.example.notepad.ui.components.LoadingView
+import com.example.notepad.ui.components.NoDataDescriptionBlock
 import com.example.notepad.ui.screens.navigation.NavigationRoutes
 import com.example.notepad.ui.states.NoteResult
 import com.example.notepad.ui.viewmodels.screens.NoteEditScreenViewModel
@@ -106,7 +106,7 @@ private fun NoteEditView(
             textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
             cursorBrush = SolidColor(if (isSystemInDarkTheme()) Color.White else Color.Black),
             decorationBox = @Composable { innerTextField ->
-                BasicTextFieldUiPlaceholder(
+                BasicTextFieldPlaceholder(
                     value = noteEditScreenState.noteContent,
                     placeholderText = "Write here anything...",
                     startPadding = 5.dp,
@@ -149,7 +149,7 @@ private fun NoteEditView(
         ) { Text(text = "edit note") }
     }
 
-    AlertUiMessageDialog(
+    AlertMessageDialog(
         onDismissRequestFunction = { errorOfEmptyNotAlertMessageDialogState = false },
         containerColor = MaterialTheme.colorScheme.error,
         contentColor = Color.White,
@@ -167,7 +167,7 @@ private fun NoteEditView(
         ) { Text(text = "Ok") }
     }
 
-    AlertUiMessageDialog(
+    AlertMessageDialog(
         onDismissRequestFunction = { errorOfNoteChangesAlertMessageDialogState = false },
         containerColor = MaterialTheme.colorScheme.error,
         contentColor = Color.White,
@@ -194,7 +194,7 @@ private fun NoteEditView(
  * @param noteViewModel notes viewmodel.
  */
 @Composable
-fun NoteUiEditScreen(
+fun NoteAppEditScreen(
     noteId: Long?,
     onNavigateTo: (String) -> Unit,
     noteViewModel: NoteViewModel
@@ -211,7 +211,7 @@ fun NoteUiEditScreen(
 
     Scaffold(
         topBar = {
-            TopUiBar(
+            TopAppBar(
                 titleContent = {
                     when (val noteState = currentNote) {
                         is NoteResult.Found -> {
@@ -222,7 +222,7 @@ fun NoteUiEditScreen(
                                     noteEditScreenState.updateNoteName(noteState.note.name)
                             }
 
-                            LineInputUiField(
+                            BorderedLineInputField(
                                 state = noteEditScreenState.noteName,
                                 placeholder = "Edit note name",
                                 buttonContentDescription = null,
@@ -264,21 +264,21 @@ fun NoteUiEditScreen(
                         noteEditScreenState = noteEditScreenState
                     )
                 is NoteResult.Exception ->
-                    NoDataUiDescriptionBlock(
+                    NoDataDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = noteState.message
                     )
                 is NoteResult.NotFound ->
-                    NoDataUiDescriptionBlock(
+                    NoDataDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),
                         description = "This note, not found."
                     )
                 NoteResult.Loading ->
-                    LoadingUiBlock(
+                    LoadingView(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding),

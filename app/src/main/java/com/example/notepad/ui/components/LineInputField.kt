@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.example.notepad.R
 
 /**
- * Creates a sing-line text input field with ability
+ * Creates a bordered sing-line text input field with ability
  * to clear text by clicking icon button.
  *
  * @param state text state.
@@ -37,7 +37,7 @@ import com.example.notepad.R
  */
 @Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
-fun LineInputUiField(
+fun BorderedLineInputField(
     state: String,
     placeholder: String,
     buttonContentDescription: String? = null,
@@ -76,7 +76,7 @@ fun LineInputUiField(
             textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
             cursorBrush = SolidColor(value = if (isSystemInDarkTheme()) Color.White else Color.Black),
             decorationBox = @Composable { innerTextField ->
-                BasicTextFieldUiPlaceholder(
+                BasicTextFieldPlaceholder(
                     value = state,
                     placeholderText = placeholder,
                     startPadding = 5.dp,
