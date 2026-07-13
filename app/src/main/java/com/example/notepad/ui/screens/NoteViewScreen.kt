@@ -62,6 +62,7 @@ import com.example.notepad.ui.viewmodels.AppDataStoreViewModel
 import com.example.notepad.ui.viewmodels.NoteViewModel
 import com.example.notepad.utils.ClipBoardManager
 import com.example.notepad.utils.DateTimeFormatter
+import kotlin.time.Duration.Companion.milliseconds
 
 // text size selector slider steps count
 private const val TEXT_SIZE_SLIDER_STEPS = 8
@@ -130,7 +131,7 @@ private fun ScreenDropdownMenu(
                 onCheckedChange = { state ->
                    onUpdateTextWrapState(state)
                    hideMenuScope.launch {
-                       delay(250)     // delay 250 ms
+                       delay(250.milliseconds)     // delay 250 ms
                        dropdownMenuState = false // hide menu
                    }
                 }
@@ -245,7 +246,9 @@ private fun NoteContentView(
 
         // note content scroll value indicator
         LinearProgressIndicator(
-            progress = { verticalScrollState.value / verticalScrollState.maxValue.toFloat() },
+            progress = {
+                verticalScrollState.run { this.value / this.maxValue.toFloat() }
+            },
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.onPrimary,
             drawStopIndicator = {} // without stop indicator
