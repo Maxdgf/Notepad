@@ -172,7 +172,7 @@ private fun ScrollableNoteItemsList(
         // normal list
         LazyColumn(
             modifier = modifier,
-            verticalArrangement = Arrangement.spacedBy(5.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             itemsIndexed(
                 items = notes,
