@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notepad.R
@@ -109,13 +110,14 @@ fun NoteUiCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp),
+            .height(110.dp),
         colors = CardDefaults.cardColors(
             contentColor = MaterialTheme.colorScheme.onSurface,
             containerColor =
                 if (useBrightBg) MaterialTheme.colorScheme.surfaceContainerHighest
                 else MaterialTheme.colorScheme.surfaceContainer
-        )
+        ),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Box(
             modifier = Modifier
@@ -133,11 +135,24 @@ fun NoteUiCard(
                         .fillMaxHeight()
                         .weight(1f)
                 ) {
-                    Text(
-                        text = noteName,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.basicMarquee(Int.MAX_VALUE)
-                    )
+                    Row {
+                        // note order num
+                        noteOrderNum?.let {
+                            Text(
+                                text = it.toString(),
+                                fontWeight = FontWeight.Light,
+                                fontSize = 10.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Text(
+                            text = noteName,
+                            fontWeight = FontWeight.Bold,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
 
                     Text(
                         text = noteDatetimeCreation,
@@ -158,40 +173,29 @@ fun NoteUiCard(
                                 )
 
                                 Text(
-                                    text = "last edit",
+                                    text = "edited",
                                     fontStyle = FontStyle.Italic,
                                     fontSize = 10.sp,
                                     modifier = Modifier
                                         .padding(start = 3.dp)
                                         .basicMarquee(Int.MAX_VALUE)
                                 )
+
+                                Text(
+                                    text = dateTime,
+                                    fontWeight = FontWeight.Light,
+                                    fontSize = 10.sp,
+                                    modifier = Modifier
+                                        .padding(start = 5.dp)
+                                        .basicMarquee(Int.MAX_VALUE)
+                                )
                             }
 
                             HorizontalDivider(
-                                modifier = Modifier.width(130.dp),
+                                modifier = Modifier.width(190.dp),
                                 color = if (isSystemInDarkTheme()) Color.White else Color.Black
                             )
-
-                            Text(
-                                text = dateTime,
-                                fontWeight = FontWeight.Light,
-                                fontSize = 10.sp,
-                                modifier = Modifier
-                                    .padding(start = 5.dp)
-                                    .basicMarquee(Int.MAX_VALUE)
-                            )
                         }
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    // note order num
-                    noteOrderNum?.let {
-                        Text(
-                            text = it.toString(),
-                            fontWeight = FontWeight.Light,
-                            fontSize = 10.sp
-                        )
                     }
                 }
 
