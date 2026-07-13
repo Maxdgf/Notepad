@@ -25,16 +25,18 @@ fun BasicTextFieldUiPlaceholder(
     startPadding: Dp,
     innerTextField: @Composable () -> Unit
 ) {
-    Box {
-        if (value.isEmpty()) // check is basic text field text content empty
+    Box(modifier = Modifier.padding(start = startPadding)) {
+        if (value.isEmpty()) { // check is basic text field text content empty
             Text(
                 text = placeholderText,
                 color =
                     if (isSystemInDarkTheme()) Color.White.copy(alpha = 0.5f)
                     else Color.Black.copy(alpha = 0.5f), // placeholder text color
-                modifier = Modifier.padding(start = startPadding),
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                lineHeight = 16.sp,
+                softWrap = false
             )
+        }
 
         innerTextField() // inner text field
     }
