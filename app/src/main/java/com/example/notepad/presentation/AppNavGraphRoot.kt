@@ -1,14 +1,9 @@
 package com.example.notepad.presentation
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -41,30 +36,10 @@ fun AppNavGraphRoot(noteManager: NoteManager) {
         NavHost(
             navController = navController,
             startDestination = NavigationRoutes.MainScreen.route,
-            enterTransition = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(SCREEN_TRANSITION_DURATION)
-                )
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(SCREEN_TRANSITION_DURATION)
-                )
-            },
-            popEnterTransition = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(SCREEN_TRANSITION_DURATION)
-                )
-            },
-            popExitTransition = {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(SCREEN_TRANSITION_DURATION)
-                )
-            }
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
         ) {
             // main screen
             composable(route = NavigationRoutes.MainScreen.route) {
@@ -72,7 +47,33 @@ fun AppNavGraphRoot(noteManager: NoteManager) {
             }
 
             // note creation screen
-            composable(route = NavigationRoutes.NoteCreationScreen.route) {
+            composable(
+                route = NavigationRoutes.NoteCreationScreen.route,
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                }
+            ) {
                 NoteAppCreationScreen(
                     onNavigateTo = navigator::navigateTo,
                     onAddNote = noteManager::addNote
@@ -84,7 +85,31 @@ fun AppNavGraphRoot(noteManager: NoteManager) {
                 route = "${NavigationRoutes.NoteViewScreen.route}/{noteId}",
                 arguments = listOf(
                     navArgument("noteId") { type = NavType.LongType }
-                )
+                ),
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                }
             ) { navBackStackEntry ->
                 val noteId = navBackStackEntry.arguments?.getLong("noteId")
 
@@ -99,7 +124,31 @@ fun AppNavGraphRoot(noteManager: NoteManager) {
                 route = "${NavigationRoutes.NoteEditScreen.route}/{noteId}",
                 arguments = listOf(
                     navArgument("noteId") { type = NavType.LongType }
-                )
+                ),
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                }
             ) { navBackStackEntry ->
                 val noteId = navBackStackEntry.arguments?.getLong("noteId")
 
@@ -110,9 +159,33 @@ fun AppNavGraphRoot(noteManager: NoteManager) {
             }
 
             // settings screen
-            composable(route = NavigationRoutes.NoteSettingsScreen.route) {
-                SettingsAppScreen(onNavigateTo = navigator::navigateTo)
-            }
+            composable(
+                route = NavigationRoutes.NoteSettingsScreen.route,
+                enterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                        animationSpec = tween(SCREEN_TRANSITION_DURATION)
+                    )
+                }
+            ) { SettingsAppScreen(onNavigateTo = navigator::navigateTo) }
         }
     }
 }
