@@ -1,6 +1,5 @@
 package com.example.notepad.presentation.edit_note
 
-import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -48,7 +46,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.notepad.R
-import com.example.notepad.domain.crypto.TextCipher
 import com.example.notepad.domain.model.Note
 import com.example.notepad.presentation.common.SCREEN_TRANSITION_DURATION
 import com.example.notepad.presentation.common.components.TopAppBar
@@ -63,7 +60,6 @@ import com.example.notepad.presentation.common.state.LockedNoteResult
 import com.example.notepad.presentation.navigation.NavigationRoutes
 import com.example.notepad.presentation.common.state.NoteResult
 import com.example.notepad.presentation.common.state.PasswordActionState
-import com.example.notepad.presentation.common.state.PasswordState
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 

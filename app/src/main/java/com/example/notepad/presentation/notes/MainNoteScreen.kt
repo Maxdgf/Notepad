@@ -30,7 +30,6 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,8 +56,6 @@ import com.example.notepad.presentation.common.components.NoteCard
 import com.example.notepad.presentation.common.components.SearchPanelView
 import com.example.notepad.presentation.common.components.SimpleFloatingIconButton
 import com.example.notepad.presentation.common.components.TopAppBar
-import com.example.notepad.presentation.common.components.VerifyPasswordFrame
-import com.example.notepad.presentation.common.state.PasswordActionState
 import com.example.notepad.presentation.common.utils.AppManager
 import com.example.notepad.presentation.common.utils.DateTimeFormatter
 import com.example.notepad.presentation.common.utils.Toaster
