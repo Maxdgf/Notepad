@@ -8,7 +8,4 @@ data class Note(
     val passwordHint: String? = null,
     val creationTime: Long = 0L,
     val lastEditTime: Long? = null
-) {
-    fun locked(): Boolean =
-        this.passwordSalt != null
-}
+)
