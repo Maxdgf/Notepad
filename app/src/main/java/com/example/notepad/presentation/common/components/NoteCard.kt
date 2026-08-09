@@ -48,6 +48,7 @@ import com.example.notepad.R
 @Composable
 private fun ActionsMenuList(
     state: Boolean,
+    isNoteLocked: Boolean,
     onDismissRequest: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -73,15 +74,19 @@ private fun ActionsMenuList(
             text = "delete"
         )
 
-        HorizontalDivider() // divider
+        // share function only available on normal notes!
+        // all information in a locked (password-protected) note is considered private.
+        if (!isNoteLocked) {
+            HorizontalDivider() // divider
 
-        // share note button
-        DropdownMenuIconItem(
-            onClick = { onShare() },
-            iconPainter = painterResource(R.drawable.outline_share_24),
-            contentDescription = null,
-            text = "share"
-        )
+            // share note button
+            DropdownMenuIconItem(
+                onClick = { onShare() },
+                iconPainter = painterResource(R.drawable.outline_share_24),
+                contentDescription = null,
+                text = "share"
+            )
+        }
     }
 }
 
@@ -104,6 +109,7 @@ fun NoteCard(
     noteName: String,
     noteOrderNum: Int?,
     useBrightBg: Boolean,
+    isNoteLocked: Boolean,
     noteDatetimeCreation: String,
     noteLastEditDatetime: String?
 ) {
@@ -224,7 +230,8 @@ fun NoteCard(
                         onShare = {
                             dropdownMenuState = false // close dropdown menu
                             onShare()
-                        }
+                        },
+                        isNoteLocked = isNoteLocked
                     )
                 }
             }

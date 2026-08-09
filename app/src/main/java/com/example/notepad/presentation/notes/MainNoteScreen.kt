@@ -30,6 +30,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,8 @@ import com.example.notepad.presentation.common.components.NoteCard
 import com.example.notepad.presentation.common.components.SearchPanelView
 import com.example.notepad.presentation.common.components.SimpleFloatingIconButton
 import com.example.notepad.presentation.common.components.TopAppBar
+import com.example.notepad.presentation.common.components.VerifyPasswordFrame
+import com.example.notepad.presentation.common.state.PasswordActionState
 import com.example.notepad.presentation.common.utils.AppManager
 import com.example.notepad.presentation.common.utils.DateTimeFormatter
 import com.example.notepad.presentation.common.utils.Toaster
@@ -151,11 +154,13 @@ private fun ScrollableNoteItemsList(
                         val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
                         val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
 
-                        if (sendIntent.resolveActivity(packageManager) != null)
+                        if (sendIntent.resolveActivity(packageManager) != null) {
                             context.startActivity(shareIntent)
-                        else
+                        } else {
                             toaster.showToast("Unable to share note!")
+                        }
                     },
+                    isNoteLocked = note.passwordSalt != null,
                     useBrightBg =
                         if (isAlternatingNoteColorsEnabled) {
                             if (isNoteCardDark) false // dark bg
@@ -198,11 +203,13 @@ private fun ScrollableNoteItemsList(
                         val sendIntent = sendNoteIntent(note.name + "\n\n" + note.content)
                         val shareIntent = Intent.createChooser(sendIntent, null) // create chooser
 
-                        if (sendIntent.resolveActivity(packageManager) != null)
+                        if (sendIntent.resolveActivity(packageManager) != null) {
                             context.startActivity(shareIntent)
-                        else
+                        } else {
                             toaster.showToast("Unable to share note!")
+                        }
                     },
+                    isNoteLocked = note.passwordSalt != null,
                     useBrightBg =
                         if (isAlternatingNoteColorsEnabled) {
                             // check is index even
@@ -288,7 +295,7 @@ fun MainAppScreen(
     var deleteAllNotesAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
     var searchViewState by rememberSaveable { mutableStateOf(false) }
 
-    val allNotesList by mainNoteViewModel.a.collectAsState() //noteList
+    val allNotesList by mainNoteViewModel.noteList.collectAsState() //noteList
     val foundedNotesBySearchQuery by mainNoteViewModel.noteListBySearchQuery.collectAsState()
     val notesDisplaySettings by settingsViewModel.notesDisplaySettings.collectAsState()
 
@@ -401,16 +408,17 @@ fun MainAppScreen(
         },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            SimpleFloatingIconButton(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onNavigateTo(NavigationRoutes.NoteCreationScreen.route)
-                },
-                icon = painterResource(R.drawable.outline_add_24),
-                buttonShape = FloatingActionButtonDefaults.shape,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
+            if (!searchViewState)
+                SimpleFloatingIconButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onNavigateTo(NavigationRoutes.NoteCreationScreen.route)
+                    },
+                    icon = painterResource(R.drawable.outline_add_24),
+                    buttonShape = FloatingActionButtonDefaults.shape,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
         },
         content = { innerPadding ->
             Box(

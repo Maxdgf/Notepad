@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -42,6 +44,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -51,13 +54,18 @@ import kotlinx.coroutines.launch
 
 import com.example.notepad.R
 import com.example.notepad.domain.model.Note
+import com.example.notepad.presentation.common.SCREEN_TRANSITION_DURATION
 import com.example.notepad.presentation.common.state.NoteResult
 import com.example.notepad.presentation.common.components.AlertMessageDialog
 import com.example.notepad.presentation.common.components.DropdownMenuIconItem
+import com.example.notepad.presentation.common.components.FakeBlurredNoteContent
 import com.example.notepad.presentation.common.components.LoadingView
 import com.example.notepad.presentation.common.components.NoDataDescriptionBlock
+import com.example.notepad.presentation.common.components.VerifyPasswordFrame
 import com.example.notepad.presentation.common.components.SwitchWithText
 import com.example.notepad.presentation.common.components.TopAppBar
+import com.example.notepad.presentation.common.state.LockedNoteResult
+import com.example.notepad.presentation.common.state.PasswordActionState
 import com.example.notepad.presentation.common.utils.ClipBoardManager
 import com.example.notepad.presentation.common.utils.DateTimeFormatter
 import com.example.notepad.presentation.navigation.NavigationRoutes
@@ -296,15 +304,21 @@ fun NoteAppViewScreen(
 
     // select note by id
     LaunchedEffect(Unit) {
+        // Wait 500 ms for the screen transition effect to finish
+        delay(SCREEN_TRANSITION_DURATION.milliseconds)
+
         noteId?.let { id ->
             noteViewModel.selectNote(id)
         }
     }
 
+    val decryptedNote by noteViewModel.decryptedNoteContent.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
                 titleContent = {
+                    // matching note state
                     when (val noteState = currentNote) {
                         is NoteResult.Found -> NoteTitle(note = noteState.note)
                         is NoteResult.Exception -> {
@@ -313,17 +327,35 @@ fun NoteAppViewScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
-                        is NoteResult.NotFound -> {
+                        NoteResult.NotFound -> {
                             Text(
                                 text = "Not founded",
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         NoteResult.Loading -> {
-                            LoadingView(
-                                showLoadingBar = false,
-                                description = "Loading note..."
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
+                        }
+                        is NoteResult.Locked -> {
+                            // matching locked note state
+                            when (val textState = decryptedNote) {
+                                is LockedNoteResult.Decrypted -> NoteTitle(note = textState.decryptedNote)
+                                LockedNoteResult.Decrypting -> {
+                                    LinearProgressIndicator(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                                LockedNoteResult.Encrypted -> {
+                                    Text(
+                                        text = "The note is locked.",
+                                        modifier = Modifier.blur(10.dp),
+                                    )
+                                }
+                            }
                         }
                     }
                 },
@@ -338,27 +370,56 @@ fun NoteAppViewScreen(
                 barActionElements = {
                     val clipBoardManager = remember { ClipBoardManager(context) }
 
+                    // matching note state
                     when (val noteState = currentNote) {
-                        is NoteResult.Found ->
+                        is NoteResult.Found -> {
                             ScreenDropdownMenu(
                                 textWrap = noteViewSettings.isTextWrapEnabled,
                                 currentFontSize = noteViewSettings.noteTextSize,
                                 onUpdateCurrentFontSize = { size ->
-                                    settingsViewModel.performEvent(NoteViewSettingsEvent.UpdateTextSizeState(size))
+                                    settingsViewModel.performEvent(
+                                        NoteViewSettingsEvent.UpdateTextSizeState(size)
+                                    )
                                 },
                                 onCopyNoteContent = {
                                     clipBoardManager.setTextToClipboard(noteState.note.content)
                                 },
                                 onUpdateTextWrapState = { state ->
-                                    settingsViewModel.performEvent(NoteViewSettingsEvent.UpdateTextWrapState(state))
+                                    settingsViewModel.performEvent(
+                                        NoteViewSettingsEvent.UpdateTextWrapState(state)
+                                    )
                                 }
                             )
+                        }
+                        is NoteResult.Locked -> {
+                            val decrypted = decryptedNote
+                            if (decrypted is LockedNoteResult.Decrypted) {
+                                ScreenDropdownMenu(
+                                    textWrap = noteViewSettings.isTextWrapEnabled,
+                                    currentFontSize = noteViewSettings.noteTextSize,
+                                    onUpdateCurrentFontSize = { size ->
+                                        settingsViewModel.performEvent(
+                                            NoteViewSettingsEvent.UpdateTextSizeState(size)
+                                        )
+                                    },
+                                    onCopyNoteContent = {
+                                        clipBoardManager.setTextToClipboard(decrypted.decryptedNote.content)
+                                    },
+                                    onUpdateTextWrapState = { state ->
+                                        settingsViewModel.performEvent(
+                                            NoteViewSettingsEvent.UpdateTextWrapState(state)
+                                        )
+                                    }
+                                )
+                            }
+                        }
                         else -> {} // nothing show
                     }
                 }
             )
         },
         content = { innerPadding ->
+            // matching note state
             when (val noteState = currentNote) {
                 is NoteResult.Found -> {
                     NoteContentView(
@@ -376,7 +437,79 @@ fun NoteAppViewScreen(
                         description = noteState.message
                     )
                 }
-                is NoteResult.NotFound -> {
+                is NoteResult.Locked -> {
+                    // matching locked note state
+                    when (val textState = decryptedNote) {
+                        is LockedNoteResult.Decrypted -> {
+                            NoteContentView(
+                                content = textState.decryptedNote.content,
+                                currentFontSize = noteViewSettings.noteTextSize,
+                                isTextWrapEnabled = noteViewSettings.isTextWrapEnabled,
+                                paddingValues = innerPadding
+                            )
+                        }
+                        LockedNoteResult.Decrypting -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            ) {
+                                LoadingView(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(innerPadding),
+                                    description = "Decrypting note..."
+                                )
+                            }
+                        }
+                        LockedNoteResult.Encrypted -> {
+                            FakeBlurredNoteContent(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+
+                            val password by noteViewModel.passwordString.collectAsState()
+                            val passwordState by noteViewModel.passwordState.collectAsState()
+
+                            var dialogState by rememberSaveable { mutableStateOf(true) }
+
+                            AlertMessageDialog(
+                                state = dialogState,
+                                onDismissRequestFunction = {},
+                                titleIcon = painterResource(R.drawable.outline_lock_open_24),
+                                titleText = "Enter password of note"
+                            ) {
+                                VerifyPasswordFrame(
+                                    passwordValue = password,
+                                    onPasswordValueChanged = { newValue ->
+                                        noteViewModel.updatePassword(newValue)
+                                    },
+                                    passwordHint = noteState.lockedNote.passwordHint,
+                                    currentPasswordState = passwordState
+                                )
+
+                                Row {
+                                    Spacer(modifier = Modifier.weight(1.0f))
+
+                                    TextButton(
+                                        onClick = {
+                                            dialogState = false
+                                            onNavigateTo(NavigationRoutes.MainScreen.route)
+                                        }
+                                    ) {
+                                        Text(text = "Cancel")
+                                    }
+
+                                    TextButton(onClick = { noteViewModel.updatePasswordState(PasswordActionState.Submit) }) {
+                                        Text(text = "Unlock")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                NoteResult.NotFound -> {
                     NoDataDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()

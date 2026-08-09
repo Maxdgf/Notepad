@@ -1,9 +1,13 @@
 package com.example.notepad.presentation.edit_note
 
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -17,37 +21,51 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.example.notepad.R
+import com.example.notepad.domain.crypto.TextCipher
 import com.example.notepad.domain.model.Note
+import com.example.notepad.presentation.common.SCREEN_TRANSITION_DURATION
 import com.example.notepad.presentation.common.components.TopAppBar
 import com.example.notepad.presentation.common.components.AlertMessageDialog
 import com.example.notepad.presentation.common.components.BasicTextFieldPlaceholder
 import com.example.notepad.presentation.common.components.BorderedLineInputField
+import com.example.notepad.presentation.common.components.FakeBlurredNoteContent
 import com.example.notepad.presentation.common.components.LoadingView
 import com.example.notepad.presentation.common.components.NoDataDescriptionBlock
+import com.example.notepad.presentation.common.components.VerifyPasswordFrame
+import com.example.notepad.presentation.common.state.LockedNoteResult
 import com.example.notepad.presentation.navigation.NavigationRoutes
 import com.example.notepad.presentation.common.state.NoteResult
+import com.example.notepad.presentation.common.state.PasswordActionState
+import com.example.notepad.presentation.common.state.PasswordState
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
@@ -160,11 +178,9 @@ private fun NoteEditView(
     ) {
         Text(text = "Note couldn't be empty!\n- Check note name and content.")
 
-        Button(
+        TextButton(
             onClick = { errorOfEmptyNotAlertMessageDialogState = false },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError),
-            shape = RoundedCornerShape(10.dp)
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
         ) { Text(text = "Ok") }
     }
 
@@ -178,10 +194,8 @@ private fun NoteEditView(
     ) {
         Text(text = "Changes not detected! Note cannot be edited.")
 
-        Button(
+        TextButton(
             onClick = { errorOfNoteChangesAlertMessageDialogState = false },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onError)
         ) { Text(text = "Ok") }
     }
@@ -202,6 +216,9 @@ fun NoteAppEditScreen(
 
     // select note by id
     LaunchedEffect(Unit) {
+        // Wait 500 ms for the screen transition effect to finish
+        delay(SCREEN_TRANSITION_DURATION.milliseconds)
+
         noteId?.let { id ->
             noteViewModel.selectNote(id)
         }
@@ -209,6 +226,8 @@ fun NoteAppEditScreen(
 
     val currentNote by noteViewModel.currentNote.collectAsState()
     val noteEditScreenState: NoteEditScreenViewModel = viewModel()
+
+    val decryptedNote by noteViewModel.decryptedNoteContent.collectAsState()
 
     Scaffold(
         topBar = {
@@ -238,7 +257,63 @@ fun NoteAppEditScreen(
                                 }
                             )
                         }
-                        else -> {}
+                        is NoteResult.Exception -> {
+                            Text(
+                                text = "Error",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        NoteResult.NotFound -> {
+                            Text(
+                                text = "Not founded",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        NoteResult.Loading -> {
+                            LinearProgressIndicator(
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                        is NoteResult.Locked -> {
+                            when (val decryptedState = decryptedNote) {
+                                is LockedNoteResult.Decrypted -> {
+                                    // update note name state
+                                    LaunchedEffect(Unit) {
+                                        // check is note name edited
+                                        if (!noteEditScreenState.isNoteNameEdited)
+                                            noteEditScreenState.updateNoteName(decryptedState.decryptedNote.name)
+                                    }
+
+                                    BorderedLineInputField(
+                                        state = noteEditScreenState.noteName,
+                                        placeholder = "Edit note name",
+                                        buttonContentDescription = null,
+                                        onUpdateState = { newValue ->
+                                            noteEditScreenState.apply {
+                                                updateNoteName(newValue)
+                                                setNoteNameEdited()
+                                            }
+                                        },
+                                        onClearContent = {
+                                            noteEditScreenState.updateNoteName("")
+                                        }
+                                    )
+                                }
+                                LockedNoteResult.Decrypting -> {
+                                    LinearProgressIndicator(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                                LockedNoteResult.Encrypted -> {
+                                    Text(
+                                        text = "The note is locked.",
+                                        modifier = Modifier.blur(10.dp),
+                                    )
+                                }
+                            }
+                        }
                     }
                 },
                 barIcon = {
@@ -273,7 +348,7 @@ fun NoteAppEditScreen(
                         description = noteState.message
                     )
                 }
-                is NoteResult.NotFound -> {
+                NoteResult.NotFound -> {
                     NoDataDescriptionBlock(
                         modifier = Modifier
                             .fillMaxSize()
@@ -288,6 +363,80 @@ fun NoteAppEditScreen(
                             .padding(innerPadding),
                         description = "Loading note, please wait."
                     )
+                }
+                is NoteResult.Locked -> {
+                    // matching locked note state
+                    when (val textState = decryptedNote) {
+                        is LockedNoteResult.Decrypted -> {
+                            NoteEditView(
+                                paddingValues = innerPadding,
+                                currentNote = textState.decryptedNote,
+                                onPerformEvent = noteViewModel::performEvent,
+                                onNavigateTo = onNavigateTo,
+                                onPerformHaptic = haptic::performHapticFeedback,
+                                noteEditScreenState = noteEditScreenState
+                            )
+                        }
+                        LockedNoteResult.Decrypting -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            ) {
+                                LoadingView(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(innerPadding),
+                                    description = "Decrypting note..."
+                                )
+                            }
+                        }
+                        LockedNoteResult.Encrypted -> {
+                            FakeBlurredNoteContent(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+
+                            val password by noteViewModel.passwordString.collectAsState()
+                            val passwordState by noteViewModel.passwordState.collectAsState()
+
+                            var dialogState by rememberSaveable { mutableStateOf(true) }
+
+                            AlertMessageDialog(
+                                state = dialogState,
+                                onDismissRequestFunction = {},
+                                titleIcon = painterResource(R.drawable.outline_lock_open_24),
+                                titleText = "Enter password of note"
+                            ) {
+                                VerifyPasswordFrame(
+                                    passwordValue = password,
+                                    onPasswordValueChanged = { newValue ->
+                                        noteViewModel.updatePassword(newValue)
+                                    },
+                                    passwordHint = noteState.lockedNote.passwordHint,
+                                    currentPasswordState = passwordState
+                                )
+
+                                Row {
+                                    Spacer(modifier = Modifier.weight(1.0f))
+
+                                    TextButton(
+                                        onClick = {
+                                            dialogState = false
+                                            onNavigateTo(NavigationRoutes.MainScreen.route)
+                                        }
+                                    ) {
+                                        Text(text = "Cancel")
+                                    }
+
+                                    TextButton(onClick = { noteViewModel.updatePasswordState(PasswordActionState.Submit) }) {
+                                        Text(text = "Unlock")
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

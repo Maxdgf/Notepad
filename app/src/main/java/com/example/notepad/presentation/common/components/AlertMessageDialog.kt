@@ -53,9 +53,8 @@ fun AlertMessageDialog(
                     .wrapContentWidth()
                     .wrapContentHeight(),
                 shape = MaterialTheme.shapes.large,
-                color = containerColor ?: MaterialTheme.colorScheme.surface, // set surface color
-                contentColor = contentColor
-                    ?: MaterialTheme.colorScheme.onSurface, // set color to surface's elements
+                color = containerColor ?: MaterialTheme.colorScheme.surface,        // set surface color
+                contentColor = contentColor ?: MaterialTheme.colorScheme.onSurface, // set color to surface's elements
                 tonalElevation = AlertDialogDefaults.TonalElevation
             ) {
                 Column(

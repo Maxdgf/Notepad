@@ -9,21 +9,9 @@ class NoteCreationScreenViewModel : ViewModel() {
     var noteName by mutableStateOf("")
     var noteContent by mutableStateOf("")
 
-    /**
-     * Updates note name state value.
-     * @param text input text.
-     */
-    fun updateNoteName(text: String) {
-        noteName = text
-    }
+    var password by mutableStateOf("")
+    var passwordHint by mutableStateOf("")
 
-    /**
-     * Updates note content state value.
-     * @param text input text.
-     */
-    fun updateNoteContent(text: String) {
-        noteContent = text
-    }
 
     /**
      * Checks is note name and content empty

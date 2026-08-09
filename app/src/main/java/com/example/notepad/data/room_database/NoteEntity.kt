@@ -15,6 +15,12 @@ data class NoteEntity(
     @ColumnInfo(name = "content")
     val content: String,
 
+    @ColumnInfo(name = "password_salt")
+    val passwordSalt: String? = null,
+
+    @ColumnInfo(name = "password_hint")
+    val passwordHint: String? = null,
+
     @ColumnInfo(name = "creation_time")
     val creationTime: Long = System.currentTimeMillis(),
 

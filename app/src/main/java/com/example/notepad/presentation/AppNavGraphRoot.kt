@@ -3,11 +3,17 @@ package com.example.notepad.presentation
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -20,11 +26,10 @@ import com.example.notepad.presentation.create_note.NoteAppCreationScreen
 import com.example.notepad.presentation.edit_note.NoteAppEditScreen
 import com.example.notepad.presentation.note_view.NoteAppViewScreen
 import com.example.notepad.presentation.app_settings.SettingsAppScreen
+import com.example.notepad.presentation.common.SCREEN_TRANSITION_DURATION
 import com.example.notepad.presentation.navigation.NavigationRoutes
 import com.example.notepad.presentation.navigation.Navigator
 import com.example.notepad.presentation.create_note.NoteManager
-
-private const val SCREEN_TRANSITION_DURATION = 500
 
 /** Main screen root. */
 @Composable

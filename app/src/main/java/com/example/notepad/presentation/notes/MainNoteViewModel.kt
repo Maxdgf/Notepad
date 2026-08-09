@@ -2,7 +2,6 @@ package com.example.notepad.presentation.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notepad.data.room_database.toDomainModel
 import com.example.notepad.domain.repository.NoteRepository
 import com.example.notepad.domain.usecase.note.GetAllNotesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,10 +10,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
@@ -28,31 +26,7 @@ class MainNoteViewModel @Inject constructor(
     getAllNotesUseCase: GetAllNotesUseCase
 ) : ViewModel() {
     // All notes list
-    val noteList = noteRepository.getAllNotes()
-        .map { list ->
-            if (list.isNotEmpty()) {
-                val noteList = list.map { it.toDomainModel() }
-                NotesListResult.ContentList(noteList)
-            } else {
-                NotesListResult.EmptyList
-            }
-        }
-        .catch { exception ->
-            // emit exception state
-            emit(
-                NotesListResult.Exception(
-                    exception.message ?:
-                    "An unexpected error occurred, the notes was not loaded."
-                )
-            )
-        }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            NotesListResult.Loading // initial value (loading state)
-        )
-
-    val a = getAllNotesUseCase()
+    val noteList = getAllNotesUseCase()
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -60,11 +34,12 @@ class MainNoteViewModel @Inject constructor(
         )
 
     // search note query state
-    val searchQuery = MutableStateFlow("")
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
 
     // found notes by search query state
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val noteListBySearchQuery = searchQuery
+    val noteListBySearchQuery = _searchQuery
         .debounce(250.milliseconds) // debounce 250 ms
         .distinctUntilChanged()
         .transformLatest { query ->
@@ -106,7 +81,7 @@ class MainNoteViewModel @Inject constructor(
     /** Updates search query state.
      * @param query input search query. */
     fun updateSearchQuery(query: String) {
-        searchQuery.value = query
+        _searchQuery.value = query
     }
 
 
@@ -116,7 +91,7 @@ class MainNoteViewModel @Inject constructor(
         is MainNoteEvent.DeleteMainNoteById -> viewModelScope.launch {
             noteRepository.deleteNote(event.id)
         }
-        is MainNoteEvent.DeleteAllNotes -> viewModelScope.launch {
+        MainNoteEvent.DeleteAllNotes -> viewModelScope.launch {
             noteRepository.deleteAllNotes()
         }
     }

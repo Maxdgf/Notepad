@@ -3,6 +3,8 @@ package com.example.notepad.presentation.create_note
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -17,12 +19,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -33,6 +39,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -42,6 +49,7 @@ import com.example.notepad.presentation.common.components.TopAppBar
 import com.example.notepad.presentation.common.components.AlertMessageDialog
 import com.example.notepad.presentation.common.components.BasicTextFieldPlaceholder
 import com.example.notepad.presentation.common.components.BorderedLineInputField
+import com.example.notepad.presentation.common.components.DescriptionField
 import com.example.notepad.presentation.navigation.NavigationRoutes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,7 +64,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun NoteAppCreationScreen(
     onNavigateTo: (String) -> Unit,
-    onAddNote: suspend (note: Note) -> Unit
+    onAddNote: suspend (password: String?, note: Note) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
     val noteCreationScreenViewModel: NoteCreationScreenViewModel = viewModel()
@@ -71,6 +79,8 @@ fun NoteAppCreationScreen(
         )
     }
 
+    var state by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -80,10 +90,10 @@ fun NoteAppCreationScreen(
                         placeholder = "Enter note name...",
                         buttonContentDescription = null,
                         onUpdateState = { newValue ->
-                            noteCreationScreenViewModel.updateNoteName(newValue)
+                            noteCreationScreenViewModel.noteName = newValue
                         },
                         onClearContent = {
-                            noteCreationScreenViewModel.updateNoteName("")
+                            noteCreationScreenViewModel.noteName = ""
                         }
                     )
                 },
@@ -91,6 +101,14 @@ fun NoteAppCreationScreen(
                     IconButton(onClick = { onNavigateTo(NavigationRoutes.MainScreen.route) }) {
                         Icon(
                             painter = painterResource(R.drawable.baseline_arrow_back_24),
+                            contentDescription = null
+                        )
+                    }
+                },
+                barActionElements = {
+                    IconButton(onClick = { state = true }) {
+                        Icon(
+                            painter = painterResource(R.drawable.outline_lock_24),
                             contentDescription = null
                         )
                     }
@@ -116,7 +134,7 @@ fun NoteAppCreationScreen(
                         .weight(1f)
                         .verticalScroll(noteContentInputFieldVerticalScrollState),
                     value = noteCreationScreenViewModel.noteContent,
-                    onValueChange = { newValue -> noteCreationScreenViewModel.updateNoteContent(newValue) },
+                    onValueChange = { newValue -> noteCreationScreenViewModel.noteContent = newValue },
                     textStyle = TextStyle(color = MaterialTheme.colorScheme.onPrimary),
                     cursorBrush = SolidColor(if (isSystemInDarkTheme()) Color.White else Color.Black),
                     decorationBox = @Composable { innerTextField ->
@@ -142,9 +160,13 @@ fun NoteAppCreationScreen(
                             coroutineScope.launch {
                                 // add note to database
                                 onAddNote(
+                                    noteCreationScreenViewModel.password
+                                        .trim()
+                                        .ifBlank { null },
                                     Note(
-                                        name = noteCreationScreenViewModel.noteName,
-                                        content = noteCreationScreenViewModel.noteContent
+                                        name = noteCreationScreenViewModel.noteName.trim(),
+                                        content = noteCreationScreenViewModel.noteContent,
+                                        passwordHint = noteCreationScreenViewModel.passwordHint
                                     )
                                 )
 
@@ -164,6 +186,62 @@ fun NoteAppCreationScreen(
                     ),
                     shape = RoundedCornerShape(10.dp)
                 ) { Text(text = "create note") }
+            }
+
+            AlertMessageDialog(
+                state = state,
+                onDismissRequestFunction = { state = false },
+                titleIcon = painterResource(R.drawable.outline_lock_24),
+                titleText = "Set password to note"
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = noteCreationScreenViewModel.password,
+                    onValueChange = { newValue -> noteCreationScreenViewModel.password = newValue },
+                    visualTransformation = PasswordVisualTransformation(mask = '*'),
+                    label = { Text(text = "Password") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = noteCreationScreenViewModel.passwordHint,
+                    onValueChange = { newValue -> noteCreationScreenViewModel.passwordHint = newValue },
+                    label = { Text(text = "Password hint") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
+                )
+
+                DescriptionField(
+                    description = "Don't write a real password into password hint field!",
+                    iconPainter = painterResource(R.drawable.outline_error_outline_24)
+                )
+
+                Row {
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    TextButton(
+                        onClick = {
+                            state = false
+                            noteCreationScreenViewModel.password = ""
+                        }
+                    ) { Text(text = "Cancel") }
+
+                    TextButton(
+                        onClick = {
+                            state = false
+                        }
+                    ) {
+                        Text(text = "Apply")
+                    }
+                }
             }
 
             AlertMessageDialog(
