@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,10 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -165,6 +166,11 @@ private fun ScrollableNoteItemsList(
                         } else false
                 )
             }
+
+            // bottom spacer
+            item {
+                Spacer(modifier = Modifier.height(5.dp))
+            }
         }
     } else {
         // normal list
@@ -214,6 +220,11 @@ private fun ScrollableNoteItemsList(
                             else false                     // dark bg
                         } else false
                 )
+            }
+
+            // bottom spacer
+            item {
+                Spacer(modifier = Modifier.height(5.dp))
             }
         }
     }
@@ -403,19 +414,25 @@ fun MainAppScreen(
                 }
             )
         },
-        floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = {
-            if (!searchViewState)
-                SimpleFloatingIconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateTo(NavigationRoutes.NoteCreationScreen.route)
+        bottomBar = {
+            if (!searchViewState) {
+                BottomAppBar(
+                    actions = {},
+                    floatingActionButton = {
+                        SimpleFloatingIconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onNavigateTo(NavigationRoutes.NoteCreationScreen.route)
+                            },
+                            icon = painterResource(R.drawable.outline_add_24),
+                            buttonShape = FloatingActionButtonDefaults.shape,
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     },
-                    icon = painterResource(R.drawable.outline_add_24),
-                    buttonShape = FloatingActionButtonDefaults.shape,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    tonalElevation = 3.dp
                 )
+            }
         },
         content = { innerPadding ->
             Box(
