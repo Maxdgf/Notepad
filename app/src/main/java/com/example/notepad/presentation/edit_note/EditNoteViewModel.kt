@@ -7,6 +7,7 @@ import com.example.notepad.data.room_database.toDomainModel
 import com.example.notepad.domain.crypto.TextCipher
 import com.example.notepad.domain.model.Note
 import com.example.notepad.domain.repository.NoteRepository
+import com.example.notepad.domain.usecase.note.EditNoteUseCase
 import com.example.notepad.presentation.common.state.LockedNoteResult
 import com.example.notepad.presentation.common.state.NoteResult
 import com.example.notepad.presentation.common.state.PasswordActionState
@@ -37,7 +38,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class EditNoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val savedStateHandle: SavedStateHandle,
-    private val textCipher: TextCipher
+    private val textCipher: TextCipher,
+    private val editNoteUseCase: EditNoteUseCase
 ) : ViewModel() {
     private companion object {
         const val SELECTED_NOTE_KEY = "selected_note_id"
@@ -126,6 +128,7 @@ class EditNoteViewModel @Inject constructor(
                     emit(
                         LockedNoteResult.Decrypted(
                             Note(
+                                id = locked.lockedNote.id,
                                 name = locked.lockedNote.name,
                                 content = decryptedNoteText,
                                 creationTime = locked.lockedNote.creationTime
@@ -169,15 +172,12 @@ class EditNoteViewModel @Inject constructor(
     }
 
 
-    fun performEvent(event: EditNoteEvent) = when (event) {
-        is EditNoteEvent.EditNote -> viewModelScope.launch {
-            event.run {
-                noteRepository.editNote(
-                    name,
-                    content,
-                    id
-                )
-            }
-        }
+    fun editNote(name: String, content: String, id: Long) = viewModelScope.launch {
+        editNoteUseCase(
+            _passwordString.value.ifBlank { null },
+            id,
+            name,
+            content
+        )
     }
 }

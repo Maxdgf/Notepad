@@ -26,6 +26,7 @@ interface NoteDao {
         SET 
             name = :name, 
             content = :content, 
+            password_salt = COALESCE(:passwordSalt, password_salt),
             last_edit_time = :lastEditDateTime 
         WHERE 
             id = :id
@@ -34,6 +35,7 @@ interface NoteDao {
     suspend fun updateNote(
         name: String,
         content: String,
+        passwordSalt: String?,
         lastEditDateTime: Long,
         id: Long,
     )

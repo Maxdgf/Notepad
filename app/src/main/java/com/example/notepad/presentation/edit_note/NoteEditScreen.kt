@@ -69,7 +69,7 @@ private fun NoteEditView(
     paddingValues: PaddingValues,
     currentNote: Note,
     noteEditScreenState: NoteEditScreenViewModel,
-    onPerformEvent: (EditNoteEvent) -> Unit,
+    onEditNote: (String, String, Long) -> Unit,
     onNavigateTo: (String) -> Unit,
     onPerformHaptic: (HapticFeedbackType) -> Unit
 ) {
@@ -142,15 +142,16 @@ private fun NoteEditView(
                         noteEditScreenState.noteName != currentNote.name ||
                         noteEditScreenState.noteContent != currentNote.content
                     ) {
-                        onPerformEvent(
-                            EditNoteEvent.EditNote(
-                                noteEditScreenState.noteName,
-                                noteEditScreenState.noteName,
-                                currentNote.id
-                            )
+                        onEditNote(
+                            noteEditScreenState.noteName,
+                            noteEditScreenState.noteContent,
+                            currentNote.id
                         )
+
                         onNavigateTo(NavigationRoutes.MainScreen.route)
-                    } else errorOfNoteChangesAlertMessageDialogState = true
+                    } else {
+                        errorOfNoteChangesAlertMessageDialogState = true
+                    }
                 }
             },
             modifier = Modifier
@@ -330,7 +331,7 @@ fun NoteAppEditScreen(
                     NoteEditView(
                         paddingValues = innerPadding,
                         currentNote = noteState.note,
-                        onPerformEvent = noteViewModel::performEvent,
+                        onEditNote = noteViewModel::editNote,
                         onNavigateTo = onNavigateTo,
                         onPerformHaptic = haptic::performHapticFeedback,
                         noteEditScreenState = noteEditScreenState
@@ -367,7 +368,7 @@ fun NoteAppEditScreen(
                             NoteEditView(
                                 paddingValues = innerPadding,
                                 currentNote = textState.decryptedNote,
-                                onPerformEvent = noteViewModel::performEvent,
+                                onEditNote = noteViewModel::editNote,
                                 onNavigateTo = onNavigateTo,
                                 onPerformHaptic = haptic::performHapticFeedback,
                                 noteEditScreenState = noteEditScreenState

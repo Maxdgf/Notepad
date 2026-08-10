@@ -24,10 +24,12 @@ class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : Not
     override suspend fun editNote(
         name: String,
         content: String,
+        passwordSalt: String?,
         id: Long
     ) = noteDao.updateNote(
         name,
         content,
+        passwordSalt,
         System.currentTimeMillis(),
         id
     )

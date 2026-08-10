@@ -16,6 +16,7 @@ interface NoteRepository {
     suspend fun editNote(
         name: String,
         content: String,
+        passwordSalt: String?,
         id: Long
     )
 
