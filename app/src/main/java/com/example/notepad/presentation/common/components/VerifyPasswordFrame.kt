@@ -75,6 +75,7 @@ fun VerifyPasswordFrame(
             )
         }
 
+        // error description field
         AnimatedVisibility(visible = currentPasswordState != PasswordState.None) {
             ErrorField(
                 errorDescription = when (currentPasswordState) {
@@ -85,8 +86,12 @@ fun VerifyPasswordFrame(
             )
         }
 
+        // password hint field
         passwordHint?.let {
-            DescriptionField(description = it)
+            DescriptionField(
+                description = it,
+                iconPainter = painterResource(R.drawable.outline_edit_24)
+            )
         }
     }
 }
