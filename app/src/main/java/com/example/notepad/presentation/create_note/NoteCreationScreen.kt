@@ -18,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +42,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -50,6 +53,8 @@ import com.example.notepad.presentation.common.components.AlertMessageDialog
 import com.example.notepad.presentation.common.components.BasicTextFieldPlaceholder
 import com.example.notepad.presentation.common.components.BorderedLineInputField
 import com.example.notepad.presentation.common.components.DescriptionField
+import com.example.notepad.presentation.common.components.ErrorField
+import com.example.notepad.presentation.common.theme.arlekin
 import com.example.notepad.presentation.navigation.NavigationRoutes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,7 +84,10 @@ fun NoteAppCreationScreen(
         )
     }
 
-    var state by remember { mutableStateOf(false) }
+    var passwordInputDialogState by remember { mutableStateOf(false) }
+
+    val passwordString by noteCreationScreenViewModel.passwordString.collectAsState()
+    val passwordValidationState by noteCreationScreenViewModel.passwordValidationState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -106,10 +114,15 @@ fun NoteAppCreationScreen(
                     }
                 },
                 barActionElements = {
-                    IconButton(onClick = { state = true }) {
+                    IconButton(onClick = { passwordInputDialogState = true }) {
                         Icon(
                             painter = painterResource(R.drawable.outline_lock_24),
-                            contentDescription = null
+                            contentDescription = null,
+                            tint = if (passwordString.isNotBlank() && passwordValidationState == PasswordValidation.Valid) {
+                                arlekin
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            }
                         )
                     }
                 }
@@ -160,13 +173,11 @@ fun NoteAppCreationScreen(
                             coroutineScope.launch {
                                 // add note to database
                                 onAddNote(
-                                    noteCreationScreenViewModel.password
-                                        .trim()
-                                        .ifBlank { null },
+                                    passwordString.ifBlank { null },
                                     Note(
                                         name = noteCreationScreenViewModel.noteName.trim(),
                                         content = noteCreationScreenViewModel.noteContent,
-                                        passwordHint = noteCreationScreenViewModel.passwordHint
+                                        passwordHint = noteCreationScreenViewModel.passwordHint.ifBlank { null }
                                     )
                                 )
 
@@ -189,23 +200,69 @@ fun NoteAppCreationScreen(
             }
 
             AlertMessageDialog(
-                state = state,
-                onDismissRequestFunction = { state = false },
+                state = passwordInputDialogState,
+                onDismissRequestFunction = {},
                 titleIcon = painterResource(R.drawable.outline_lock_24),
                 titleText = "Set password to note"
             ) {
+                var isPasswordVisible by remember { mutableStateOf(false) }
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = noteCreationScreenViewModel.password,
-                    onValueChange = { newValue -> noteCreationScreenViewModel.password = newValue },
-                    visualTransformation = PasswordVisualTransformation(mask = '*'),
+                    value = passwordString,
+                    onValueChange = { newValue ->
+                        noteCreationScreenViewModel.updatePasswordString(newValue)
+                    },
+                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(mask = '*'),
                     label = { Text(text = "Password") },
+                    leadingIcon = {
+                        IconToggleButton(
+                            checked = isPasswordVisible,
+                            onCheckedChange = { state -> isPasswordVisible = state }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.outline_visibility_24),
+                                contentDescription = null
+                            )
+                        }
+                    },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                        focusedBorderColor = if (passwordValidationState == PasswordValidation.Valid) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            Color.Red
+                        },
+                        unfocusedBorderColor = if (passwordValidationState == PasswordValidation.Valid) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            Color.Red
+                        }.copy(alpha = 0.5f),
+                        focusedLabelColor = if (passwordValidationState == PasswordValidation.Valid) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            Color.Red
+                        },
+                        unfocusedLabelColor = if (passwordValidationState == PasswordValidation.Valid) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            Color.Red
+                        }.copy(alpha = 0.5f)
                     )
                 )
+
+                // show password validation state
+                when (passwordValidationState) {
+                    PasswordValidation.IsEmpty -> ErrorField("password couldn't be empty!")
+                    PasswordValidation.IsBlank -> ErrorField("password couldn't be blank!")
+                    PasswordValidation.WhiteSpacesAtStartAndEndFound -> ErrorField("password must not contain spaces at the beginning or the end.")
+                    PasswordValidation.ToShort -> ErrorField("password to short! Min length is $MIN_PASSWORD_LENGTH chars.")
+                    PasswordValidation.ToLong -> ErrorField("password to long! Max length is $MAX_PASSWORD_LENGTH chars.")
+                    PasswordValidation.EngLettersDigitsSpecCharsExcepted -> ErrorField("only eng letters, digits and spec chars excepted!")
+                    PasswordValidation.FewLetters -> ErrorField("few letters in password! Min letters count is $MIN_LETTERS_COUNT.")
+                    PasswordValidation.FewDigits -> ErrorField("few digits in password! Min digits count is $MIN_DIGITS_COUNT.")
+                    PasswordValidation.FewSpecialChars -> ErrorField("few spec chars in password! Min spec chars count is $MIN_SPEC_CHARS_COUNT.")
+                    PasswordValidation.Valid -> {}
+                }
 
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -225,22 +282,19 @@ fun NoteAppCreationScreen(
                 )
 
                 Row {
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1.0f))
 
                     TextButton(
                         onClick = {
-                            state = false
-                            noteCreationScreenViewModel.password = ""
+                            passwordInputDialogState = false
+                            noteCreationScreenViewModel.updatePasswordString("")
                         }
                     ) { Text(text = "Cancel") }
 
                     TextButton(
-                        onClick = {
-                            state = false
-                        }
-                    ) {
-                        Text(text = "Apply")
-                    }
+                        onClick = { passwordInputDialogState = false },
+                        enabled = passwordValidationState == PasswordValidation.Valid
+                    ) { Text(text = "Apply") }
                 }
             }
 
