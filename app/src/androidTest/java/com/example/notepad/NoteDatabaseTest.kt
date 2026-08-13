@@ -85,6 +85,7 @@ class NoteDatabaseTest : TestCase() {
                 name = "My updated test note",
                 content = "Note has been updated! ✨",
                 lastEditDateTime = System.currentTimeMillis(),
+                passwordSalt = null,
                 id = 1
             )
         }
@@ -94,6 +95,7 @@ class NoteDatabaseTest : TestCase() {
         assertTrue(updatedNote != null)
         assertEquals(updatedNote?.name, "My updated test note")
         assertEquals(updatedNote?.content, "Note has been updated! ✨")
+        assertNull(updatedNote?.passwordSalt)
         assertTrue(updatedNote?.lastEditTime != null)
     }
 
