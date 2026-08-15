@@ -226,6 +226,14 @@ fun NoteAppCreationScreen(
                             )
                         }
                     },
+                    trailingIcon = {
+                        IconButton(onClick = { noteCreationScreenViewModel.updatePasswordString("") }) {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_clear_24),
+                                contentDescription = null
+                            )
+                        }
+                    },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = if (passwordValidationState == PasswordValidation.Valid) {
