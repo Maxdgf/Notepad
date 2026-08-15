@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    //alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
@@ -16,7 +15,7 @@ android {
     defaultConfig {
         applicationId = "com.example.notepad"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -36,13 +35,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
     buildFeatures {
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
@@ -64,6 +64,7 @@ protobuf {
 }
 
 dependencies {
+    // ----- third-party dependencies -----
     implementation(libs.dataStore)
     implementation(libs.protobuf.javalite)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -74,6 +75,7 @@ dependencies {
     implementation(libs.hilt.navigation)
     testImplementation(libs.mockk)
 
+    // ----- standart dependencies ------
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
