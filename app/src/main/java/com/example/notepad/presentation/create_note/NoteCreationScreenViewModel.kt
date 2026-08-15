@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.text.trimmedLength
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,7 @@ class NoteCreationScreenViewModel : ViewModel() {
         .debounce(250.milliseconds)
         .distinctUntilChanged()
         .transformLatest { password ->
+            // emit password validation state
             emit(
                 when {
                     password.isEmpty() -> PasswordValidation.IsEmpty // check is password string empty
@@ -65,6 +67,8 @@ class NoteCreationScreenViewModel : ViewModel() {
     fun isNoteNameOrContentEmpty(): Boolean =
         noteName.isEmpty() || noteContent.isEmpty()
 
+    /** Updates password string state
+     * @param password input password */
     fun updatePasswordString(password: String) {
         _passwordString.value = password
     }

@@ -2,9 +2,10 @@ package com.example.notepad.presentation.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notepad.domain.repository.NoteRepository
-import com.example.notepad.domain.usecase.note.GetAllNotesUseCase
+
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -17,8 +18,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+
+import com.example.notepad.domain.repository.NoteRepository
+import com.example.notepad.domain.usecase.note.GetAllNotesUseCase
 
 @HiltViewModel
 class MainNoteViewModel @Inject constructor(

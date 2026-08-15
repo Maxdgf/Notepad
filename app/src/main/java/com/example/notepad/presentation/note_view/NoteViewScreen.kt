@@ -47,9 +47,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 import com.example.notepad.R
 import com.example.notepad.domain.model.Note
@@ -68,7 +70,6 @@ import com.example.notepad.presentation.common.state.PasswordActionState
 import com.example.notepad.presentation.common.utils.ClipBoardManager
 import com.example.notepad.presentation.common.utils.DateTimeFormatter
 import com.example.notepad.presentation.navigation.NavigationRoutes
-import kotlin.time.Duration.Companion.milliseconds
 
 // text size selector slider steps count
 private const val TEXT_SIZE_SLIDER_STEPS = 8
@@ -178,10 +179,8 @@ private fun ScreenDropdownMenu(
     }
 }
 
-/**
- * Creates a note data title(note name, creation datetime, symbols count).
- * @param note current note entity.
- */
+/** Creates a note data title(note name, creation datetime, symbols count).
+ * @param note current note entity. */
 @Composable
 private fun NoteTitle(note: Note) {
     val dateTimeFormatter = remember { DateTimeFormatter() }

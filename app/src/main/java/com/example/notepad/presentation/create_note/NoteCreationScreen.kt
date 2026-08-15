@@ -46,6 +46,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 import com.example.notepad.R
 import com.example.notepad.domain.model.Note
 import com.example.notepad.presentation.common.components.TopAppBar
@@ -56,9 +60,6 @@ import com.example.notepad.presentation.common.components.DescriptionField
 import com.example.notepad.presentation.common.components.ErrorField
 import com.example.notepad.presentation.common.theme.arlekin
 import com.example.notepad.presentation.navigation.NavigationRoutes
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Creates a note creation app screen.

@@ -10,6 +10,7 @@ class ClipBoardManager(context: Context) {
 
     /**
      * Sets text to clipboard.
+     *
      * @param text text string.
      * @param label clipboard item label.
      */

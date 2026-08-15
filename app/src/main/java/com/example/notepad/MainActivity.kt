@@ -4,11 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+
 import com.example.notepad.presentation.AppNavGraphRoot
 import com.example.notepad.presentation.common.theme.NotepadTheme
 import com.example.notepad.presentation.create_note.NoteManager
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 // =======================================================
 // |                      Notepad                        |
@@ -19,7 +21,7 @@ import javax.inject.Inject
 // | by Maxdgf github: https://github.com/Maxdgf/Notepad |
 // =======================================================
 // |--> created at: 27.09.2025
-// |--> last update: 16.07.2026
+// |--> last update: 15.08.2026
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

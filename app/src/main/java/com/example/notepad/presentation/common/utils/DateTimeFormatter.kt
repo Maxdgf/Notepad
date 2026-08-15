@@ -5,10 +5,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class DateTimeFormatter {
-    /**
-     * Formats datetime millis by pattern: `dd:MM:yyyy HH:mm:ss E`.
-     * @return string datetime.
-     */
+    /** Formats datetime millis by pattern: `dd:MM:yyyy HH:mm:ss E`.
+     * @return string datetime. */
     fun formatDatetimeNow(millis: Long): String {
         val instant = Instant.ofEpochMilli(millis)
         val formatter = DateTimeFormatter

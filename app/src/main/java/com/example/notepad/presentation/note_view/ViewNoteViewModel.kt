@@ -3,15 +3,11 @@ package com.example.notepad.presentation.note_view
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notepad.data.room_database.toDomainModel
-import com.example.notepad.domain.crypto.TextCipher
-import com.example.notepad.domain.model.Note
-import com.example.notepad.domain.repository.NoteRepository
-import com.example.notepad.presentation.common.state.LockedNoteResult
-import com.example.notepad.presentation.common.state.NoteResult
-import com.example.notepad.presentation.common.state.PasswordActionState
-import com.example.notepad.presentation.common.state.PasswordState
+
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -29,8 +25,15 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+
+import com.example.notepad.data.room_database.toDomainModel
+import com.example.notepad.domain.crypto.TextCipher
+import com.example.notepad.domain.model.Note
+import com.example.notepad.domain.repository.NoteRepository
+import com.example.notepad.presentation.common.state.LockedNoteResult
+import com.example.notepad.presentation.common.state.NoteResult
+import com.example.notepad.presentation.common.state.PasswordActionState
+import com.example.notepad.presentation.common.state.PasswordState
 
 @HiltViewModel
 class ViewNoteViewModel @Inject constructor(

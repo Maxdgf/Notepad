@@ -2,14 +2,15 @@ package com.example.notepad.presentation.note_view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notepad.domain.repository.DataStoreRepository
-import com.example.notepad.proto.NoteViewSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+
+import com.example.notepad.domain.repository.DataStoreRepository
+import com.example.notepad.proto.NoteViewSettings
 
 @HiltViewModel
 class NoteViewSettingsViewModel @Inject constructor(
@@ -21,6 +22,8 @@ class NoteViewSettingsViewModel @Inject constructor(
         NoteViewSettings.getDefaultInstance()
     )
 
+    /** Performs specific event.
+     * @param event needed event type */
     fun performEvent(event: NoteViewSettingsEvent) {
         val noteSettings = noteViewSettings.value.toBuilder()
 

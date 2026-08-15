@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.notepad.R
+
 import com.example.notepad.presentation.common.state.PasswordState
 
 @Composable

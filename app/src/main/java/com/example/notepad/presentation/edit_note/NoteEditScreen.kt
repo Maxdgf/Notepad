@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
+
 import com.example.notepad.R
 import com.example.notepad.domain.model.Note
 import com.example.notepad.presentation.common.SCREEN_TRANSITION_DURATION
@@ -60,8 +63,6 @@ import com.example.notepad.presentation.common.state.LockedNoteResult
 import com.example.notepad.presentation.navigation.NavigationRoutes
 import com.example.notepad.presentation.common.state.NoteResult
 import com.example.notepad.presentation.common.state.PasswordActionState
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable

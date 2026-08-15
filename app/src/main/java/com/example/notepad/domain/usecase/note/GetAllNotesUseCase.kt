@@ -22,6 +22,8 @@ class GetAllNotesUseCase @Inject constructor(
      *
      * @param isAsc sort by ASC
      * @param selector specific selector for sorting
+     *
+     * @return sorted list of notes
      */
     private fun <Note, R : Comparable<R>> List<Note>.sortByAscOrDesc(
         isAsc: Boolean,
@@ -39,21 +41,22 @@ class GetAllNotesUseCase @Inject constructor(
                     var notesList = withContext(Dispatchers.Default) {
                         notes.map { it.toDomainModel() }
                     }
-                    val isAsc = displaySettings.isSortAsc
+                    val isAsc = displaySettings.isSortAsc // is ASC or DESC
 
-                     notesList = when (displaySettings.sortMode) {
-                        SortNotesMode.Default -> notesList
+                    // sort note list
+                    notesList = when (displaySettings.sortMode) {
+                        SortNotesMode.Default -> notesList // by default
                         SortNotesMode.ByCreationTime -> withContext(Dispatchers.Default) {
-                            notesList.sortByAscOrDesc(isAsc) { it.creationTime }
+                            notesList.sortByAscOrDesc(isAsc) { it.creationTime } // by creation time millis
                         }
                         SortNotesMode.ByContentSize -> withContext(Dispatchers.Default) {
-                            notesList.sortByAscOrDesc(isAsc) { it.content.length }
+                            notesList.sortByAscOrDesc(isAsc) { it.content.length } // by note's content size
                         }
                         SortNotesMode.ByNameLength -> withContext(Dispatchers.Default) {
-                            notesList.sortByAscOrDesc(isAsc) { it.name.length }
+                            notesList.sortByAscOrDesc(isAsc) { it.name.length } // by note's name length
                         }
                         SortNotesMode.ByLastEditTime -> withContext(Dispatchers.Default) {
-                            notesList.sortByAscOrDesc(isAsc) { it.lastEditTime }
+                            notesList.sortByAscOrDesc(isAsc) { it.lastEditTime } // by last edit time millis
                         }
                         SortNotesMode.UNRECOGNIZED -> notesList
                     }

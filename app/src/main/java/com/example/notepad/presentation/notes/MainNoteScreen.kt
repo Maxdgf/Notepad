@@ -98,10 +98,8 @@ private fun ScrollableNoteItemsList(
     var deleteNoteAlertMessageDialogState by rememberSaveable { mutableStateOf(false) }
     var selectedNoteIdToEdit: Long? by rememberSaveable { mutableStateOf(null) }
 
-    /**
-     * Configures intent for send note text.
-     * @return intent object.
-     */
+    /** Configures intent for send note text.
+     * @return intent object. */
     val sendNoteIntent: (String) -> Intent = remember {
         { textToSend ->
             Intent().apply {
@@ -273,9 +271,7 @@ private const val DEVELOPER_EMAIL_ADDRESS = "maxma4090@gmail.com"
  * @param onNavigateTo function for navigate to specific screen */
 @Suppress("ASSIGNED_VALUE_IS_NEVER_READ")
 @Composable
-fun MainAppScreen(
-    onNavigateTo: (String) -> Unit
-) {
+fun MainAppScreen(onNavigateTo: (String) -> Unit) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val activity = LocalActivity.current
@@ -287,10 +283,8 @@ fun MainAppScreen(
     val mainNoteViewModel: MainNoteViewModel = hiltViewModel()
     val settingsViewModel: NoteDisplaySettingsViewModel = hiltViewModel()
 
-    /**
-     * Configures intent for send feedback about app by email.
-     * @return intent object.
-     */
+    /** Configures intent for send feedback about app by email.
+     * @return intent object. */
     val sendFeedbackViaEmailIntent: (String) -> Intent = remember {
         { subject ->
             // only email apps

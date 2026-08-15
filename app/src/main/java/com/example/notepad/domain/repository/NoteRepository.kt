@@ -1,8 +1,9 @@
 package com.example.notepad.domain.repository
 
+import kotlinx.coroutines.flow.Flow
+
 import com.example.notepad.data.room_database.NoteEntity
 import com.example.notepad.domain.model.Note
-import kotlinx.coroutines.flow.Flow
 
 interface NoteRepository {
     fun getAllNotes(): Flow<List<NoteEntity>>
