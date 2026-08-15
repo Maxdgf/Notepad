@@ -155,6 +155,7 @@ fun NoteCard(
 
                         Text(
                             text = noteName,
+                            softWrap = false, // softwrap mode disabled
                             fontWeight = FontWeight.Bold,
                             overflow = TextOverflow.Ellipsis
                         )
