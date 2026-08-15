@@ -1,27 +1,47 @@
 <h1 align="center">Notepad</h1>
 
-![Compose BOM](https://img.shields.io/badge/Compose%20Bom-2026.03.00-blue)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-purple)
+![Compose BOM](https://img.shields.io/badge/Compose%20Bom-2026.08.00-blue)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple)
 ![Api](https://img.shields.io/badge/API-26+-green)
 
 **Notepad** a simple and minimalistic android app📱 for notes📃
-Based on *Room* and *Jetpack Compose* with **MVVM** architecture.
+Based on *Room* and *Jetpack Compose* with **Clean Architecture**.
 
-## 🖼️Gallery
-#### Screenshots in ☀️light/🌙dark themes
+## Tech stack 📚
+
+### 🗃️DI
+* **Hilt**
+
+### 💾Data storing
+* **Room**
+* **Data store**
+* **Google Protobuf**
+
+### ⚙️Code generation
+* **Ksp**
+
+### 📱UI state
+* **Viewmodel**
+
+### 🔧Testing
+* **Mockk**
+* **Junit**
+
+
+## Gallery 🖼️
 <table>
     <tr>
         <td>
-            <img src="previews/preview (1).jpg" alt="app preview 1">
+            <img src="previews/preview (6).jpg" alt="app preview 1">
         </td>
         <td>
-            <img src="previews/preview (2).jpg" alt="app preview 2">
+            <img src="previews/preview (7).jpg" alt="app preview 2">
         </td>
         <td>
             <img src="previews/preview (4).jpg" alt="app preview 4">
         </td>
         <td>
-            <img src="previews/preview (3).jpg" alt="app preview 3">
+            <img src="previews/preview (1).jpg" alt="app preview 3">
         </td>
         <td>
             <img src="previews/preview (5).jpg" alt="app preview 5">
@@ -29,34 +49,52 @@ Based on *Room* and *Jetpack Compose* with **MVVM** architecture.
     </tr>
 </table>
 
-## 🦾Functionality
+## Features ⭐
+### 📨sharing notes
+<table>
+    <tr>
+        <td>
+            Send notes to contacts with the touch of a button!
+        </td>
+        <td>
+            <img src="previews/preview (8).jpg" style="width: 150px">
+        </td>
+    </tr>
+</table>
 
-#### Base:
-* creating a note
-* deleting a note
-* editing a note
-* deleting all notes
+#
 
-#### Additional:
-* sharing a note
-* searching specific note-s via search string
-* editing all notes display settings
-* editing note display settings
+### 🔍search specific notes
+<table>
+    <tr>
+        <td>
+            Find the notes you need using the search bar. 
+        </td>
+        <td>
+            <img src="previews/preview (6).jpg" style="width: 150px">
+        </td>
+    </tr>
+</table>
 
-## 📖How to use?
-The app's functionality is simple and convenient. The plus button at the bottom creates a new note. Tapping a note once opens it. Editing and action buttons are located on the right side of the note card, and you can also delete all notes. A search bar is available to help you find the note you need. Settings are also available, allowing you to customize options (such as how notes are displayed) to your liking.
+#
 
-## 🏗️Architecture patterns
-* **MVVM**
-* **Repository pattern**
+### 🔒password-protected notes
 
-## 📚Tech stack
-* **Dagger-Hilt** - dependency injection
-* **Room** - store all notes in database
-* **Ksp** - Room and Dagger-Hilt implementation
-* **Viewmodel** - store and update states
-* **Data store** - store app settings parameters
-* **Google Protobuf** - structuring application settings flags and parameters for store in a datastore
+<table>
+    <tr>
+        <td>
+            Set password to protect your notes!
+        </td>
+        <td>
+            <img src="previews/preview (3).jpg" style="width: 150px">
+        </td>
+        <td>
+            <img src="previews/preview (2).jpg" style="width: 150px">
+        </td>
+    </tr>
+</table>
 
-## 🔃Android Versions
+Password-protected notes are encrypted using the **AES** algorithm. they cannot be shared, and the password cannot be edited.
+
+## Android Versions 🔃
 Android **8.0** and later
