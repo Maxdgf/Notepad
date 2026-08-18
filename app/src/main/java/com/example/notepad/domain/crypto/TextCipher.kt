@@ -9,8 +9,10 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.text.toCharArray
 
+@Singleton
 class TextCipher @Inject constructor() {
     private companion object {
         const val IV_GCM_LENGTH = 12 // 12 bytes required in GCM for better performance
@@ -26,7 +28,7 @@ class TextCipher @Inject constructor() {
      * @param salt key generation salt
      *
      * @return secret key for encrypt/decode data
-     * */
+     */
     private fun generatePBKDFKey(password: CharArray, salt: ByteArray): ByteArray {
         val spec = PBEKeySpec(password, salt, 65536, 256)
         val secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")

@@ -3,6 +3,7 @@ package com.example.notepad.di
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
+import javax.inject.Singleton
 import dagger.hilt.components.SingletonComponent
 
 import com.example.notepad.data.repository_impl.DataStoreRepositoryImpl
@@ -14,8 +15,10 @@ import com.example.notepad.data.repository_impl.NoteRepositoryImpl
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
     @Binds
+    @Singleton
     abstract fun bindNoteRepository(impl: NoteRepositoryImpl): NoteRepository
 
     @Binds
+    @Singleton
     abstract fun bindDataStoreRepository(impl: DataStoreRepositoryImpl): DataStoreRepository
 }
